@@ -24,3 +24,5 @@ android {
 }
 
 apply from: '../build.dependencies.gradle'
+
+android { sourceSets { main { java { srcDirs('../../ftc-hotpatch/src/') } } } }
