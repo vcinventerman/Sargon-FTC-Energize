@@ -54,9 +54,11 @@ android {
     defaultConfig {
         signingConfig signingConfigs.debug
         applicationId 'com.qualcomm.ftcrobotcontroller'
-        minSdkVersion 23
+        minSdkVersion 24
         //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 28
+
+        multiDexEnabled true
 
         /**
          * We keep the versionCode and versionName of robot controller applications in sync with
@@ -101,7 +103,8 @@ android {
             debuggable true
             jniDebuggable true
             ndk {
-                abiFilters "armeabi-v7a", "arm64-v8a"
+                // EasyOpenCV doesn't support 64-bit builds
+                abiFilters "armeabi-v7a" //, "arm64-v8a"
             }
         }
     }
