@@ -504,7 +504,10 @@ public class FtcRobotControllerActivity extends Activity
     if (Device.isRevControlHub() == true) {
       networkType = NetworkType.RCWIRELESSAP;
     } else {
-      networkType = NetworkType.fromString(preferencesHelper.readString(context.getString(R.string.pref_pairing_kind), NetworkType.globalDefaultAsString()));
+      // Since our setup when we're away from Rev Control Hubs requires wifi adb, do nothing
+      networkType = NetworkType.WIRELESSAP;
+
+      //networkType = NetworkType.fromString(preferencesHelper.readString(context.getString(R.string.pref_pairing_kind), NetworkType.globalDefaultAsString()));
     }
 
     // update the app_settings
