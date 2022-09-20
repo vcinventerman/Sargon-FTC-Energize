@@ -1,5 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
+import static org.firstinspires.ftc.robotcore.external.tfod.TfodCurrentGame.LABELS;
+import static org.firstinspires.ftc.robotcore.external.tfod.TfodCurrentGame.TFOD_MODEL_ASSET;
+import static org.firstinspires.ftc.teamcode.Config.barcodeToSignalZone;
+
 import com.google.mlkit.vision.barcode.common.Barcode;
 import com.karrmedia.ftchotpatch.Supervised;
 import com.karrmedia.ftchotpatch.SupervisedOpMode;
@@ -8,6 +12,7 @@ import com.vuforia.PIXEL_FORMAT;
 import com.vuforia.Vuforia;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
@@ -16,50 +21,55 @@ import org.firstinspires.ftc.teamcode.Config.SignalZone;
 @Supervised(name="BarcodeTest_?", group="Iterative Opmode", autonomous=false, variations = {"A5", "A2", "F5", "F2"})
 public class BarcodeTest extends SupervisedOpMode {
 
-    private VuforiaLocalizer vuforia;
-    private TFObjectDetector tfod;
+    VuforiaLocalizer vuforia;
+    TFObjectDetector tfod;
 
     BarcodeReader barcodeReader;
     SignalZone targetZone;
     Barcode currentBarcode;
+    Config.StartSpace startSpace;
 
 
     // Code that runs when the INIT button is pressed (mandatory)
-    public void init()  {
+    public void init() throws Exception {
+        startSpace = Enum.valueOf(Config.StartSpace.class, variation.substring(0, 2));
         telemetry = Config.getDefaultTelemetry(telemetry);
 
         initVuforia();
         initTfod();
 
-        barcodeReader = new BarcodeReader(Barcode.FORMAT_UPC_E);
+        if (tfod == null) {
+            throw new Exception("TFOD WAS NULL");
+        }
+
+        tfod.setZoom(1.0, 16.0/9.0);
     }
 
     public void start() throws Exception {
         tfod.activate();
+
+        barcodeReader = new BarcodeReader(1, Long.MAX_VALUE, vuforia.getFrameQueue(), new BarcodeReader.Callback() {
+            @Override
+            public void onSuccess(Barcode b) {
+                if (b == null || b.getDisplayValue() == null) { return; }
+
+                if (currentBarcode == null || !currentBarcode.getDisplayValue().equals(b.getDisplayValue())) {
+                    currentBarcode = b;
+                    telemetry.addData("CurrentBarcodeText", currentBarcode.getDisplayValue());
+                    telemetry.addData("CurrentSignalZone", barcodeToSignalZone(b.getDisplayValue(), startSpace));
+                    telemetry.update();
+                }
+            }
+        }, 1, Barcode.FORMAT_UPC_E);
     }
 
     // Code that runs repeatedly after the PLAY button is pressed (optional)
     public void loop() throws Exception {
-        barcodeReader.tryToRead(vuforia.getFrameQueue(), new BarcodeReader.Callback() {
-            @Override
-            public void onSuccess(Barcode b) {
-                if (currentBarcode == null || currentBarcode.getDisplayValue() != b.getDisplayValue()) {
-                    currentBarcode = b;
-                    telemetry.addData("CurrentBarcodeText", currentBarcode.getDisplayValue());
-                    telemetry.update();
-                }
-            }
-        });
+        if (tfod == null) {
+            throw new Exception("TFOD WAS NULL");
+        }
 
-        /*if (targetZone == null) {
-            barcodeReader.tryToRead(vuforia.getFrameQueue());
-
-            if (barcodeReader.hasResult()) {
-
-            }
-        }*/
-
-
+        barcodeReader.tick();
     }
 
     // Code that runs when the OpMode is stopped (optional)
@@ -89,7 +99,7 @@ public class BarcodeTest extends SupervisedOpMode {
 
         if (Device.isRevControlHub()) {
             // Use USB Webcam
-            //parameters.cameraName = hardwareMap.get(WebcamName.class, "Webcam 1");
+            parameters.cameraName = hardwareMap.get(WebcamName.class, "Webcam 1");
         }
         else {
             // Use internal back camera
@@ -116,7 +126,7 @@ public class BarcodeTest extends SupervisedOpMode {
 
         // Use loadModelFromAsset() if the TF Model is built in as an asset by Android Studio
         // Use loadModelFromFile() if you have downloaded a custom team model to the Robot Controller's FLASH.
-        /*tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABELS);*/
+        tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABELS);
         // tfod.loadModelFromFile(TFOD_MODEL_FILE, LABELS);
     }
 }

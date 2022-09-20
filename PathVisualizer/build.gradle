@@ -13,8 +13,5 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.NoahBres:MeepMeep:2.0.1'
-
-    implementation 'com.google.zxing:core:3.4.1'
-    implementation 'com.google.zxing:android-core:3.3.0'
+    implementation 'com.github.NoahBres:MeepMeep:2.0.2'
 }
