@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.jetbrains.annotations.Contract;
 
 @com.acmerobotics.dashboard.config.Config
 public class Config {
@@ -44,6 +45,7 @@ public class Config {
 
 
 
+    // Does nothing - put a breakpoint on it
     public static void nop() {}
 
     public static SignalZone[] getAvailableSignalZones(StartSpace space) {
@@ -68,7 +70,24 @@ public class Config {
     }
 
     // Our default telemetry is just ftc-dashboard bundled with the default instance
-    static Telemetry getDefaultTelemetry(Telemetry current) {
+    public static Telemetry getDefaultTelemetry(Telemetry current) {
         return new MultipleTelemetry(current, FtcDashboard.getInstance().getTelemetry());
+    }
+
+    public static SignalZone barcodeToSignalZone(String barcodeData, StartSpace startSpace) {
+        try {
+            if (barcodeData.length() == 0) {
+                return null;
+            } else if (barcodeData.length() == 1) {
+                return Enum.valueOf(SignalZone.class, startSpace + "_" + barcodeData);
+            } else {
+                // Alliance check: 0->Blue 1->Red
+                /*assert ((startSpace.toString().startsWith("A") && barcodeData.startsWith("0")) ||
+                        (startSpace.toString().startsWith("F") && barcodeData.startsWith("1")));*/
+
+                return Enum.valueOf(SignalZone.class, startSpace + "_" + barcodeData.substring(barcodeData.length() - 1));
+            }
+        }
+        catch (Exception e) { return null; }
     }
 }
