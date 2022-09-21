@@ -48,6 +48,13 @@ public class Config {
     // Does nothing - put a breakpoint on it
     public static void nop() {}
 
+    public static boolean contains(int[] array, int value) {
+        for (int i : array) {
+            if (i == value) return true;
+        }
+        return false;
+    }
+
     public static SignalZone[] getAvailableSignalZones(StartSpace space) {
         switch (space)
         {
