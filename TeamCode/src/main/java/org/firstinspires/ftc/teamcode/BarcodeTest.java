@@ -1,132 +1,192 @@
+/* Copyright (c) 2020 FIRST. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted (subject to the limitations in the disclaimer below) provided that
+ * the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this list
+ * of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice, this
+ * list of conditions and the following disclaimer in the documentation and/or
+ * other materials provided with the distribution.
+ *
+ * Neither the name of FIRST nor the names of its contributors may be used to endorse or
+ * promote products derived from this software without specific prior written permission.
+ *
+ * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
+ * LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 package org.firstinspires.ftc.teamcode;
 
-import static org.firstinspires.ftc.robotcore.external.tfod.TfodCurrentGame.LABELS;
-import static org.firstinspires.ftc.robotcore.external.tfod.TfodCurrentGame.TFOD_MODEL_ASSET;
 import static org.firstinspires.ftc.teamcode.Config.barcodeToSignalZone;
+import static org.firstinspires.ftc.teamcode.Config.nop;
+
+import android.graphics.Bitmap;
+import android.graphics.ImageFormat;
+import android.os.Handler;
+
+import androidx.annotation.NonNull;
 
 import com.google.mlkit.vision.barcode.common.Barcode;
-import com.karrmedia.ftchotpatch.Supervised;
-import com.karrmedia.ftchotpatch.SupervisedOpMode;
-import com.qualcomm.robotcore.util.Device;
-import com.vuforia.PIXEL_FORMAT;
-import com.vuforia.Vuforia;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.android.util.Size;
+import org.firstinspires.ftc.robotcore.external.function.Consumer;
+import org.firstinspires.ftc.robotcore.external.function.Continuation;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.Camera;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraCaptureRequest;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraCaptureSequenceId;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraCaptureSession;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraCharacteristics;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraException;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraFrame;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraManager;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
+import org.firstinspires.ftc.robotcore.internal.collections.EvictingBlockingQueue;
+import org.firstinspires.ftc.robotcore.internal.network.CallbackLooper;
+import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
+import org.firstinspires.ftc.robotcore.internal.system.ContinuationSynchronizer;
+import org.firstinspires.ftc.robotcore.internal.system.Deadline;
 
-import org.firstinspires.ftc.teamcode.Config.SignalZone;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Locale;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
-@Supervised(name="BarcodeTest_?", group="Iterative Opmode", autonomous=false, variations = {"A5", "A2", "F5", "F2"})
-public class BarcodeTest extends SupervisedOpMode {
-
-    VuforiaLocalizer vuforia;
-    TFObjectDetector tfod;
+/**
+ * This OpMode illustrates how to open a webcam and retrieve images from it. It requires a configuration
+ * containing a webcam with the default name ("Webcam 1"). When the opmode runs, pressing the 'A' button
+ * will cause a frame from the camera to be written to a file on the device, which can then be retrieved
+ * by various means (e.g.: Device File Explorer in Android Studio; plugging the device into a PC and
+ * using Media Transfer; ADB; etc)
+ */
+@TeleOp(name="Concept: Webcam", group ="Concept")
+public class BarcodeTest extends LinearOpMode {
 
     BarcodeReader barcodeReader;
-    SignalZone targetZone;
     Barcode currentBarcode;
     Config.StartSpace startSpace;
 
 
-    // Code that runs when the INIT button is pressed (mandatory)
-    public void init() throws Exception {
-        startSpace = Enum.valueOf(Config.StartSpace.class, variation.substring(0, 2));
-        telemetry = Config.getDefaultTelemetry(telemetry);
+    @Override public void runOpMode() {
 
-        initVuforia();
-        initTfod();
 
-        if (tfod == null) {
-            throw new Exception("TFOD WAS NULL");
-        }
 
-        tfod.setZoom(1.0, 16.0/9.0);
-    }
+        try {
+            barcodeReader = new BarcodeReader(1, Long.MAX_VALUE, hardwareMap, new BarcodeReader.Callback() {
+                @Override
+                public void onSuccess(Barcode b) {
+                    if (b == null || b.getDisplayValue() == null) { return; }
 
-    public void start() throws Exception {
-        tfod.activate();
-
-        barcodeReader = new BarcodeReader(1, Long.MAX_VALUE, vuforia.getFrameQueue(), new BarcodeReader.Callback() {
-            @Override
-            public void onSuccess(Barcode b) {
-                if (b == null || b.getDisplayValue() == null) { return; }
-
-                if (currentBarcode == null || !currentBarcode.getDisplayValue().equals(b.getDisplayValue())) {
-                    currentBarcode = b;
-                    telemetry.addData("CurrentBarcodeText", currentBarcode.getDisplayValue());
-                    telemetry.addData("CurrentSignalZone", barcodeToSignalZone(b.getDisplayValue(), startSpace));
-                    telemetry.update();
+                    if (currentBarcode == null || !currentBarcode.getDisplayValue().equals(b.getDisplayValue())) {
+                        currentBarcode = b;
+                        telemetry.addData("CurrentBarcodeText", currentBarcode.getDisplayValue());
+                        telemetry.addData("CurrentSignalZone", barcodeToSignalZone(b.getDisplayValue(), startSpace));
+                        telemetry.update();
+                    }
                 }
+            }, Barcode.FORMAT_UPC_E);
+
+
+
+            telemetry.addData(">", "Press Play to start");
+            telemetry.update();
+            waitForStart();
+            telemetry.clear();
+            telemetry.addData(">", "Started...Press 'A' to capture frame");
+
+            boolean buttonPressSeen = false;
+            boolean captureWhenAvailable = false;
+            while (opModeIsActive()) {
+
+                boolean buttonIsPressed = gamepad1.a;
+                if (buttonIsPressed && !buttonPressSeen) {
+                    captureWhenAvailable = true;
+                }
+                buttonPressSeen = buttonIsPressed;
+
+                try {
+                    barcodeReader.tick();
+                }
+                catch (Exception e) {
+                    nop();
+                }
+
+                if (captureWhenAvailable) {
+                    //Bitmap bmp = reader.frameQueue.poll();
+                    /*if (bmp != null) {
+                        captureWhenAvailable = false;
+
+                    }*/
+                }
+
+                //telemetry.update();
             }
-        }, 1, Barcode.FORMAT_UPC_E);
-    }
-
-    // Code that runs repeatedly after the PLAY button is pressed (optional)
-    public void loop() throws Exception {
-        if (tfod == null) {
-            throw new Exception("TFOD WAS NULL");
+        } finally {
+            reader.closeCamera();
         }
-
-        barcodeReader.tick();
     }
 
-    // Code that runs when the OpMode is stopped (optional)
-    public void stop() {
-        vuforia = null;
-        tfod = null;
+    BarcodeReader reader;
+
+
+
+    //----------------------------------------------------------------------------------------------
+    // Camera operations
+    //----------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+    //----------------------------------------------------------------------------------------------
+    // Utilities
+    //----------------------------------------------------------------------------------------------
+    /*
+    private void error(String msg) {
+        telemetry.log().add(msg);
+        telemetry.update();
+    }
+    private void error(String format, Object...args) {
+        telemetry.log().add(format, args);
+        telemetry.update();
     }
 
-    // Code that runs after this OpMode is dynamically updated
-    public void hotpatch() {
+    private
 
-    }
-
-
-
-
-    /**
-     * Initialize the Vuforia localization engine.
-     */
-    private void initVuforia() {
-        /*
-         * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
-         */
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
-
-        parameters.vuforiaLicenseKey = Config.VUFORIA_KEY;
-
-        if (Device.isRevControlHub()) {
-            // Use USB Webcam
-            parameters.cameraName = hardwareMap.get(WebcamName.class, "Webcam 1");
+    private void saveBitmap(Bitmap bitmap) {
+        File file = new File(captureDirectory, String.format(Locale.getDefault(), "webcam-frame-%d.jpg", captureCounter++));
+        try {
+            try (FileOutputStream outputStream = new FileOutputStream(file)) {
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+                telemetry.log().add("captured %s", file.getName());
+            }
+        } catch (IOException e) {
+            RobotLog.ee(TAG, e, "exception in saveBitmap()");
+            error("exception saving %s", file.getName());
         }
-        else {
-            // Use internal back camera
-            parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
-        }
-
-        //  Instantiate the Vuforia engine
-        vuforia = ClassFactory.getInstance().createVuforia(parameters);
-
-        Vuforia.setFrameFormat(PIXEL_FORMAT.YUV, true);
     }
+    */
 
-    /**
-     * Initialize the TensorFlow Object Detection engine.
-     */
-    private void initTfod() {
-        int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
-                "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
-        tfodParameters.minResultConfidence = 0.75f;
-        tfodParameters.isModelTensorFlow2 = true;
-        tfodParameters.inputSize = 300;
-        tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
-
-        // Use loadModelFromAsset() if the TF Model is built in as an asset by Android Studio
-        // Use loadModelFromFile() if you have downloaded a custom team model to the Robot Controller's FLASH.
-        tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABELS);
-        // tfod.loadModelFromFile(TFOD_MODEL_FILE, LABELS);
-    }
 }
