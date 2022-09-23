@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import static org.firstinspires.ftc.teamcode.Config.barcodeToSignalZone;
 import static org.firstinspires.ftc.teamcode.Config.contains;
+import static org.firstinspires.ftc.teamcode.Config.nop;
 
 import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
@@ -81,7 +82,8 @@ public class BarcodeReader {
 
 
     Bitmap frameStore;
-    AtomicBoolean isFrameStored;
+    AtomicBoolean isFrameStored = new AtomicBoolean(false);
+    AtomicBoolean isFrameProcessing = new AtomicBoolean(true);
 
 
     public BarcodeReader(double freq, long maxAttempts, HardwareMap hardwareMap, Callback callback, @Barcode.BarcodeFormat int format, @NonNull @Barcode.BarcodeFormat int... moreFormats) {
@@ -164,11 +166,12 @@ public class BarcodeReader {
 
     // Call this in your loop
     public void tick() throws Exception {
-        if (timer.seconds() > freq && currentAttempt < maxAttempts) {
+        if (timer.seconds() > freq && currentAttempt < maxAttempts && isFrameStored.get() && !isFrameProcessing.get()) {
+            isFrameProcessing.set(true);
             timer.reset();
             currentAttempt++;
 
-            tryToRead(frameQueue.poll());
+            tryToRead(frameStore);
         }
     }
 
@@ -229,11 +232,15 @@ public class BarcodeReader {
                         session.startCapture(captureRequest,
                                 new CameraCaptureSession.CaptureCallback() {
                                     @Override public void onNewFrame(@NonNull CameraCaptureSession session, @NonNull CameraCaptureRequest request, @NonNull CameraFrame cameraFrame) {
-                                        /** A new frame is available. The frame data has <em>not</em> been copied for us, and we can only access it
-                                         * for the duration of the callback. So we copy here manually. */
-                                        Bitmap bmp = captureRequest.createEmptyBitmap();
-                                        cameraFrame.copyToBitmap(bmp);
-                                        frameQueue.offer(bmp);
+                                        if (!isFrameStored.get()) {
+                                            cameraFrame.copyToBitmap(frameStore);
+                                            isFrameProcessing.set(false);
+
+                                            Bitmap emptyBitmap = Bitmap.createBitmap(frameStore.getWidth(), frameStore.getHeight(), frameStore.getConfig());
+                                            if (frameStore.sameAs(emptyBitmap)) {
+                                                nop();
+                                            }
+                                        }
                                     }
                                 },
                                 Continuation.create(callbackHandler, new CameraCaptureSession.StatusCallback() {
