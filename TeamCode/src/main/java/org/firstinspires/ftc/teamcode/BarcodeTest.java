@@ -1,192 +1,264 @@
-/* Copyright (c) 2020 FIRST. All rights reserved.
+/*
+ * Copyright (c) 2021 OpenFTC Team
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted (subject to the limitations in the disclaimer below) provided that
- * the following conditions are met:
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Redistributions of source code must retain the above copyright notice, this list
- * of conditions and the following disclaimer.
- *
- * Redistributions in binary form must reproduce the above copyright notice, this
- * list of conditions and the following disclaimer in the documentation and/or
- * other materials provided with the distribution.
- *
- * Neither the name of FIRST nor the names of its contributors may be used to endorse or
- * promote products derived from this software without specific prior written permission.
- *
- * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
- * LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 package org.firstinspires.ftc.teamcode;
 
-import static org.firstinspires.ftc.teamcode.Config.barcodeToSignalZone;
 import static org.firstinspires.ftc.teamcode.Config.nop;
 
 import android.graphics.Bitmap;
-import android.graphics.ImageFormat;
+import android.graphics.Rect;
 import android.os.Handler;
 
 import androidx.annotation.NonNull;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.mlkit.vision.barcode.BarcodeScanner;
+import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
+import com.google.mlkit.vision.barcode.BarcodeScanning;
 import com.google.mlkit.vision.barcode.common.Barcode;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.google.mlkit.vision.common.InputImage;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.util.RobotLog;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.android.util.Size;
 import org.firstinspires.ftc.robotcore.external.function.Consumer;
 import org.firstinspires.ftc.robotcore.external.function.Continuation;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.Camera;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraCaptureRequest;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraCaptureSequenceId;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraCaptureSession;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraCharacteristics;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraException;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraFrame;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraManager;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.internal.collections.EvictingBlockingQueue;
-import org.firstinspires.ftc.robotcore.internal.network.CallbackLooper;
-import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
-import org.firstinspires.ftc.robotcore.internal.system.ContinuationSynchronizer;
-import org.firstinspires.ftc.robotcore.internal.system.Deadline;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.openftc.easyopencv.OpenCvPipeline;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Locale;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * This OpMode illustrates how to open a webcam and retrieve images from it. It requires a configuration
- * containing a webcam with the default name ("Webcam 1"). When the opmode runs, pressing the 'A' button
- * will cause a frame from the camera to be written to a file on the device, which can then be retrieved
- * by various means (e.g.: Device File Explorer in Android Studio; plugging the device into a PC and
- * using Media Transfer; ADB; etc)
+ * In this sample, we demonstrate how to use EasyOpenCV in
+ * Vuforia passthrough mode. In this mode, EasyOpenCV does not
+ * take direct control over the camera. Instead, it pulls frames
+ * out of a VuforiaLocalizer's frame queue. This allows you to
+ * run both OpenCV and Vuforia simultaneously on the same camera.
+ * The downside is that you do not get to choose the resolution
+ * of frames delivered to your pipeline, and you do not get any
+ * sort of manual control over sensor parameters such as exposure,
+ * gain, ISO, or frame rate.
  */
-@TeleOp(name="Concept: Webcam", group ="Concept")
-public class BarcodeTest extends LinearOpMode {
+@TeleOp
+public class BarcodeTest extends LinearOpMode
+{
+    VuforiaLocalizer vuforia = null;
+    OpenCvCamera vuforiaPassthroughCam;
 
-    BarcodeReader barcodeReader;
-    Barcode currentBarcode;
-    Config.StartSpace startSpace;
+    ElapsedTime timer = new ElapsedTime();
+    double freq = 1;
+    long maxAttempts = Long.MAX_VALUE;
+    long currentAttempt = 0;
+    AtomicBoolean isFrameStored = new AtomicBoolean(false);
+    AtomicBoolean isFrameProcessing = new AtomicBoolean(true);
+    Executor executor = Executors.newSingleThreadExecutor();
+    Bitmap frame;
+    Barcode detectedBarcode;
 
+    enum FrameState {
+        WAIT,
+    }
 
-    @Override public void runOpMode() {
+    @Override
+    public void runOpMode()
+    {
+        /**
+         * NOTE: Many comments have been omitted from this sample for the
+         * sake of conciseness. If you're just starting out with EasyOpenCV,
+         * you should take a look at {@link InternalCamera1Example} or its
+         * webcam counterpart, {@link WebcamExample} first.
+         */
 
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        int[] viewportContainerIds = OpenCvCameraFactory.getInstance().splitLayoutForMultipleViewports(cameraMonitorViewId, 2, OpenCvCameraFactory.ViewportSplitMethod.VERTICALLY);
 
+        /*
+         * Setup Vuforia
+         */
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(viewportContainerIds[0]);
+        parameters.vuforiaLicenseKey = Config.VUFORIA_KEY;
+        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+        // Uncomment this line below to use a webcam
+        //parameters.cameraName = hardwareMap.get(WebcamName.class, "Webcam 1");
+        vuforia = ClassFactory.getInstance().createVuforia(parameters);
 
-        try {
-            barcodeReader = new BarcodeReader(1, Long.MAX_VALUE, hardwareMap, new BarcodeReader.Callback() {
-                @Override
-                public void onSuccess(Barcode b) {
-                    if (b == null || b.getDisplayValue() == null) { return; }
+        // Create a Vuforia passthrough "virtual camera"
+        vuforiaPassthroughCam = OpenCvCameraFactory.getInstance().createVuforiaPassthrough(vuforia, parameters, viewportContainerIds[1]);
 
-                    if (currentBarcode == null || !currentBarcode.getDisplayValue().equals(b.getDisplayValue())) {
-                        currentBarcode = b;
-                        telemetry.addData("CurrentBarcodeText", currentBarcode.getDisplayValue());
-                        telemetry.addData("CurrentSignalZone", barcodeToSignalZone(b.getDisplayValue(), startSpace));
-                        telemetry.update();
-                    }
-                }
-            }, Barcode.FORMAT_UPC_E);
+        vuforiaPassthroughCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        {
+            @Override
+            public void onOpened()
+            {
+                // Using GPU acceleration can be particularly helpful when using Vuforia passthrough
+                // mode, because Vuforia often chooses high resolutions (such as 720p) which can be
+                // very CPU-taxing to rotate in software. GPU acceleration has been observed to cause
+                // issues on some devices, though, so if you experience issues you may wish to disable it.
+                vuforiaPassthroughCam.setViewportRenderer(OpenCvCamera.ViewportRenderer.GPU_ACCELERATED);
+                vuforiaPassthroughCam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
+                vuforiaPassthroughCam.setPipeline(new UselessColorBoxDrawingPipeline(new Scalar(255,0,0,255)));
 
+                // We don't get to choose resolution, unfortunately. The width and height parameters
+                // are entirely ignored when using Vuforia passthrough mode. However, they are left
+                // in the method signature to provide interface compatibility with the other types
+                // of cameras.
+                vuforiaPassthroughCam.startStreaming(0,0, OpenCvCameraRotation.UPRIGHT);
+            }
 
+            @Override
+            public void onError(int errorCode)
+            {
+                /*
+                 * This will be called if the camera could not be opened
+                 */
+                nop();
+            }
+        });
 
-            telemetry.addData(">", "Press Play to start");
+        BarcodeScannerOptions options =
+                new BarcodeScannerOptions.Builder()
+                        .setBarcodeFormats(Barcode.FORMAT_UPC_E)
+                        .build();
+
+        BarcodeScanner scanner = BarcodeScanning.getClient(options);
+
+        waitForStart();
+
+        while (opModeIsActive())
+        {
+            telemetry.addData("Passthrough FPS", vuforiaPassthroughCam.getFps());
+            telemetry.addData("Frame count", vuforiaPassthroughCam.getFrameCount());
+            if (detectedBarcode != null && detectedBarcode.getDisplayValue() != null) { telemetry.addData("Barcode", detectedBarcode.getDisplayValue()); }
             telemetry.update();
-            waitForStart();
-            telemetry.clear();
-            telemetry.addData(">", "Started...Press 'A' to capture frame");
 
-            boolean buttonPressSeen = false;
-            boolean captureWhenAvailable = false;
-            while (opModeIsActive()) {
 
-                boolean buttonIsPressed = gamepad1.a;
-                if (buttonIsPressed && !buttonPressSeen) {
-                    captureWhenAvailable = true;
-                }
-                buttonPressSeen = buttonIsPressed;
 
-                try {
-                    barcodeReader.tick();
-                }
-                catch (Exception e) {
-                    nop();
-                }
+            if (timer.seconds() > freq && currentAttempt < maxAttempts && isFrameStored.get() && !isFrameProcessing.get()) {
+                isFrameProcessing.set(true);
+                timer.reset();
+                currentAttempt++;
 
-                if (captureWhenAvailable) {
-                    //Bitmap bmp = reader.frameQueue.poll();
-                    /*if (bmp != null) {
-                        captureWhenAvailable = false;
-
-                    }*/
-                }
-
-                //telemetry.update();
+                vuforiaPassthroughCam.getFrameBitmap(Continuation.create(executor, new Consumer<Bitmap>() {
+                    @Override
+                    public void accept(Bitmap value) {
+                        frame = value;
+                        isFrameStored.set(true);
+                        isFrameProcessing.set(false);
+                    }
+                }));
             }
-        } finally {
-            reader.closeCamera();
+
+            if (isFrameStored.get() && !isFrameProcessing.get()) {
+                isFrameProcessing.set(true);
+
+                InputImage image = InputImage.fromBitmap(frame, 0);
+
+                Task<List<Barcode>> result = scanner.process(image)
+                        .addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
+                            @Override
+                            public void onSuccess(List<Barcode> barcodes) {
+                                if (barcodes.size() > 0) {
+                                    detectedBarcode = barcodes.get(0);
+                                    int detectedBarcodeSize = detectedBarcode.getBoundingBox().width() * detectedBarcode.getBoundingBox().height();
+
+                                    for (Barcode i : barcodes) {
+                                        Rect box = i.getBoundingBox();
+                                        if (box != null) {
+                                            int size = box.width() * box.height();
+
+                                            if (size > detectedBarcodeSize) {
+                                                detectedBarcode = i;
+                                                detectedBarcodeSize = size;
+                                            }
+                                        }
+                                    }
+
+                                    //callback.onSuccess(detectedBarcode);
+                                }
+                                else {
+                                    //callback.onFailure(null);
+                                }
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                //callback.onFailure(e);
+                            }
+                        })
+                        .addOnCompleteListener(new OnCompleteListener<List<Barcode>>() {
+                            @Override
+                            public void onComplete(@NonNull Task<List<Barcode>> task) {
+                                frame.recycle();
+                                isFrameProcessing.set(false);
+                                isFrameStored.set(false);
+                            }
+                        });
+            }
+
+
+
+
+            idle();
         }
     }
 
-    BarcodeReader reader;
+    class UselessColorBoxDrawingPipeline extends OpenCvPipeline
+    {
+        Scalar color;
 
+        UselessColorBoxDrawingPipeline(Scalar color)
+        {
+            this.color = color;
+        }
 
+        @Override
+        public Mat processFrame(Mat input)
+        {
+            Imgproc.rectangle(
+                    input,
+                    new Point(
+                            input.cols()/4.0,
+                            input.rows()/4.0),
+                    new Point(
+                            input.cols()*(3f/4f),
+                            input.rows()*(3f/4f)),
+                    color, 4);
 
-    //----------------------------------------------------------------------------------------------
-    // Camera operations
-    //----------------------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-    //----------------------------------------------------------------------------------------------
-    // Utilities
-    //----------------------------------------------------------------------------------------------
-    /*
-    private void error(String msg) {
-        telemetry.log().add(msg);
-        telemetry.update();
-    }
-    private void error(String format, Object...args) {
-        telemetry.log().add(format, args);
-        telemetry.update();
-    }
-
-    private
-
-    private void saveBitmap(Bitmap bitmap) {
-        File file = new File(captureDirectory, String.format(Locale.getDefault(), "webcam-frame-%d.jpg", captureCounter++));
-        try {
-            try (FileOutputStream outputStream = new FileOutputStream(file)) {
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
-                telemetry.log().add("captured %s", file.getName());
-            }
-        } catch (IOException e) {
-            RobotLog.ee(TAG, e, "exception in saveBitmap()");
-            error("exception saving %s", file.getName());
+            return input;
         }
     }
-    */
-
 }
