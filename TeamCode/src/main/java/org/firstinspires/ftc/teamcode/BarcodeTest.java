@@ -41,10 +41,16 @@ import com.google.mlkit.vision.common.InputImage;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.RobotLog;
+import com.qualcomm.robotcore.util.ThreadPool;
+import com.vuforia.Frame;
+import com.vuforia.Image;
 
+import org.checkerframework.checker.units.qual.C;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.function.Consumer;
 import org.firstinspires.ftc.robotcore.external.function.Continuation;
+import org.firstinspires.ftc.robotcore.external.function.ContinuationResult;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.opencv.core.Mat;
@@ -56,7 +62,11 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvPipeline;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -83,9 +93,10 @@ public class BarcodeTest extends LinearOpMode
     long maxAttempts = Long.MAX_VALUE;
     long currentAttempt = 0;
     AtomicBoolean isFrameStored = new AtomicBoolean(false);
-    AtomicBoolean isFrameProcessing = new AtomicBoolean(true);
-    Executor executor = Executors.newSingleThreadExecutor();
-    Bitmap frame;
+    AtomicBoolean isFrameProcessing = new AtomicBoolean(false);
+    Executor executor = Executors.newCachedThreadPool();
+    //Bitmap frame;
+    Frame frame;
     Barcode detectedBarcode;
 
     enum FrameState {
@@ -95,6 +106,7 @@ public class BarcodeTest extends LinearOpMode
     @Override
     public void runOpMode()
     {
+        telemetry = Config.getDefaultTelemetry(telemetry);
         /**
          * NOTE: Many comments have been omitted from this sample for the
          * sake of conciseness. If you're just starting out with EasyOpenCV,
@@ -114,6 +126,7 @@ public class BarcodeTest extends LinearOpMode
         // Uncomment this line below to use a webcam
         //parameters.cameraName = hardwareMap.get(WebcamName.class, "Webcam 1");
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
+        vuforia.enableConvertFrameToBitmap();
 
         // Create a Vuforia passthrough "virtual camera"
         vuforiaPassthroughCam = OpenCvCameraFactory.getInstance().createVuforiaPassthrough(vuforia, parameters, viewportContainerIds[1]);
@@ -166,67 +179,159 @@ public class BarcodeTest extends LinearOpMode
 
 
 
-            if (timer.seconds() > freq && currentAttempt < maxAttempts && isFrameStored.get() && !isFrameProcessing.get()) {
+            if (timer.seconds() > freq && currentAttempt < maxAttempts && !isFrameProcessing.get()) {
                 isFrameProcessing.set(true);
                 timer.reset();
                 currentAttempt++;
 
-                vuforiaPassthroughCam.getFrameBitmap(Continuation.create(executor, new Consumer<Bitmap>() {
+                vuforia.getFrameOnce(Continuation.create(ThreadPool.getDefault(), new Consumer<Frame>()
+                {
+                    @Override public void accept(Frame frame)
+                    {
+                        Bitmap bitmap = vuforia.convertFrameToBitmap(frame);
+                        if (bitmap != null) {
+
+                            //Image img = frame.getImage(0);
+                            //InputImage input = InputImage.fromByteBuffer(img.getPixels(), img.getWidth(), img.getHeight(), 0, img.getFormat());
+                            InputImage image = InputImage.fromBitmap(bitmap, 0);
+
+                            //Bitmap test = input.getBitmapInternal();
+
+                            Task<List<Barcode>> result = scanner.process(image)
+                                    .addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
+                                        @Override
+                                        public void onSuccess(List<Barcode> barcodes) {
+                                            if (barcodes.size() > 0 && detectedBarcode.getBoundingBox() != null) {
+                                                detectedBarcode = barcodes.get(0);
+                                                int detectedBarcodeSize = detectedBarcode.getBoundingBox().width() * detectedBarcode.getBoundingBox().height();
+
+                                                for (Barcode i : barcodes) {
+                                                    Rect box = i.getBoundingBox();
+                                                    if (box != null) {
+                                                        int size = box.width() * box.height();
+
+                                                        if (size > detectedBarcodeSize) {
+                                                            detectedBarcode = i;
+                                                            detectedBarcodeSize = size;
+                                                        }
+                                                    }
+                                                }
+
+                                                //callback.onSuccess(detectedBarcode);
+                                            } else {
+                                                //callback.onFailure(null);
+                                            }
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            //callback.onFailure(e);
+                                        }
+                                    })
+                                    .addOnCompleteListener(new OnCompleteListener<List<Barcode>>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<List<Barcode>> task) {
+                                            //frame.recycle();
+
+                                            isFrameProcessing.set(false);
+                                        }
+                                    });
+
+                        }
+                    }
+                }));
+
+                /*
+                vuforia.getFrameOnce(Continuation.create(executor, new Consumer<Frame>() {
+                    @Override
+                    public void accept(Frame value) {
+                        //frame = vuforia.convertFrameToBitmap(value);
+                        frame = value;
+
+                        isFrameStored.set(true);
+                        isFrameProcessing.set(false);
+                    }
+                }));*/
+
+                /*vuforia.getFrameOnce(Continuation.create(executor, new Consumer<Frame>() {
+                    @Override
+                    public void accept(Frame value) {
+                        continuation.dispatch(new ContinuationResult<Consumer<Bitmap>>() {
+                            @Override
+                            public void handle(Consumer<Bitmap> consumer) {
+                                consumer.accept(vuforia.convertFrameToBitmap(frame));
+                            }
+                        });
+                    }
+                }));*/
+
+                /*vuforiaPassthroughCam.getFrameBitmap(Continuation.create(executor, new Consumer<Bitmap>() {
                     @Override
                     public void accept(Bitmap value) {
                         frame = value;
                         isFrameStored.set(true);
                         isFrameProcessing.set(false);
                     }
-                }));
+                }));*/
             }
 
             if (isFrameStored.get() && !isFrameProcessing.get()) {
-                isFrameProcessing.set(true);
+                if (frame == null || frame.getNumImages() < 1) {
+                    isFrameStored.set(false);
+                    isFrameProcessing.set(false);
+                } else {
 
-                InputImage image = InputImage.fromBitmap(frame, 0);
+                    isFrameProcessing.set(true);
 
-                Task<List<Barcode>> result = scanner.process(image)
-                        .addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
-                            @Override
-                            public void onSuccess(List<Barcode> barcodes) {
-                                if (barcodes.size() > 0) {
-                                    detectedBarcode = barcodes.get(0);
-                                    int detectedBarcodeSize = detectedBarcode.getBoundingBox().width() * detectedBarcode.getBoundingBox().height();
+                    Image img = frame.getImage(0);
+                    InputImage input = InputImage.fromByteBuffer(img.getPixels(), img.getWidth(), img.getHeight(), 0, img.getFormat());
+                    //InputImage image = InputImage.fromBitmap(frame, 0);
 
-                                    for (Barcode i : barcodes) {
-                                        Rect box = i.getBoundingBox();
-                                        if (box != null) {
-                                            int size = box.width() * box.height();
+                    Bitmap test = input.getBitmapInternal();
 
-                                            if (size > detectedBarcodeSize) {
-                                                detectedBarcode = i;
-                                                detectedBarcodeSize = size;
+                    Task<List<Barcode>> result = scanner.process(input)
+                            .addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
+                                @Override
+                                public void onSuccess(List<Barcode> barcodes) {
+                                    if (barcodes.size() > 0 && detectedBarcode.getBoundingBox() != null) {
+                                        detectedBarcode = barcodes.get(0);
+                                        int detectedBarcodeSize = detectedBarcode.getBoundingBox().width() * detectedBarcode.getBoundingBox().height();
+
+                                        for (Barcode i : barcodes) {
+                                            Rect box = i.getBoundingBox();
+                                            if (box != null) {
+                                                int size = box.width() * box.height();
+
+                                                if (size > detectedBarcodeSize) {
+                                                    detectedBarcode = i;
+                                                    detectedBarcodeSize = size;
+                                                }
                                             }
                                         }
-                                    }
 
-                                    //callback.onSuccess(detectedBarcode);
+                                        //callback.onSuccess(detectedBarcode);
+                                    } else {
+                                        //callback.onFailure(null);
+                                    }
                                 }
-                                else {
-                                    //callback.onFailure(null);
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    //callback.onFailure(e);
                                 }
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                //callback.onFailure(e);
-                            }
-                        })
-                        .addOnCompleteListener(new OnCompleteListener<List<Barcode>>() {
-                            @Override
-                            public void onComplete(@NonNull Task<List<Barcode>> task) {
-                                frame.recycle();
-                                isFrameProcessing.set(false);
-                                isFrameStored.set(false);
-                            }
-                        });
+                            })
+                            .addOnCompleteListener(new OnCompleteListener<List<Barcode>>() {
+                                @Override
+                                public void onComplete(@NonNull Task<List<Barcode>> task) {
+                                    //frame.recycle();
+
+                                    isFrameProcessing.set(false);
+                                    isFrameStored.set(false);
+                                }
+                            });
+                }
             }
 
 
