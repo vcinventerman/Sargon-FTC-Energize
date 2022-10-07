@@ -130,7 +130,7 @@ public class MecanumDriveCancelable extends MecanumDrive {
         }
 
         // TODO: adjust the names of the following hardware devices to match your configuration
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu = hardwareMap.get(BNO055IMU.class, "imu-rc");
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
         imu.initialize(parameters);
@@ -139,13 +139,14 @@ public class MecanumDriveCancelable extends MecanumDrive {
         // upward (normal to the floor) using a command like the following:
         // BNO055IMUUtil.remapAxes(imu, AxesOrder.XYZ, AxesSigns.NPN);
 
-        rightRear = hardwareMap.get(DcMotorEx.class, "driveFrontLeft");
-        rightFront = hardwareMap.get(DcMotorEx.class, "driveBackLeft");
-        leftFront = hardwareMap.get(DcMotorEx.class, "driveBackRight");
-        leftRear = hardwareMap.get(DcMotorEx.class, "driveFrontRight");
+        rightRear = hardwareMap.get(DcMotorEx.class, "driveBackRight");
+        rightFront = hardwareMap.get(DcMotorEx.class, "driveFrontRight");
+        leftFront = hardwareMap.get(DcMotorEx.class, "driveFrontLeft");
+        leftRear = hardwareMap.get(DcMotorEx.class, "driveBackLeft");
 
-        rightRear.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
+        //rightRear.setDirection(DcMotorSimple.Direction.REVERSE);
+        //rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
+
 
         motors = Arrays.asList(leftFront, leftRear, rightRear, rightFront);
 
