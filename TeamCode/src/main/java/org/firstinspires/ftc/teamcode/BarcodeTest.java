@@ -29,15 +29,13 @@ import android.os.Handler;
 
 import androidx.annotation.NonNull;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.mlkit.vision.barcode.BarcodeScanner;
-import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
-import com.google.mlkit.vision.barcode.BarcodeScanning;
-import com.google.mlkit.vision.barcode.common.Barcode;
-import com.google.mlkit.vision.common.InputImage;
+import com.google.zxing.BinaryBitmap;
+import com.google.zxing.LuminanceSource;
+import com.google.zxing.RGBLuminanceSource;
+import com.google.zxing.Result;
+import com.google.zxing.common.HybridBinarizer;
+import com.google.zxing.multi.MultipleBarcodeReader;
+import com.google.zxing.oned.UPCEReader;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -97,7 +95,9 @@ public class BarcodeTest extends LinearOpMode
     Executor executor = Executors.newCachedThreadPool();
     //Bitmap frame;
     Frame frame;
-    Barcode detectedBarcode;
+    /*Barcode detectedBarcode;
+    InputImage image;
+    BarcodeScanner scanner;*/
 
     enum FrameState {
         WAIT,
@@ -161,12 +161,12 @@ public class BarcodeTest extends LinearOpMode
             }
         });
 
-        BarcodeScannerOptions options =
+        /*BarcodeScannerOptions options =
                 new BarcodeScannerOptions.Builder()
                         .setBarcodeFormats(Barcode.FORMAT_UPC_E)
                         .build();
 
-        BarcodeScanner scanner = BarcodeScanning.getClient(options);
+        scanner = BarcodeScanning.getClient(options);*/
 
         waitForStart();
 
@@ -174,7 +174,7 @@ public class BarcodeTest extends LinearOpMode
         {
             telemetry.addData("Passthrough FPS", vuforiaPassthroughCam.getFps());
             telemetry.addData("Frame count", vuforiaPassthroughCam.getFrameCount());
-            if (detectedBarcode != null && detectedBarcode.getDisplayValue() != null) { telemetry.addData("Barcode", detectedBarcode.getDisplayValue()); }
+            //if (detectedBarcode != null && detectedBarcode.getDisplayValue() != null) { telemetry.addData("Barcode", detectedBarcode.getDisplayValue()); }
             telemetry.update();
 
 
@@ -188,16 +188,35 @@ public class BarcodeTest extends LinearOpMode
                 {
                     @Override public void accept(Frame frame)
                     {
-                        Bitmap bitmap = vuforia.convertFrameToBitmap(frame);
+                        Bitmap bitmapOrig = vuforia.convertFrameToBitmap(frame);
+                        Bitmap bitmap = bitmapOrig.copy(bitmapOrig.getConfig(), false);
                         if (bitmap != null) {
+
+                            int[] intArray = new int[bitmap.getWidth()*bitmap.getHeight()];
+                            //copy pixel data from the Bitmap into the 'intArray' array
+                            bitmap.getPixels(intArray, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
+
+                            LuminanceSource source = new RGBLuminanceSource(bitmap.getWidth(), bitmap.getHeight(), intArray);
+                            BinaryBitmap bitmapBinary = new BinaryBitmap(new HybridBinarizer(source));
+
+                            UPCEReader reader = new UPCEReader();
+
+                            try {
+                                Result res = reader.decode(bitmapBinary);
+                                nop();
+                            }
+                            catch (Exception e) {
+                                nop();
+                            }
 
                             //Image img = frame.getImage(0);
                             //InputImage input = InputImage.fromByteBuffer(img.getPixels(), img.getWidth(), img.getHeight(), 0, img.getFormat());
-                            InputImage image = InputImage.fromBitmap(bitmap, 0);
+                            //image = InputImage.fromBitmap(bitmap, 0);
 
-                            //Bitmap test = input.getBitmapInternal();
+                            //Bitmap test = image.getBitmapInternal();
 
-                            Task<List<Barcode>> result = scanner.process(image)
+                            /*scanner.process(bitmapOrig, 0)
+                            //Task<List<Barcode>> result = scanner.process(image)
                                     .addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
                                         @Override
                                         public void onSuccess(List<Barcode> barcodes) {
@@ -236,7 +255,7 @@ public class BarcodeTest extends LinearOpMode
 
                                             isFrameProcessing.set(false);
                                         }
-                                    });
+                                    });*/
 
                         }
                     }
@@ -276,7 +295,7 @@ public class BarcodeTest extends LinearOpMode
                 }));*/
             }
 
-            if (isFrameStored.get() && !isFrameProcessing.get()) {
+            /*if (isFrameStored.get() && !isFrameProcessing.get()) {
                 if (frame == null || frame.getNumImages() < 1) {
                     isFrameStored.set(false);
                     isFrameProcessing.set(false);
@@ -285,10 +304,10 @@ public class BarcodeTest extends LinearOpMode
                     isFrameProcessing.set(true);
 
                     Image img = frame.getImage(0);
-                    InputImage input = InputImage.fromByteBuffer(img.getPixels(), img.getWidth(), img.getHeight(), 0, img.getFormat());
+                    //InputImage input = InputImage.fromByteBuffer(img.getPixels(), img.getWidth(), img.getHeight(), 0, img.getFormat());
                     //InputImage image = InputImage.fromBitmap(frame, 0);
 
-                    Bitmap test = input.getBitmapInternal();
+                    //Bitmap test = input.getBitmapInternal();
 
                     Task<List<Barcode>> result = scanner.process(input)
                             .addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
@@ -332,7 +351,7 @@ public class BarcodeTest extends LinearOpMode
                                 }
                             });
                 }
-            }
+            }*/
 
 
 

@@ -25,7 +25,7 @@ public class TeleOp extends SupervisedOpMode {
                 new Pose2d(
                         gamepad1.left_stick_y,
                         gamepad1.left_stick_x,
-                        (gamepad1.left_trigger - gamepad1.right_trigger) * 5
+                        (gamepad1.right_trigger - gamepad1.left_trigger) * 5
                 )
         );
     }
