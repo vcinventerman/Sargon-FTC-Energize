@@ -21,35 +21,25 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import static org.firstinspires.ftc.teamcode.Config.nop;
+import static org.firstinspires.ftc.teamcode.TeamConf.nop;
 
 import android.graphics.Bitmap;
-import android.graphics.Rect;
-import android.os.Handler;
-
-import androidx.annotation.NonNull;
 
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.LuminanceSource;
 import com.google.zxing.RGBLuminanceSource;
 import com.google.zxing.Result;
 import com.google.zxing.common.HybridBinarizer;
-import com.google.zxing.multi.MultipleBarcodeReader;
 import com.google.zxing.oned.UPCEReader;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.RobotLog;
 import com.qualcomm.robotcore.util.ThreadPool;
 import com.vuforia.Frame;
-import com.vuforia.Image;
 
-import org.checkerframework.checker.units.qual.C;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.function.Consumer;
 import org.firstinspires.ftc.robotcore.external.function.Continuation;
-import org.firstinspires.ftc.robotcore.external.function.ContinuationResult;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -60,11 +50,6 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvPipeline;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -106,7 +91,7 @@ public class BarcodeTest extends LinearOpMode
     @Override
     public void runOpMode()
     {
-        telemetry = Config.getDefaultTelemetry(telemetry);
+        telemetry = TeamConf.getDefaultTelemetry(telemetry);
         /**
          * NOTE: Many comments have been omitted from this sample for the
          * sake of conciseness. If you're just starting out with EasyOpenCV,
@@ -121,7 +106,7 @@ public class BarcodeTest extends LinearOpMode
          * Setup Vuforia
          */
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(viewportContainerIds[0]);
-        parameters.vuforiaLicenseKey = Config.VUFORIA_KEY;
+        parameters.vuforiaLicenseKey = TeamConf.VUFORIA_KEY;
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
         // Uncomment this line below to use a webcam
         //parameters.cameraName = hardwareMap.get(WebcamName.class, "Webcam 1");
