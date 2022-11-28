@@ -32,10 +32,12 @@ dependencies {
 
     implementation 'org.ftclib.ftclib:core:2.0.1'
     implementation 'org.openftc:easyopencv:1.5.2'
+    implementation 'org.openftc:apriltag:1.1.0'
 
     // Bundles mlkit with the app
     //implementation 'com.google.mlkit:barcode-scanning:17.0.2'
 
     implementation 'com.google.zxing:core:3.4.1'
     implementation 'com.google.zxing:android-core:3.3.0'
+
 }
