@@ -31,15 +31,19 @@ import com.google.zxing.RGBLuminanceSource;
 import com.google.zxing.Result;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.oned.UPCEReader;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.RobotLog;
 import com.qualcomm.robotcore.util.ThreadPool;
 import com.vuforia.Frame;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.function.Consumer;
 import org.firstinspires.ftc.robotcore.external.function.Continuation;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -50,6 +54,7 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvPipeline;
 
+import java.lang.reflect.Field;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -66,6 +71,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * gain, ISO, or frame rate.
  */
 @TeleOp
+@Disabled
 public class BarcodeTest extends LinearOpMode
 {
     VuforiaLocalizer vuforia = null;
@@ -91,7 +97,7 @@ public class BarcodeTest extends LinearOpMode
     @Override
     public void runOpMode()
     {
-        telemetry = TeamConf.getDefaultTelemetry(telemetry);
+        try { Field telemetryAccessor = this.getClass().getDeclaredField("telemetry"); telemetryAccessor.setAccessible(true); telemetryAccessor.set(this, TeamConf.getDefaultTelemetry(telemetry)); } catch (Exception e) { RobotLog.e("ROBOT REFLECT: " + e.toString()); }
         /**
          * NOTE: Many comments have been omitted from this sample for the
          * sake of conciseness. If you're just starting out with EasyOpenCV,
@@ -107,9 +113,10 @@ public class BarcodeTest extends LinearOpMode
          */
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(viewportContainerIds[0]);
         parameters.vuforiaLicenseKey = TeamConf.VUFORIA_KEY;
-        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+        //parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
         // Uncomment this line below to use a webcam
-        //parameters.cameraName = hardwareMap.get(WebcamName.class, "Webcam 1");
+        parameters.cameraName = hardwareMap.get(WebcamName.class, "Webcam 1");
+
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
         vuforia.enableConvertFrameToBitmap();
 
@@ -133,7 +140,7 @@ public class BarcodeTest extends LinearOpMode
                 // are entirely ignored when using Vuforia passthrough mode. However, they are left
                 // in the method signature to provide interface compatibility with the other types
                 // of cameras.
-                vuforiaPassthroughCam.startStreaming(0,0, OpenCvCameraRotation.UPRIGHT);
+                vuforiaPassthroughCam.startStreaming(0,0, OpenCvCameraRotation.UPSIDE_DOWN);
             }
 
             @Override

@@ -74,7 +74,8 @@ class AprilTagDetectionPipeline extends OpenCvPipeline
 
     public AprilTagDetectionPipeline(double tagsize, double fx, double fy, double cx, double cy)
     {
-        this(tagsize, fx, fy, cx, cy, AprilTagDetectorJNI.TagFamily.TAG_36h11.string);
+        //this(tagsize, fx, fy, cx, cy, AprilTagDetectorJNI.TagFamily.TAG_36h11.string);
+        this(tagsize, fx, fy, cx, cy, TeamConf.TAG_FAMILY.string);
     }
 
     public AprilTagDetectionPipeline(double tagsize, double fx, double fy, double cx, double cy, String tagFamily)

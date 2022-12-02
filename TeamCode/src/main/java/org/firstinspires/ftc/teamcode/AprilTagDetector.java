@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
+import static org.firstinspires.ftc.teamcode.TeamConf.TAG_OFFSET;
+
+import com.arcrobotics.ftclib.util.Timing;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.RobotLog;
 
@@ -9,11 +12,15 @@ import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class AprilTagDetector extends SignalSleeveDetector {
     OpenCvCamera camera;
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
+    Timing.Timer runTimer = new Timing.Timer(100, TimeUnit.MILLISECONDS); // Restrict to scanning every 100ms
 
     static final double FEET_PER_METER = 3.28084;
 
@@ -32,8 +39,9 @@ public class AprilTagDetector extends SignalSleeveDetector {
     int ID_TAG_OF_INTEREST = 18; // Tag ID 18 from the 36h11 family
     int[] DESIRED_TAG_IDS = { 18, 19, 20 };
 
-    AprilTagDetection[] tagsToLookFor = { null, null, null };
+    List<Integer> tagsToLookFor;
     boolean detectFail = false;
+    int tagSeen = -1;
 
     boolean isTagDesired(AprilTagDetection tag)
     {
@@ -47,6 +55,8 @@ public class AprilTagDetector extends SignalSleeveDetector {
 
     public AprilTagDetector(HardwareMap hardwareMap, List<Integer> desiredTags)
     {
+        this.tagsToLookFor = desiredTags;
+
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
         aprilTagDetectionPipeline = new AprilTagDetectionPipeline(tagsize, fx, fy, cx, cy);
@@ -57,7 +67,7 @@ public class AprilTagDetector extends SignalSleeveDetector {
             @Override
             public void onOpened()
             {
-                camera.startStreaming(800,448, OpenCvCameraRotation.UPRIGHT);
+                camera.startStreaming(800,448, TeamConf.ROBOT_CAMERA_ORIENTATION);
             }
 
             @Override
@@ -67,10 +77,44 @@ public class AprilTagDetector extends SignalSleeveDetector {
                 detectFail = true;
             }
         });
+
+        runTimer.start();
     }
 
     @Override
     void detect() {
+        if (detectFail || !runTimer.done()) { return; }
 
+        ArrayList<AprilTagDetection> currentDetections = aprilTagDetectionPipeline.getLatestDetections();
+
+        if(currentDetections.size() != 0)
+        {
+            for(AprilTagDetection tag : currentDetections)
+            {
+                if (tagsToLookFor.stream().anyMatch(i -> i == tag.id))
+                {
+                    tagSeen = tag.id - TAG_OFFSET;
+                    break;
+                }
+            }
+        }
+
+        runTimer.start();
+    }
+
+    public boolean done()
+    {
+        return detectFail || (tagSeen != -1);
+    }
+
+    public void stop()
+    {
+        camera.stopStreaming();
+    }
+
+    public int getTagSeenOrDefault(int dfault)
+    {
+        if (tagSeen != -1) { return tagSeen; }
+        else { return dfault; }
     }
 }

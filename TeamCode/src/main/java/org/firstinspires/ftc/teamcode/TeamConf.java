@@ -2,12 +2,57 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.jetbrains.annotations.Contract;
+import org.openftc.apriltag.AprilTagDetectorJNI;
+import org.openftc.easyopencv.OpenCvCameraRotation;
 
 @com.acmerobotics.dashboard.config.Config
 public class TeamConf {
+
+
+
+
+
+    // Field is 11ft 9in
+    public static double FIELD_WIDTH = 141;
+    // Tiles are 2ft
+    public static double TILE_SIZE = 24;
+
+    // Field from the point of view of the red alliance: +y is towards blue, -y is towards red, +x is towards red right
+    public static double FIELD_BEARING_NORTH = Math.PI / 2;
+    public static double FIELD_BEARING_SOUTH = Math.PI * (3.0 / 2.0);
+    public static double FIELD_BEARING_EAST = 0.0;
+    public static double FIELD_BEARING_WEST = Math.PI;
+
+    // Senior team robot
+    public static double ROBOTA_LENGTH = 18;
+    public static double ROBOTA_WIDTH = 12;
+
+    // Choose current robot here
+    public static double ROBOT_LENGTH = ROBOTA_LENGTH;
+    public static double ROBOT_WIDTH = ROBOTA_WIDTH;
+
+    public static Pose2d START_POS_RED_LEFT = new Pose2d(-35, -(FIELD_WIDTH / 2) + (ROBOT_LENGTH / 2), FIELD_BEARING_NORTH);
+    public static Pose2d START_POS_RED_RIGHT = new Pose2d(35, -(FIELD_WIDTH / 2) + (ROBOT_LENGTH / 2), FIELD_BEARING_NORTH);
+    public static Pose2d START_POS_BLUE_LEFT = new Pose2d(35, (FIELD_WIDTH / 2) - (ROBOT_LENGTH / 2), FIELD_BEARING_SOUTH);
+    public static Pose2d START_POS_BLUE_RIGHT = new Pose2d(-35, (FIELD_WIDTH / 2) - (ROBOT_LENGTH / 2), FIELD_BEARING_SOUTH);
+
+
+
+
+
+
+
+
+    public static AprilTagDetectorJNI.TagFamily TAG_FAMILY = AprilTagDetectorJNI.TagFamily.TAG_25h9;
+    // Offset to get from our tag values to the signal values [1,2,3]
+    public static int TAG_OFFSET = 20;
+
+    public static OpenCvCameraRotation ROBOT_CAMERA_ORIENTATION = OpenCvCameraRotation.UPSIDE_DOWN;
+
     public static String VUFORIA_KEY = "AQfwG73/////AAABmaET3hUmm0WIjCN9wIx3AKA6l22iwwwVNCUbgJkn4v5KLzvswWwlRaShGcgpS2jgvjX+aBry9XKAoM0JeE1yFK1hpyDD3+mR68nn4uT/NoAKQvTDPC2a6+3rN91dN5qyCwg0UWv3oslFUIjQIX9HZBuRjVdHYfS1LU/Ea93hQ0wxulW3Hij8gdqRstJSYTi9u+IiGyYzv560wYoH5wZP2rJxbB3Av/E6O1C08lYAjKgRPMqsl27Wy1CA+lKzJ0pVYjRA3Z4+9AaQFFzFPjTKHPxXG75lzYXj0eB/aA8K91fokCK16SJp5xNJqoccpgO1t3IO7B1CVonzAEz9juq+WBsGPRffzMAxanmczBJjgh7Y";;
 
     public enum SignalZone {
@@ -41,6 +86,12 @@ public class TeamConf {
         BLUE,
         RED
     }
+
+
+
+
+
+
 
 
 
@@ -96,5 +147,11 @@ public class TeamConf {
             }
         }
         catch (Exception e) { return null; }
+    }
+
+    public static void sleep(int ms){
+        try {
+            Thread.sleep(ms);
+        } catch (Exception e){}
     }
 }
