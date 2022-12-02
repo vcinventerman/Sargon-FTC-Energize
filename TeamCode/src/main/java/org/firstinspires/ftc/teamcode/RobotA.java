@@ -6,20 +6,21 @@ import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.drive.MecanumDriveCancelable;
+import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 public class RobotA {
-    public MecanumDriveCancelable drive;
+    public SampleMecanumDrive drive;
     public LinearSlideA slide;
 
     public RobotA(HardwareMap hardwareMap)
     {
-        drive = new MecanumDriveCancelable(hardwareMap);
+        drive = new SampleMecanumDrive(hardwareMap);
         slide = new LinearSlideA(hardwareMap);
 
     }
 
-    public void update(long delta)
+    public void update()
     {
-        slide.update(delta);
+        slide.update();
     }
 }

@@ -47,6 +47,8 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
+import org.firstinspires.ftc.teamcode.util.AxisDirection;
+import org.firstinspires.ftc.teamcode.util.BNO055IMUUtil;
 import org.firstinspires.ftc.teamcode.util.DashboardUtil;
 import org.firstinspires.ftc.teamcode.util.LynxModuleUtil;
 
@@ -56,7 +58,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /*
- * This is a modified SampleMecanumDrive class that implements the ability to cancel a trajectory
+ * This is a modified MecanumDriveCancelable class that implements the ability to cancel a trajectory
  * following. Essentially, it just forces the mode to IDLE.
  */
 @Config
@@ -138,11 +140,17 @@ public class MecanumDriveCancelable extends MecanumDrive {
         // TODO: if your hub is mounted vertically, remap the IMU axes so that the z-axis points
         // upward (normal to the floor) using a command like the following:
         // BNO055IMUUtil.remapAxes(imu, AxesOrder.XYZ, AxesSigns.NPN);
+        BNO055IMUUtil.remapZAxis(imu, AxisDirection.POS_Y);
 
-        rightRear = hardwareMap.get(DcMotorEx.class, "driveBackRight");
+        /*rightRear = hardwareMap.get(DcMotorEx.class, "driveBackRight");
         rightFront = hardwareMap.get(DcMotorEx.class, "driveFrontRight");
         leftFront = hardwareMap.get(DcMotorEx.class, "driveFrontLeft");
-        leftRear = hardwareMap.get(DcMotorEx.class, "driveBackLeft");
+        leftRear = hardwareMap.get(DcMotorEx.class, "driveBackLeft");*/
+
+        rightRear = hardwareMap.get(DcMotorEx.class, "driveFrontLeft");
+        rightFront = hardwareMap.get(DcMotorEx.class, "driveBackLeft");
+        leftFront = hardwareMap.get(DcMotorEx.class, "driveFrontRight");
+        leftRear = hardwareMap.get(DcMotorEx.class, "driveBackRight");
 
         //rightRear.setDirection(DcMotorSimple.Direction.REVERSE);
         //rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -167,6 +175,8 @@ public class MecanumDriveCancelable extends MecanumDrive {
         }
 
         // TODO: reverse any motors using DcMotor.setDirection()
+        rightFront.setDirection(DcMotorEx.Direction.REVERSE);
+        rightRear.setDirection(DcMotorEx.Direction.REVERSE);
 
         // TODO: if desired, use setLocalizer() to change the localization method
         // for instance, setLocalizer(new ThreeTrackingWheelLocalizer(...));

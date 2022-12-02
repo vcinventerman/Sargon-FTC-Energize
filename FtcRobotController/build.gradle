@@ -26,3 +26,4 @@ android {
 apply from: '../build.dependencies.gradle'
 
 android { sourceSets { main { java { srcDirs('../../ftc-hotpatch/src/') } } } }
+dependencies { implementation 'org.ftclib.ftclib:core:2.0.1' }

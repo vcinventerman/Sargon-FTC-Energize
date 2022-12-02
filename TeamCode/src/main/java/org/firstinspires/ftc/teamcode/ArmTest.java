@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@Supervised(name="ArmTest", autonomous=false)
+//@Supervised(name="ArmTest", autonomous=false)
 public class ArmTest extends SupervisedOpMode {
     MotorEx winch;
     ServoEx claw;
@@ -25,7 +25,7 @@ public class ArmTest extends SupervisedOpMode {
     }
 
     public void loop() {
-        winch.set(gamepad1.left_stick_y);
+        //winch.set(gamepad1.left_stick_y);
         //claw.turnToAngle(-gamepad1.right_stick_y / 360.0);
 
         
