@@ -13,7 +13,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.RobotLog;
 
-import org.firstinspires.ftc.teamcode.drive.MecanumDriveCancelable;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -52,6 +53,7 @@ import static org.firstinspires.ftc.teamcode.drive.DriveConstants.kV;
 @Autonomous(group = "drive")
 public class DriveVelocityPIDTuner extends LinearOpMode {
     public static double DISTANCE = 72; // in
+    public Telemetry telemetry = super.telemetry;
 
     enum Mode {
         DRIVER_MODE,
@@ -71,9 +73,11 @@ public class DriveVelocityPIDTuner extends LinearOpMode {
                     "PID is not in use", getClass().getSimpleName());
         }
 
-        try { Field telemetryAccessor = this.getClass().getDeclaredField("telemetry"); telemetryAccessor.setAccessible(true); telemetryAccessor.set(this, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry())); } catch (Exception e) { RobotLog.e("ROBOT REFLECT: " + e.toString()); }
+        telemetry = new MultipleTelemetry(super.telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        MecanumDriveCancelable drive = new MecanumDriveCancelable(hardwareMap);
+        //try { Field telemetryAccessor = this.getClass().getDeclaredField("telemetry"); telemetryAccessor.setAccessible(true); telemetryAccessor.set(this, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry())); } catch (Exception e) { RobotLog.e("ROBOT REFLECT: " + e.toString()); }
+
+        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
         Mode mode = Mode.TUNING_MODE;
 

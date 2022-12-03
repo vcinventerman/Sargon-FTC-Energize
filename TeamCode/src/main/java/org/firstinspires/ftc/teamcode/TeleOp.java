@@ -22,6 +22,7 @@ public class TeleOp extends SupervisedOpMode {
     GamepadButton liftButton;
     GamepadButton liftCloseButton;
     ToggleButtonReader clawButton;
+    ToggleButtonReader fineControls;
 
     // Code that runs when the INIT button is pressed (mandatory)
     public void init() {
@@ -32,6 +33,7 @@ public class TeleOp extends SupervisedOpMode {
         //liftCloseButton = new GamepadButton(gamepad1, GamepadKeys.Button.B);
         //liftButton = new GamepadButton(gamepad1, GamepadKeys.Button.X);
         clawButton = new ToggleButtonReader(gamepad1, GamepadKeys.Button.X);
+        fineControls = new ToggleButtonReader(gamepad1, GamepadKeys.Button.Y);
     }
 
     public void start() {
@@ -44,14 +46,26 @@ public class TeleOp extends SupervisedOpMode {
         clawButton.readValue();
 
 
-        robot.drive.setWeightedDrivePower(
-                new Pose2d(
-                        -gamepad1.getLeftY(),
-                        gamepad1.getLeftX(),
-                        (gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) -
-                                    gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)) * 5
-                )
-        );
+        if (fineControls.getState()) {
+            robot.drive.setWeightedDrivePower(
+                    new Pose2d(
+                            gamepad1.getLeftY() / 3.0,
+                            -gamepad1.getLeftX() / 3.0,
+                            ((-gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) +
+                                    gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)) * 5.0) / 9.0
+                    )
+            );
+        }
+        else {
+            robot.drive.setWeightedDrivePower(
+                    new Pose2d(
+                            gamepad1.getLeftY(),
+                            -gamepad1.getLeftX(),
+                            ((-gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) +
+                                    gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)) * 5.0) / 3.0
+                    )
+            );
+        }
 
         //robot.slide.winch.set(-gamepad1.right_stick_y);
         //if (gamepad1.isDown(GamepadKeys.Button.DPAD_UP)) {

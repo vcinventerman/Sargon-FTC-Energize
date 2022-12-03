@@ -22,5 +22,6 @@ public class RobotA {
     public void update()
     {
         slide.update();
+        drive.update();
     }
 }

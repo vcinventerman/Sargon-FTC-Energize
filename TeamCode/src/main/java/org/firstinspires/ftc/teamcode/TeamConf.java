@@ -3,11 +3,14 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.jetbrains.annotations.Contract;
 import org.openftc.apriltag.AprilTagDetectorJNI;
 import org.openftc.easyopencv.OpenCvCameraRotation;
+
+import java.util.Map;
 
 @com.acmerobotics.dashboard.config.Config
 public class TeamConf {
@@ -29,7 +32,7 @@ public class TeamConf {
 
     // Senior team robot
     public static double ROBOTA_LENGTH = 18;
-    public static double ROBOTA_WIDTH = 12;
+    public static double ROBOTA_WIDTH = 17;
 
     // Choose current robot here
     public static double ROBOT_LENGTH = ROBOTA_LENGTH;
@@ -44,8 +47,14 @@ public class TeamConf {
 
 
 
+    public enum JunctionHeight {
+        GROUND,
+        LOW,
+        MEDIUM,
+        HIGH
+    }
 
-
+    public static Map<Vector2d, JunctionHeight> junctions;
 
     public static AprilTagDetectorJNI.TagFamily TAG_FAMILY = AprilTagDetectorJNI.TagFamily.TAG_25h9;
     // Offset to get from our tag values to the signal values [1,2,3]
