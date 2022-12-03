@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.RobotLog;
 
-import org.firstinspires.ftc.teamcode.drive.MecanumDriveCancelable;
+import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 import java.lang.reflect.Field;
 
@@ -25,7 +25,7 @@ public class StrafeTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         try { Field telemetryAccessor = this.getClass().getDeclaredField("telemetry"); telemetryAccessor.setAccessible(true); telemetryAccessor.set(this, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry())); } catch (Exception e) { RobotLog.e("ROBOT REFLECT: " + e.toString()); }
 
-        MecanumDriveCancelable drive = new MecanumDriveCancelable(hardwareMap);
+        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
         Trajectory trajectory = drive.trajectoryBuilder(new Pose2d())
                 .strafeRight(DISTANCE)

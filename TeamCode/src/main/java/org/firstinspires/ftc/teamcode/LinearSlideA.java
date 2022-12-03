@@ -15,13 +15,13 @@ import java.util.List;
 public class LinearSlideA {
     public static volatile double WINCH_COEFFICIENT = 1.0;
     public static volatile double WINCH_TOLERANCE = 40.0;
-    public static volatile Integer SLIDE_POS_BOTTOM = 217;
+    public static volatile Integer SLIDE_POS_BOTTOM = 0;
 
     // Junction heights
-    public static volatile Integer SLIDE_POS_GROUND = SLIDE_POS_BOTTOM + 100;
-    public static volatile Integer SLIDE_POS_LOW = SLIDE_POS_BOTTOM + 200;
-    public static volatile Integer SLIDE_POS_MED = SLIDE_POS_BOTTOM + 500;
-    public static volatile Integer SLIDE_POS_HIGH = SLIDE_POS_BOTTOM + 1000;
+    public static volatile Integer SLIDE_POS_GROUND = SLIDE_POS_BOTTOM + 1000;
+    public static volatile Integer SLIDE_POS_LOW = SLIDE_POS_BOTTOM + 8200;
+    public static volatile Integer SLIDE_POS_MED = SLIDE_POS_BOTTOM + 13400;
+    public static volatile Integer SLIDE_POS_HIGH = SLIDE_POS_BOTTOM + 19000;
     public static List<Integer> SLIDE_POSITIONS = Arrays.asList(SLIDE_POS_BOTTOM, SLIDE_POS_GROUND, SLIDE_POS_LOW, SLIDE_POS_MED, SLIDE_POS_HIGH);
 
     public MotorEx winch;
@@ -53,6 +53,12 @@ public class LinearSlideA {
 
     public void update()
     {
+        // Emergency failsafe
+        if ((winch.getCurrentPosition() > (SLIDE_POS_HIGH + 200)) && !winchManualMode) {
+            setCurrentWinchTarget(SLIDE_POS_LOW);
+            return;
+        }
+
         if (!winch.atTargetPosition() && winchActive && !winchManualMode) {
             winch.set(1.0);
         }
@@ -72,7 +78,7 @@ public class LinearSlideA {
     public void goToNextSlidePos()
     {
         int index = SLIDE_POSITIONS.indexOf(currentWinchTarget);
-        setCurrentWinchTarget(SLIDE_POSITIONS.get((index + 1) % (SLIDE_POSITIONS.size() - 1)));
+        setCurrentWinchTarget(SLIDE_POSITIONS.get((index + 1) % (SLIDE_POSITIONS.size())));
     }
 
     public void enableAutomaticWinch() {
@@ -90,5 +96,11 @@ public class LinearSlideA {
     public void setClawState(double degrees) {
         claw.turnToAngle(degrees);
         //todo: stick
+    }
+
+    public void waitToReachWinchTarget() {
+        while (!winch.atTargetPosition() && winchActive) {
+            update();
+        }
     }
 }

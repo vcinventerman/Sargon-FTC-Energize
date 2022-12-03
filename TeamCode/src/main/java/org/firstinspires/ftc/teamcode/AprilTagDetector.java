@@ -83,7 +83,7 @@ public class AprilTagDetector extends SignalSleeveDetector {
 
     @Override
     void detect() {
-        if (detectFail || !runTimer.done()) { return; }
+        //if (detectFail || !runTimer.done()) { return; }
 
         ArrayList<AprilTagDetection> currentDetections = aprilTagDetectionPipeline.getLatestDetections();
 

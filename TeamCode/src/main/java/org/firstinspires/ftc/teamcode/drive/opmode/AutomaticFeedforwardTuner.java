@@ -9,8 +9,10 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.RobotLog;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.system.Misc;
-import org.firstinspires.ftc.teamcode.drive.MecanumDriveCancelable;
+import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.util.LoggingUtil;
 import org.firstinspires.ftc.teamcode.util.RegressionUtil;
 
@@ -37,17 +39,20 @@ import static org.firstinspires.ftc.teamcode.drive.DriveConstants.rpmToVelocity;
 public class AutomaticFeedforwardTuner extends LinearOpMode {
     public static double MAX_POWER = 0.7;
     public static double DISTANCE = 100; // in
+    Telemetry telemetry;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        if (RUN_USING_ENCODER) {
+        /*if (RUN_USING_ENCODER) {
             RobotLog.setGlobalErrorMsg("Feedforward constants usually don't need to be tuned " +
                     "when using the built-in drive motor velocity PID.");
-        }
+        }*/
 
-        try { Field telemetryAccessor = this.getClass().getDeclaredField("telemetry"); telemetryAccessor.setAccessible(true); telemetryAccessor.set(this, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry())); } catch (Exception e) { RobotLog.e("ROBOT REFLECT: " + e.toString()); }
+        //try { Field telemetryAccessor = this.getClass().getDeclaredField("telemetry"); telemetryAccessor.setAccessible(true); telemetryAccessor.set(this, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry())); } catch (Exception e) { RobotLog.e("ROBOT REFLECT: " + e.toString()); }
+        telemetry = new MultipleTelemetry(super.telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        MecanumDriveCancelable drive = new MecanumDriveCancelable(hardwareMap);
+
+        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
         NanoClock clock = NanoClock.system();
 

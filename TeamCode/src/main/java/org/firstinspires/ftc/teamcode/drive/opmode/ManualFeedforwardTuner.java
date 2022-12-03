@@ -13,7 +13,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.RobotLog;
 
-import org.firstinspires.ftc.teamcode.drive.MecanumDriveCancelable;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 import java.lang.reflect.Field;
 import java.util.Objects;
@@ -47,7 +48,7 @@ public class ManualFeedforwardTuner extends LinearOpMode {
 
     private FtcDashboard dashboard = FtcDashboard.getInstance();
 
-    private MecanumDriveCancelable drive;
+    private SampleMecanumDrive drive;
 
     enum Mode {
         DRIVER_MODE,
@@ -55,6 +56,8 @@ public class ManualFeedforwardTuner extends LinearOpMode {
     }
 
     private Mode mode;
+
+    Telemetry telemetry;
 
     private static MotionProfile generateProfile(boolean movingForward) {
         MotionState start = new MotionState(movingForward ? 0 : DISTANCE, 0, 0, 0);
@@ -64,14 +67,15 @@ public class ManualFeedforwardTuner extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        if (RUN_USING_ENCODER) {
+        /*if (RUN_USING_ENCODER) {
             RobotLog.setGlobalErrorMsg("Feedforward constants usually don't need to be tuned " +
                     "when using the built-in drive motor velocity PID.");
-        }
+        }*/
 
-        try { Field telemetryAccessor = this.getClass().getDeclaredField("telemetry"); telemetryAccessor.setAccessible(true); telemetryAccessor.set(this, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry())); } catch (Exception e) { RobotLog.e("ROBOT REFLECT: " + e.toString()); }
+        //try { Field telemetryAccessor = this.getClass().getDeclaredField("telemetry"); telemetryAccessor.setAccessible(true); telemetryAccessor.set(this, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry())); } catch (Exception e) { RobotLog.e("ROBOT REFLECT: " + e.toString()); }
+        telemetry = new MultipleTelemetry(super.telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        drive = new MecanumDriveCancelable(hardwareMap);
+        drive = new SampleMecanumDrive(hardwareMap);
 
         mode = Mode.TUNING_MODE;
 
