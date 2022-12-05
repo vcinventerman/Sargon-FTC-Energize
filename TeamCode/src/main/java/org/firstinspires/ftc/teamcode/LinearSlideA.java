@@ -19,9 +19,9 @@ public class LinearSlideA {
 
     // Junction heights
     public static volatile Integer SLIDE_POS_GROUND = SLIDE_POS_BOTTOM + 1000;
-    public static volatile Integer SLIDE_POS_LOW = SLIDE_POS_BOTTOM + 8200;
-    public static volatile Integer SLIDE_POS_MED = SLIDE_POS_BOTTOM + 13400;
-    public static volatile Integer SLIDE_POS_HIGH = SLIDE_POS_BOTTOM + 19000;
+    public static volatile Integer SLIDE_POS_LOW = SLIDE_POS_BOTTOM + 7800;
+    public static volatile Integer SLIDE_POS_MED = SLIDE_POS_BOTTOM + 12500;
+    public static volatile Integer SLIDE_POS_HIGH = SLIDE_POS_BOTTOM + 17000;
     public static List<Integer> SLIDE_POSITIONS = Arrays.asList(SLIDE_POS_BOTTOM, SLIDE_POS_GROUND, SLIDE_POS_LOW, SLIDE_POS_MED, SLIDE_POS_HIGH);
 
     public MotorEx winch;
@@ -30,9 +30,12 @@ public class LinearSlideA {
     public boolean winchManualMode = false;
 
 
-    public static volatile double CLAW_POS_CLOSED = 360;
-    public static volatile double CLAW_POS_OPEN = 300;
+    public static volatile double CLAW_POS_FIT = 245; // To fit inside the size box
+    public static volatile double CLAW_POS_CLOSED = 325;
+    public static volatile double CLAW_POS_OPEN = 245;
     public static volatile double CLAW_POS_OFFSET = 0;
+
+    Thread slideThread;
 
     public ServoEx claw;
 
@@ -54,7 +57,7 @@ public class LinearSlideA {
     public void update()
     {
         // Emergency failsafe
-        if ((winch.getCurrentPosition() > (SLIDE_POS_HIGH + 200)) && !winchManualMode) {
+        if ((winch.getCurrentPosition() > (SLIDE_POS_HIGH + 100)) && !winchManualMode) {
             setCurrentWinchTarget(SLIDE_POS_LOW);
             return;
         }
@@ -102,5 +105,9 @@ public class LinearSlideA {
         while (!winch.atTargetPosition() && winchActive) {
             update();
         }
+    }
+
+    void runInThread() {
+
     }
 }

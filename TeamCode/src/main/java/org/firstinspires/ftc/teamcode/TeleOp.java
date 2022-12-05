@@ -44,6 +44,7 @@ public class TeleOp extends SupervisedOpMode {
     public void loop() {
         gamepad1.readButtons();
         clawButton.readValue();
+        fineControls.readValue();
 
 
         if (fineControls.getState()) {
