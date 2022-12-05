@@ -14,6 +14,12 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.checkerframework.checker.i18nformatter.qual.I18nValidFormat;
 import org.firstinspires.ftc.teamcode.drive.MecanumDriveCancelable;
+import org.firstinspires.ftc.teamcode.wpi.first.math.filter.LinearFilter;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.FileHandler;
 
 //@Supervised(name="?TeleOp", group="Iterative Opmode", autonomous=false, variations={"Red", "Blue"})
 @Supervised(name="TeleOp", group="!CompTeleOp", autonomous=false)
@@ -23,6 +29,9 @@ public class TeleOp extends SupervisedOpMode {
     GamepadButton liftCloseButton;
     ToggleButtonReader clawButton;
     ToggleButtonReader fineControls;
+
+    LinearFilter driveXFilter;
+    LinearFilter driveYFilter;
 
     // Code that runs when the INIT button is pressed (mandatory)
     public void init() {
@@ -34,24 +43,28 @@ public class TeleOp extends SupervisedOpMode {
         //liftButton = new GamepadButton(gamepad1, GamepadKeys.Button.X);
         clawButton = new ToggleButtonReader(gamepad1, GamepadKeys.Button.X);
         fineControls = new ToggleButtonReader(gamepad1, GamepadKeys.Button.Y);
+
+        driveXFilter = LinearFilter.singlePoleIIR(0.1, 0.02);
+        driveYFilter = LinearFilter.singlePoleIIR(0.1, 0.02);
     }
 
     public void start() {
-
+        elapsedRuntime.reset();
     }
 
     // Code that runs repeatedly after the PLAY button is pressed (optional)
     public void loop() {
+        count();
+
         gamepad1.readButtons();
         clawButton.readValue();
         fineControls.readValue();
 
-
         if (fineControls.getState()) {
             robot.drive.setWeightedDrivePower(
                     new Pose2d(
-                            gamepad1.getLeftY() / 3.0,
-                            -gamepad1.getLeftX() / 3.0,
+                            driveXFilter.calculate(gamepad1.getLeftX() / 3.0),
+                            driveXFilter.calculate(-gamepad1.getLeftY() / 3.0),
                             ((-gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) +
                                     gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)) * 5.0) / 9.0
                     )
@@ -145,4 +158,20 @@ public class TeleOp extends SupervisedOpMode {
     }
 
     public int mySpecialNotDuplicatedFunction() { return 5; }
+
+
+
+    long lastSec = 0;
+    long called = 0;
+    List<Double> calledCounts = new ArrayList<Double>();
+
+    void count() {
+        long now = elapsedRuntime.now(TimeUnit.SECONDS);
+        called++;
+
+        if (now > lastSec) {
+            calledCounts.add(1.0 / called);
+            called = 0;
+        }
+    }
 }
