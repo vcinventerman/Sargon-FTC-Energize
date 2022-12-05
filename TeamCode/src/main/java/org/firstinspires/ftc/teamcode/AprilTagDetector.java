@@ -109,7 +109,8 @@ public class AprilTagDetector extends SignalSleeveDetector {
 
     public void stop()
     {
-        camera.stopStreaming();
+        // CREATES LIBUSB ERROR
+        //camera.stopStreaming();
     }
 
     public int getTagSeenOrDefault(int dfault)
