@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import static org.firstinspires.ftc.teamcode.TeamConf.within;
+
 import com.arcrobotics.ftclib.hardware.ServoEx;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
@@ -7,6 +9,7 @@ import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import java.util.Arrays;
 import java.util.List;
@@ -31,13 +34,17 @@ public class LinearSlideA {
 
 
     public static volatile double CLAW_POS_FIT = 245; // To fit inside the size box
-    public static volatile double CLAW_POS_CLOSED = 325;
-    public static volatile double CLAW_POS_OPEN = 245;
+    public static volatile double CLAW_POS_CLOSED = 60;
+    public static volatile double CLAW_POS_OPEN = 150;
     public static volatile double CLAW_POS_OFFSET = 0;
 
     Thread slideThread;
 
     public ServoEx claw;
+    public static double clawTarget = CLAW_POS_OPEN;
+    public boolean clawActive = false;
+    public boolean clawManualMode = false;
+
 
 
     public LinearSlideA(HardwareMap hardwareMap)
@@ -49,13 +56,24 @@ public class LinearSlideA {
         winch.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         winchActive = false;
 
-
+        //claw = hardwareMap.get(Servo.class, "claw");
         claw = new SimpleServo(hardwareMap, "claw", 0, 360);
-
+        clawManualMode = false;
+        clawActive = false;
     }
 
     public void update()
     {
+        if (!within(claw.getAngle(), clawTarget, 1) && clawActive && !clawManualMode) {
+            claw.turnToAngle(clawTarget);
+        }
+        else if (!clawManualMode && clawActive) {
+            clawActive = false;
+        }
+        else {
+
+        }
+
         // Emergency failsafe
         if ((winch.getCurrentPosition() > (SLIDE_POS_HIGH + 100)) && !winchManualMode) {
             setCurrentWinchTarget(SLIDE_POS_LOW);
@@ -65,10 +83,16 @@ public class LinearSlideA {
         if (!winch.atTargetPosition() && winchActive && !winchManualMode) {
             winch.set(1.0);
         }
-        else if (!winchManualMode) {
+        else if (!winchManualMode && winchActive) {
+            // Currently at target
             winch.set(0.0);
             winchActive = false;
         }
+        else {
+            // Winch will be manually moved by controller
+        }
+
+
     }
 
 
@@ -109,5 +133,9 @@ public class LinearSlideA {
 
     void runInThread() {
 
+    }
+
+    public void setClawTarget(double target) {
+        clawTarget = target;
     }
 }

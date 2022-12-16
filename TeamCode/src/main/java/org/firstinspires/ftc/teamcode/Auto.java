@@ -20,7 +20,7 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceBuilder;
 
 //todo: MUST construct trajectories in another thread or keep winch ticking in any way
-@Supervised(name="?Auto", group="!CompAuto", autonomous=true, variations={"RedLeft", "RedRight", "BlueLeft", "BlueRight"}, next="TeleOp")
+@Supervised(name="?Auto", group="!CompAuto", autonomous=true, linear=true, variations={"RedLeft", "RedRight", "BlueLeft", "BlueRight"}, next="TeleOp")
 public class Auto extends SupervisedOpMode {
     RobotA robot;
     AprilTagDetector detector;

@@ -44,8 +44,8 @@ public class TeleOp extends SupervisedOpMode {
         clawButton = new ToggleButtonReader(gamepad1, GamepadKeys.Button.X);
         fineControls = new ToggleButtonReader(gamepad1, GamepadKeys.Button.Y);
 
-        driveXFilter = LinearFilter.singlePoleIIR(0.1, 0.02);
-        driveYFilter = LinearFilter.singlePoleIIR(0.1, 0.02);
+        driveXFilter = LinearFilter.singlePoleIIR(0.1, 0.03); //todo: tune period as robot changes
+        driveYFilter = LinearFilter.singlePoleIIR(0.1, 0.03); //todo: add artificial limiter to .03
     }
 
     public void start() {
@@ -86,7 +86,7 @@ public class TeleOp extends SupervisedOpMode {
         //    robot.slide.setCurrentWinchTarget((int) (robot.slide.currentWinchTarget - (gamepad1.getRightY() * 10)));
         //}
         if (gamepad1.isDown(GamepadKeys.Button.DPAD_RIGHT)) {
-            robot.slide.claw.rotateByAngle(((gamepad1.getButton(GamepadKeys.Button.RIGHT_BUMPER) ? 0.0 : 1.0) + ((gamepad1.getButton(GamepadKeys.Button.LEFT_BUMPER) ? 0.0 : -1.0))) / 10.0);
+            //robot.slide.claw.rotateByAngle(((gamepad1.getButton(GamepadKeys.Button.RIGHT_BUMPER) ? 0.0 : 1.0) + ((gamepad1.getButton(GamepadKeys.Button.LEFT_BUMPER) ? 0.0 : -1.0))) / 10.0);
         }
 
         if (gamepad1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
@@ -115,10 +115,12 @@ public class TeleOp extends SupervisedOpMode {
 
         if (clawButton.stateJustChanged()) {
             if (clawButton.getState()) {
-                robot.slide.claw.turnToAngle(robot.slide.CLAW_POS_CLOSED);
+                //robot.slide.claw.turnToAngle(robot.slide.CLAW_POS_CLOSED);
+                robot.slide.setClawTarget(robot.slide.CLAW_POS_CLOSED);
             }
             else {
-                robot.slide.claw.turnToAngle(robot.slide.CLAW_POS_OPEN);
+                //robot.slide.claw.turnToAngle(robot.slide.CLAW_POS_OPEN);
+                robot.slide.setClawTarget(robot.slide.CLAW_POS_OPEN);
             }
         }
 
@@ -172,6 +174,11 @@ public class TeleOp extends SupervisedOpMode {
         if (now > lastSec) {
             calledCounts.add(1.0 / called);
             called = 0;
+            lastSec = now;
+
+            //telemetry.clear();
+            //telemetry.addData("Loops per sec", calledCounts);
+            //telemetry.update();
         }
     }
 }

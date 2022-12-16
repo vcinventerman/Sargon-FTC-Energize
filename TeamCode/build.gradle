@@ -37,6 +37,6 @@ dependencies {
     // Bundles mlkit with the app
     //implementation 'com.google.mlkit:barcode-scanning:17.0.2'
 
-    implementation 'com.google.zxing:core:3.4.1'
-    implementation 'com.google.zxing:android-core:3.3.0'
+    //implementation 'com.google.zxing:core:3.4.1'
+    //implementation 'com.google.zxing:android-core:3.3.0'
 }

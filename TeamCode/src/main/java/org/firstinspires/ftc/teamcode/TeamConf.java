@@ -35,10 +35,12 @@ public class TeamConf {
     // Senior team robot
     public static double ROBOTA_LENGTH = 18;
     public static double ROBOTA_WIDTH = 17;
+    public static String ROBOTA_IMU_DEFAULT = "imu0"; // imu0 is in control hub, imu1 is in expansion hub
 
     // Choose current robot here
     public static double ROBOT_LENGTH = ROBOTA_LENGTH;
     public static double ROBOT_WIDTH = ROBOTA_WIDTH;
+    public static String ROBOT_IMU_DEFAULT = ROBOTA_IMU_DEFAULT;
 
     public static Pose2d START_POS_RED_LEFT = new Pose2d(-35, -(FIELD_WIDTH / 2) + (ROBOT_LENGTH / 2), FIELD_BEARING_NORTH);
     public static Pose2d START_POS_RED_RIGHT = new Pose2d(35, -(FIELD_WIDTH / 2) + (ROBOT_LENGTH / 2), FIELD_BEARING_NORTH);
@@ -164,5 +166,13 @@ public class TeamConf {
         try {
             Thread.sleep(ms);
         } catch (Exception e){}
+    }
+
+
+    public static boolean within(double val, double target, double range) {
+        return Math.abs(val - target) < range;
+    }
+    public static boolean within(long val, long target, long range) {
+        return Math.abs(val - target) < range;
     }
 }
