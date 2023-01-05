@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.FileHandler;
 
 //@Supervised(name="?TeleOp", group="Iterative Opmode", autonomous=false, variations={"Red", "Blue"})
-@Supervised(name="TeleOp", group="!CompTeleOp", autonomous=false)
+@Supervised(name="TeleOp", group="!CompTeleOp", autonomous=false, linear=false)
 public class TeleOp extends SupervisedOpMode {
     RobotA robot;
     GamepadButton liftButton;
@@ -63,8 +63,8 @@ public class TeleOp extends SupervisedOpMode {
         if (fineControls.getState()) {
             robot.drive.setWeightedDrivePower(
                     new Pose2d(
-                            driveXFilter.calculate(gamepad1.getLeftX() / 3.0),
-                            driveXFilter.calculate(-gamepad1.getLeftY() / 3.0),
+                            gamepad1.getLeftY() / 3.0,
+                            -gamepad1.getLeftX() / 3.0,
                             ((-gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) +
                                     gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)) * 5.0) / 9.0
                     )
@@ -73,8 +73,8 @@ public class TeleOp extends SupervisedOpMode {
         else {
             robot.drive.setWeightedDrivePower(
                     new Pose2d(
-                            gamepad1.getLeftY(),
-                            -gamepad1.getLeftX(),
+                            gamepad1.getLeftY() / 10.0,
+                            -gamepad1.getLeftX() / 10.0,
                             ((-gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) +
                                     gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)) * 5.0) / 3.0
                     )
