@@ -60,7 +60,9 @@ public class TeleOp extends SupervisedOpMode {
         clawButton.readValue();
         fineControls.readValue();
 
-        if (fineControls.getState()) {
+        if (fineControls.stateJustChanged()) { robot.drive.toggleBrake(); }
+
+        /*if (fineControls.getState()) {
             robot.drive.setWeightedDrivePower(
                     new Pose2d(
                             gamepad1.getLeftY() / 3.0,
@@ -73,13 +75,22 @@ public class TeleOp extends SupervisedOpMode {
         else {
             robot.drive.setWeightedDrivePower(
                     new Pose2d(
-                            gamepad1.getLeftY() / 10.0,
-                            -gamepad1.getLeftX() / 10.0,
+                            gamepad1.getLeftY(),
+                            -gamepad1.getLeftX(),
                             ((-gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) +
                                     gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)) * 5.0) / 3.0
                     )
             );
-        }
+        }*/
+
+        robot.drive.setWeightedDrivePower(
+                new Pose2d(
+                        gamepad1.getLeftY(),
+                        -gamepad1.getLeftX(),
+                        ((-gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) +
+                                gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)) * 5.0) / 3.0
+                )
+        );
 
         //robot.slide.winch.set(-gamepad1.right_stick_y);
         //if (gamepad1.isDown(GamepadKeys.Button.DPAD_UP)) {

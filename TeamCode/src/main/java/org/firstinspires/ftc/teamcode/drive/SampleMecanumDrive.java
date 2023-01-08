@@ -77,7 +77,7 @@ public class SampleMecanumDrive extends MecanumDrive {
     private DcMotorEx leftFront, leftRear, rightRear, rightFront;
     private List<DcMotorEx> motors;
 
-    private BNO055IMU imu;
+    //private BNO055IMU imu;
     private VoltageSensor batteryVoltageSensor;
 
     public SampleMecanumDrive(HardwareMap hardwareMap) {
@@ -95,10 +95,10 @@ public class SampleMecanumDrive extends MecanumDrive {
         }
 
         // TODO: adjust the names of the following hardware devices to match your configuration
-        imu = hardwareMap.get(BNO055IMU.class, ROBOT_IMU_DEFAULT);
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
-        imu.initialize(parameters);
+        //imu = hardwareMap.get(BNO055IMU.class, ROBOT_IMU_DEFAULT);
+        //BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        //parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
+        //imu.initialize(parameters);
 
         // TODO: If the hub containing the IMU you are using is mounted so that the "REV" logo does
         // not face up, remap the IMU axes so that the z-axis points upward (normal to the floor.)
@@ -121,7 +121,7 @@ public class SampleMecanumDrive extends MecanumDrive {
         //
         // For example, if +Y in this diagram faces downwards, you would use AxisDirection.NEG_Y.
         // BNO055IMUUtil.remapZAxis(imu, AxisDirection.NEG_Y);
-        BNO055IMUUtil.remapZAxis(imu, AxisDirection.NEG_Y);
+        //BNO055IMUUtil.remapZAxis(imu, AxisDirection.POS_X);
 
         /*rightRear = hardwareMap.get(DcMotorEx.class, "driveFrontLeft");
         rightFront = hardwareMap.get(DcMotorEx.class, "driveBackLeft");
@@ -148,7 +148,8 @@ public class SampleMecanumDrive extends MecanumDrive {
             setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
 
-        setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
         if (RUN_USING_ENCODER && MOTOR_VELO_PID != null) {
             setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID);
@@ -312,8 +313,10 @@ public class SampleMecanumDrive extends MecanumDrive {
 
     @Override
     public double getRawExternalHeading() {
-        Orientation orientation = imu.getAngularOrientation();
-        return orientation.firstAngle;
+        throw new NullPointerException();
+
+        //Orientation orientation = imu.getAngularOrientation();
+        //return orientation.firstAngle;
     }
 
     @Override
@@ -325,8 +328,10 @@ public class SampleMecanumDrive extends MecanumDrive {
         //
         // See https://github.com/FIRST-Tech-Challenge/FtcRobotController/issues/251 for details.
         // using
-        AngularVelocity vel = imu.getAngularVelocity();
-        return (double) vel.zRotationRate;
+        //AngularVelocity vel = imu.getAngularVelocity();
+        //return (double) vel.zRotationRate;
+
+        throw new NullPointerException();
     }
 
     public static TrajectoryVelocityConstraint getVelocityConstraint(double maxVel, double maxAngularVel, double trackWidth) {
@@ -338,5 +343,14 @@ public class SampleMecanumDrive extends MecanumDrive {
 
     public static TrajectoryAccelerationConstraint getAccelerationConstraint(double maxAccel) {
         return new ProfileAccelerationConstraint(maxAccel);
+    }
+
+    public void toggleBrake()
+    {
+        DcMotor.ZeroPowerBehavior newState =
+                motors.get(0).getZeroPowerBehavior() == DcMotor.ZeroPowerBehavior.BRAKE ?
+                DcMotor.ZeroPowerBehavior.FLOAT : DcMotor.ZeroPowerBehavior.BRAKE;
+
+        motors.forEach(motor -> motor.setZeroPowerBehavior(newState));
     }
 }
