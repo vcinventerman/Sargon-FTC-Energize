@@ -209,6 +209,10 @@ public class Auto extends SupervisedOpMode {
         return new Pose2d(robotPos.plus(new Vector2d(offsetX, offsetY)), angle);
     }
 
+    Trajectory pathToNearestPole(Vector2d junctionPos, Pose2d robotPos) {
+
+    }
+
     void createTrajectories(int tag) {
         trajectories = new Trajectory[5];
 

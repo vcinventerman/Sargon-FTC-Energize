@@ -125,12 +125,6 @@ public class LinearSlideA {
         //todo: stick
     }
 
-    public void waitToReachWinchTarget() {
-        while (!winch.atTargetPosition() && winchActive) {
-            update();
-        }
-    }
-
     void runInThread() {
 
     }
