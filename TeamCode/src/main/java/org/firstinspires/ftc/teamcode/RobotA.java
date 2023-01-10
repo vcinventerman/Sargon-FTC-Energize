@@ -16,6 +16,7 @@ public class RobotA {
     public RobotA(HardwareMap hardwareMap)
     {
         PhotonCore.enable();
+        PhotonCore.experimental.setSinglethreadedOptimized(false);
 
         drive = new SampleMecanumDrive(hardwareMap);
         slide = new LinearSlideA(hardwareMap);

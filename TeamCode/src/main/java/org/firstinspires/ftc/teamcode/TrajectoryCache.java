@@ -5,8 +5,11 @@ import android.content.res.Resources;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 
+import java.util.List;
 import java.util.Map;
 
+// Store trajectories that have been calculated with the current robot not to hit any junctions
+// Creating trajectories is very time consuming, so it should be done mostly in advance
 public class TrajectoryCache {
 
     static class TrajNotFoundException extends Exception {}
@@ -32,5 +35,15 @@ public class TrajectoryCache {
             cache.put(key, traj);
             return true;
         }
+    }
+
+    static public boolean set(List<Trajectory> trajectories) {
+        boolean succeed = true;
+
+        for (Trajectory i : trajectories) {
+            succeed = set(i) && succeed;
+        }
+
+        return succeed;
     }
 }

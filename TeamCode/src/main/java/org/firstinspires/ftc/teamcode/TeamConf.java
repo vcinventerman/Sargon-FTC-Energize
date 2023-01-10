@@ -6,12 +6,18 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.sun.tools.javac.util.List;
 
+import org.firstinspires.ftc.robotcore.external.Func;
+import org.firstinspires.ftc.robotcore.external.Function;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.drive.MecanumDriveCancelable;
+import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.jetbrains.annotations.Contract;
 import org.openftc.apriltag.AprilTagDetectorJNI;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @com.acmerobotics.dashboard.config.Config
@@ -41,13 +47,24 @@ public class TeamConf {
     public static double ROBOT_LENGTH = ROBOTA_LENGTH;
     public static double ROBOT_WIDTH = ROBOTA_WIDTH;
     public static String ROBOT_IMU_DEFAULT = ROBOTA_IMU_DEFAULT;
+    public static SampleMecanumDrive ROBOT_DRIVE = null;
 
     public static Pose2d START_POS_RED_LEFT = new Pose2d(-35, -(FIELD_WIDTH / 2) + (ROBOT_LENGTH / 2), FIELD_BEARING_NORTH);
     public static Pose2d START_POS_RED_RIGHT = new Pose2d(35, -(FIELD_WIDTH / 2) + (ROBOT_LENGTH / 2), FIELD_BEARING_NORTH);
     public static Pose2d START_POS_BLUE_LEFT = new Pose2d(35, (FIELD_WIDTH / 2) - (ROBOT_LENGTH / 2), FIELD_BEARING_SOUTH);
     public static Pose2d START_POS_BLUE_RIGHT = new Pose2d(-35, (FIELD_WIDTH / 2) - (ROBOT_LENGTH / 2), FIELD_BEARING_SOUTH);
+    public static List<Pose2d> START_POSITIONS = List.of(START_POS_RED_LEFT, START_POS_RED_RIGHT, START_POS_BLUE_LEFT, START_POS_BLUE_RIGHT);
 
 
+    // Measurements from https://cdn.andymark.com/media/W1siZiIsIjIwMjIvMDkvMDYvMTYvMzYvNTUvODgxZjAzNDctNThhYS00MzNhLTkwMTEtYTFiYWIwMTIwNzg5L2FtLTQ4MDFfYmx1ZSBhbS00ODAxX3JlZCBDb25lIFJFVjIucGRmIl1d/am-4801_blue%20am-4801_red%20Cone%20REV2.pdf?sha=593981254c44ff81
+    public static double CONE_DIAMETER = 4.0;
+    public static double CONE_HEIGHT = 3.65 + 1.23;
+
+    public static Vector2d CONE_STACK_POS_RED_LEFT = new Vector2d(-FIELD_WIDTH + CONE_DIAMETER / 2.0, -TILE_SIZE / 2.0);
+    public static Vector2d CONE_STACK_POS_RED_RIGHT = new Vector2d(FIELD_WIDTH + CONE_DIAMETER / 2.0, -TILE_SIZE / 2.0);
+    public static Vector2d CONE_STACK_POS_BLUE_LEFT = new Vector2d(FIELD_WIDTH + CONE_DIAMETER / 2.0, TILE_SIZE / 2.0);
+    public static Vector2d CONE_STACK_POS_BLUE_RIGHT = new Vector2d(-FIELD_WIDTH - CONE_DIAMETER / 2.0, TILE_SIZE / 2.0);
+    public static List<Vector2d> CONE_STACK_POSITIONS = List.of(CONE_STACK_POS_RED_LEFT, CONE_STACK_POS_RED_RIGHT, CONE_STACK_POS_BLUE_LEFT, CONE_STACK_POS_BLUE_RIGHT);
 
 
 
@@ -58,7 +75,62 @@ public class TeamConf {
         HIGH
     }
 
-    public static Map<Vector2d, JunctionHeight> junctions;
+    public static List<Vector2d> junctions = List.of(
+            // High
+            new Vector2d(0, TILE_SIZE * 1),
+            new Vector2d(0, TILE_SIZE * -1),
+            new Vector2d(TILE_SIZE * -1, 0),
+            new Vector2d(TILE_SIZE * -1, 0),
+
+            // Medium
+            new Vector2d(TILE_SIZE * 1, TILE_SIZE * 1),
+            new Vector2d(TILE_SIZE * 1, TILE_SIZE * -1),
+            new Vector2d(TILE_SIZE * -1, TILE_SIZE * 1),
+            new Vector2d(TILE_SIZE * -1, TILE_SIZE * -1),
+
+            // Low
+            new Vector2d(TILE_SIZE * 1, TILE_SIZE * 2),
+            new Vector2d(TILE_SIZE * 2, TILE_SIZE * 1),
+
+            new Vector2d(TILE_SIZE * 1, TILE_SIZE * -2),
+            new Vector2d(TILE_SIZE * 2, TILE_SIZE * -1),
+
+            new Vector2d(TILE_SIZE * 1, TILE_SIZE * -2),
+            new Vector2d(TILE_SIZE * 2, TILE_SIZE * -1),
+
+            new Vector2d(TILE_SIZE * 1, TILE_SIZE * 2),
+            new Vector2d(TILE_SIZE * 2, TILE_SIZE * 1),
+
+            // Ground
+            new Vector2d(0, 0),
+            new Vector2d(TILE_SIZE * 2, TILE_SIZE),
+            new Vector2d(TILE_SIZE * -2, TILE_SIZE),
+            new Vector2d(TILE_SIZE, TILE_SIZE * 2),
+            new Vector2d(TILE_SIZE, TILE_SIZE * -2),
+            new Vector2d(TILE_SIZE * 2, TILE_SIZE * 2),
+            new Vector2d(TILE_SIZE * 2, TILE_SIZE * -2),
+            new Vector2d(TILE_SIZE * -2, TILE_SIZE * 2),
+            new Vector2d(TILE_SIZE * -2, TILE_SIZE * -2)
+    );
+
+    public static Map<Vector2d, JunctionHeight> junctionHeights = new Function<Integer, Map<Vector2d, JunctionHeight>>(){
+        @Override
+        public Map<Vector2d, JunctionHeight> apply(Integer ignore) {
+            Map<Vector2d, JunctionHeight> ret = new HashMap<>();
+
+            List<JunctionHeight> heights = List.of(JunctionHeight.HIGH, JunctionHeight.HIGH, JunctionHeight.HIGH, JunctionHeight.HIGH,
+                    JunctionHeight.MEDIUM, JunctionHeight.MEDIUM, JunctionHeight.MEDIUM, JunctionHeight.MEDIUM,
+                    JunctionHeight.LOW, JunctionHeight.LOW, JunctionHeight.LOW, JunctionHeight.LOW, JunctionHeight.LOW, JunctionHeight.LOW, JunctionHeight.LOW, JunctionHeight.LOW,
+                    JunctionHeight.GROUND, JunctionHeight.GROUND, JunctionHeight.GROUND, JunctionHeight.GROUND, JunctionHeight.GROUND, JunctionHeight.GROUND, JunctionHeight.GROUND, JunctionHeight.GROUND, JunctionHeight.GROUND);
+
+            int i = 0;
+            for (Vector2d junction : junctions) {
+                ret.put(junction, heights.get(i));
+                i++;
+            }
+
+            return ret;
+        } }.apply(null);
 
     public static AprilTagDetectorJNI.TagFamily TAG_FAMILY = AprilTagDetectorJNI.TagFamily.TAG_25h9;
     // Offset to get from our tag values to the signal values [1,2,3]
