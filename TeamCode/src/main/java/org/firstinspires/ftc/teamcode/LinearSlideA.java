@@ -30,8 +30,8 @@ public class LinearSlideA {
     public static List<Integer> SLIDE_POSITIONS = Arrays.asList(SLIDE_POS_BOTTOM, SLIDE_POS_GROUND, SLIDE_POS_LOW, SLIDE_POS_MED, SLIDE_POS_HIGH);
 
     // In linear slide ticks
-    public static com.sun.tools.javac.util.List<Integer> CONE_STACK_HEIGHTS =
-            com.sun.tools.javac.util.List.of(130, 110, 90, 70, 50);
+    public static List<Integer> CONE_STACK_HEIGHTS = Arrays.asList(130, 110, 90, 70, 50);
+    public static int CONE_STACK_OFFSET = 20;
 
     public MotorEx winch;
     public int currentWinchTarget = SLIDE_POS_BOTTOM;
@@ -128,7 +128,7 @@ public class LinearSlideA {
     }
 
     public void waitToPassConeStack() {
-        int safeHeight = CONE_STACK_HEIGHTS.get(coneStackState - 1) + 50;
+        int safeHeight = CONE_STACK_HEIGHTS.get(coneStackState - 1) + CONE_STACK_OFFSET;
 
         if (currentWinchTarget <= CONE_STACK_HEIGHTS.get(coneStackState - 1)) {
             RobotLog.e("Invalid invocation of waitToPassConeStack!");
