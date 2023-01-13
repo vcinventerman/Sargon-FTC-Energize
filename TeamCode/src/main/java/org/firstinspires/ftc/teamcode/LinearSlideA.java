@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import static org.firstinspires.ftc.teamcode.TeamConf.getDefaultTelemetry;
 import static org.firstinspires.ftc.teamcode.TeamConf.within;
 
 import com.arcrobotics.ftclib.hardware.ServoEx;
@@ -10,6 +11,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import java.util.Arrays;
 import java.util.List;
@@ -27,15 +29,19 @@ public class LinearSlideA {
     public static volatile Integer SLIDE_POS_HIGH = SLIDE_POS_BOTTOM + 17000;
     public static List<Integer> SLIDE_POSITIONS = Arrays.asList(SLIDE_POS_BOTTOM, SLIDE_POS_GROUND, SLIDE_POS_LOW, SLIDE_POS_MED, SLIDE_POS_HIGH);
 
+    // In linear slide ticks
+    public static com.sun.tools.javac.util.List<Integer> CONE_STACK_HEIGHTS =
+            com.sun.tools.javac.util.List.of(130, 110, 90, 70, 50);
+
     public MotorEx winch;
     public int currentWinchTarget = SLIDE_POS_BOTTOM;
     public boolean winchActive = false;
     public boolean winchManualMode = false;
 
 
-    public static volatile double CLAW_POS_FIT = 245; // To fit inside the size box
-    public static volatile double CLAW_POS_CLOSED = 60;
-    public static volatile double CLAW_POS_OPEN = 150;
+    public static volatile double CLAW_POS_FIT = 210; // To fit inside the size box
+    public static volatile double CLAW_POS_CLOSED = 110;
+    public static volatile double CLAW_POS_OPEN = 180;
     public static volatile double CLAW_POS_OFFSET = 0;
 
     Thread slideThread;
@@ -114,6 +120,25 @@ public class LinearSlideA {
         winchManualMode = false;
     }
 
+    public Integer coneStackState = 0;
+    public void goToNextConeStackHeight() {
+        setCurrentWinchTarget(CONE_STACK_HEIGHTS.get(coneStackState));
+
+        coneStackState = coneStackState >= CONE_STACK_HEIGHTS.size() - 1 ? 0 : coneStackState + 1;
+    }
+
+    public void waitToPassConeStack() {
+        int safeHeight = CONE_STACK_HEIGHTS.get(coneStackState - 1) + 50;
+
+        if (currentWinchTarget <= CONE_STACK_HEIGHTS.get(coneStackState - 1)) {
+            RobotLog.e("Invalid invocation of waitToPassConeStack!");
+        }
+
+        while (winch.getCurrentPosition() < safeHeight) {
+            update();
+        }
+    }
+
     public void disableAutomaticWinch() {
         winch.setRunMode(Motor.RunMode.RawPower);
         winchActive = false;
@@ -131,5 +156,6 @@ public class LinearSlideA {
 
     public void setClawTarget(double target) {
         clawTarget = target;
+        clawActive = true;
     }
 }

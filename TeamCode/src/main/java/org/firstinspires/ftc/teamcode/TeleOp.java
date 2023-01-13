@@ -10,6 +10,7 @@ import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.karrmedia.ftchotpatch.SupervisedOpMode;
 import com.karrmedia.ftchotpatch.Supervised;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.checkerframework.checker.i18nformatter.qual.I18nValidFormat;
@@ -60,15 +61,19 @@ public class TeleOp extends SupervisedOpMode {
         clawButton.readValue();
         fineControls.readValue();
 
-        if (fineControls.stateJustChanged()) { robot.drive.toggleBrake(); }
+        if (fineControls.stateJustChanged()) { robot.drive.setZeroPowerBehavior(fineControls.getState() ? DcMotor.ZeroPowerBehavior.BRAKE : DcMotor.ZeroPowerBehavior.FLOAT); }
 
-        /*if (fineControls.getState()) {
+        double DRIVE_SLOW_MULTIPLIER = 3.0;
+        double DRIVE_SLOW_TURN_MULTIPLIER = 3.0;
+
+        //todo: adapt for deadzone/ps4
+        if (fineControls.getState()) {
             robot.drive.setWeightedDrivePower(
                     new Pose2d(
-                            gamepad1.getLeftY() / 3.0,
-                            -gamepad1.getLeftX() / 3.0,
+                            gamepad1.getLeftY() / DRIVE_SLOW_MULTIPLIER,
+                            -gamepad1.getLeftX() / DRIVE_SLOW_MULTIPLIER,
                             ((-gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) +
-                                    gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)) * 5.0) / 9.0
+                                    gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)) * 5.0) / DRIVE_SLOW_TURN_MULTIPLIER
                     )
             );
         }
@@ -81,16 +86,7 @@ public class TeleOp extends SupervisedOpMode {
                                     gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)) * 5.0) / 3.0
                     )
             );
-        }*/
-
-        robot.drive.setWeightedDrivePower(
-                new Pose2d(
-                        gamepad1.getLeftY(),
-                        -gamepad1.getLeftX(),
-                        ((-gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) +
-                                gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)) * 5.0) / 3.0
-                )
-        );
+        }
 
         //robot.slide.winch.set(-gamepad1.right_stick_y);
         //if (gamepad1.isDown(GamepadKeys.Button.DPAD_UP)) {

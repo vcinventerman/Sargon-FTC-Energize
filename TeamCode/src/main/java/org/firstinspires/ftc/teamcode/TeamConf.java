@@ -42,12 +42,15 @@ public class TeamConf {
     public static double ROBOTA_LENGTH = 18;
     public static double ROBOTA_WIDTH = 17;
     public static String ROBOTA_IMU_DEFAULT = "imu0"; // imu0 is in control hub, imu1 is in expansion hub
+    public static Vector2d ROBOTA_CLAW_OFFSET = new Vector2d(0.0, 10.0);
 
     // Choose current robot here
     public static double ROBOT_LENGTH = ROBOTA_LENGTH;
     public static double ROBOT_WIDTH = ROBOTA_WIDTH;
     public static String ROBOT_IMU_DEFAULT = ROBOTA_IMU_DEFAULT;
     public static SampleMecanumDrive ROBOT_DRIVE = null;
+    // Distance from center to claw
+    public static Vector2d ROBOT_CLAW_OFFSET = ROBOTA_CLAW_OFFSET;
 
     public static Pose2d START_POS_RED_LEFT = new Pose2d(-35, -(FIELD_WIDTH / 2) + (ROBOT_LENGTH / 2), FIELD_BEARING_NORTH);
     public static Pose2d START_POS_RED_RIGHT = new Pose2d(35, -(FIELD_WIDTH / 2) + (ROBOT_LENGTH / 2), FIELD_BEARING_NORTH);
@@ -67,7 +70,6 @@ public class TeamConf {
     public static List<Vector2d> CONE_STACK_POSITIONS = List.of(CONE_STACK_POS_RED_LEFT, CONE_STACK_POS_RED_RIGHT, CONE_STACK_POS_BLUE_LEFT, CONE_STACK_POS_BLUE_RIGHT);
 
 
-
     public enum JunctionHeight {
         GROUND,
         LOW,
@@ -75,7 +77,7 @@ public class TeamConf {
         HIGH
     }
 
-    public static List<Vector2d> junctions = List.of(
+    public static List<Vector2d> JUNCTIONS = List.of(
             // High
             new Vector2d(0, TILE_SIZE * 1),
             new Vector2d(0, TILE_SIZE * -1),
@@ -124,7 +126,7 @@ public class TeamConf {
                     JunctionHeight.GROUND, JunctionHeight.GROUND, JunctionHeight.GROUND, JunctionHeight.GROUND, JunctionHeight.GROUND, JunctionHeight.GROUND, JunctionHeight.GROUND, JunctionHeight.GROUND, JunctionHeight.GROUND);
 
             int i = 0;
-            for (Vector2d junction : junctions) {
+            for (Vector2d junction : JUNCTIONS) {
                 ret.put(junction, heights.get(i));
                 i++;
             }
@@ -210,6 +212,13 @@ public class TeamConf {
         if (col.equals("A") || col.equals("B") || col.equals("C")) { return Alliance.BLUE; }
         else if (col.equals("D") || col.equals("E") || col.equals("F")) { return Alliance.RED; }
         else { return Alliance.NONE; }
+    }
+
+    public static Pose2d stringToStartPose(String start) {
+        if (start.equals("RedLeft")) { return START_POSITIONS.get(0); }
+        else if (start.equals("RedRight")) { return START_POSITIONS.get(1); }
+        else if (start.equals("BlueLeft")) { return START_POSITIONS.get(2); }
+        else /* if (start.equals("BlueRight")) */ { return START_POSITIONS.get(3); }
     }
 
     // Our default telemetry is just ftc-dashboard bundled with the default instance
