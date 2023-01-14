@@ -42,7 +42,7 @@ public class TeamConf {
     public static double ROBOTA_LENGTH = 18;
     public static double ROBOTA_WIDTH = 17;
     public static String ROBOTA_IMU_DEFAULT = "imu1"; // imu0 is in control hub, imu1 is in expansion hub
-    public static Vector2d ROBOTA_CLAW_OFFSET = new Vector2d(0.0, 10.0);
+    public static Vector2d ROBOTA_CLAW_OFFSET = new Vector2d(0.0, 8.5);
 
     // Choose current robot here
     public static double ROBOT_LENGTH = ROBOTA_LENGTH;
@@ -63,11 +63,11 @@ public class TeamConf {
     public static double CONE_DIAMETER = 4.0;
     public static double CONE_HEIGHT = 3.65 + 1.23;
 
-    public static Vector2d CONE_STACK_POS_RED_LEFT = new Vector2d(-FIELD_WIDTH + CONE_DIAMETER / 2.0, -TILE_SIZE / 2.0);
-    public static Vector2d CONE_STACK_POS_RED_RIGHT = new Vector2d(FIELD_WIDTH + CONE_DIAMETER / 2.0, -TILE_SIZE / 2.0);
-    public static Vector2d CONE_STACK_POS_BLUE_LEFT = new Vector2d(FIELD_WIDTH + CONE_DIAMETER / 2.0, TILE_SIZE / 2.0);
-    public static Vector2d CONE_STACK_POS_BLUE_RIGHT = new Vector2d(-FIELD_WIDTH - CONE_DIAMETER / 2.0, TILE_SIZE / 2.0);
-    public static List<Vector2d> CONE_STACK_POSITIONS = List.of(CONE_STACK_POS_RED_LEFT, CONE_STACK_POS_RED_RIGHT, CONE_STACK_POS_BLUE_LEFT, CONE_STACK_POS_BLUE_RIGHT);
+    public static Pose2d CONE_STACK_POS_RED_LEFT = new Pose2d(-FIELD_WIDTH + CONE_DIAMETER / 2.0, -TILE_SIZE / 2.0, Math.PI);
+    public static Pose2d CONE_STACK_POS_RED_RIGHT = new Pose2d(FIELD_WIDTH + CONE_DIAMETER / 2.0, -TILE_SIZE / 2.0, 0);
+    public static Pose2d CONE_STACK_POS_BLUE_LEFT = new Pose2d(FIELD_WIDTH + CONE_DIAMETER / 2.0, TILE_SIZE / 2.0, 0);
+    public static Pose2d CONE_STACK_POS_BLUE_RIGHT = new Pose2d(-FIELD_WIDTH - CONE_DIAMETER / 2.0, TILE_SIZE / 2.0, Math.PI);
+    public static List<Pose2d> CONE_STACK_POSITIONS = List.of(CONE_STACK_POS_RED_LEFT, CONE_STACK_POS_RED_RIGHT, CONE_STACK_POS_BLUE_LEFT, CONE_STACK_POS_BLUE_RIGHT);
 
 
     public enum JunctionHeight {
@@ -138,7 +138,7 @@ public class TeamConf {
     // Offset to get from our tag values to the signal values [1,2,3]
     public static int TAG_OFFSET = 20;
 
-    public static OpenCvCameraRotation ROBOT_CAMERA_ORIENTATION = OpenCvCameraRotation.UPSIDE_DOWN;
+    public static OpenCvCameraRotation ROBOT_CAMERA_ORIENTATION = OpenCvCameraRotation.UPRIGHT;
 
     public static String VUFORIA_KEY = "AQfwG73/////AAABmaET3hUmm0WIjCN9wIx3AKA6l22iwwwVNCUbgJkn4v5KLzvswWwlRaShGcgpS2jgvjX+aBry9XKAoM0JeE1yFK1hpyDD3+mR68nn4uT/NoAKQvTDPC2a6+3rN91dN5qyCwg0UWv3oslFUIjQIX9HZBuRjVdHYfS1LU/Ea93hQ0wxulW3Hij8gdqRstJSYTi9u+IiGyYzv560wYoH5wZP2rJxbB3Av/E6O1C08lYAjKgRPMqsl27Wy1CA+lKzJ0pVYjRA3Z4+9AaQFFzFPjTKHPxXG75lzYXj0eB/aA8K91fokCK16SJp5xNJqoccpgO1t3IO7B1CVonzAEz9juq+WBsGPRffzMAxanmczBJjgh7Y";
 

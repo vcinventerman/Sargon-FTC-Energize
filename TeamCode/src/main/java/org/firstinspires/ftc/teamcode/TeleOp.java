@@ -5,28 +5,20 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.button.GamepadButton;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.arcrobotics.ftclib.gamepad.ToggleButtonReader;
-import com.arcrobotics.ftclib.hardware.ServoEx;
-import com.arcrobotics.ftclib.hardware.SimpleServo;
-import com.arcrobotics.ftclib.hardware.motors.Motor;
-import com.arcrobotics.ftclib.hardware.motors.MotorEx;
-import com.karrmedia.ftchotpatch.SupervisedOpMode;
+import com.karrmedia.ftchotpatch.SupervisedLinearOpMode;
 import com.karrmedia.ftchotpatch.Supervised;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Gamepad;
 
-import org.checkerframework.checker.i18nformatter.qual.I18nValidFormat;
-import org.firstinspires.ftc.teamcode.drive.MecanumDriveCancelable;
 import org.firstinspires.ftc.teamcode.wpi.first.math.filter.LinearFilter;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.FileHandler;
 
 //@Supervised(name="?TeleOp", group="Iterative Opmode", autonomous=false, variations={"Red", "Blue"})
 @Config
 @Supervised(name="TeleOp", group="!CompTeleOp", autonomous=false, linear=false)
-public class TeleOp extends SupervisedOpMode {
+public class TeleOp extends SupervisedLinearOpMode {
     RobotA robot;
     GamepadButton liftButton;
     GamepadButton liftCloseButton;
@@ -39,6 +31,10 @@ public class TeleOp extends SupervisedOpMode {
     // Code that runs when the INIT button is pressed (mandatory)
     public void init() {
         robot = new RobotA(hardwareMap);
+
+        robot.slide.claw.setPosition(robot.slide.claw.getPosition() + 10);
+        robot.slide.claw.setPosition(robot.slide.claw.getPosition() - 10);
+
         //robot.slide.winch.setRunMode(Motor.RunMode.RawPower);
 
         //liftButton = new GamepadButton(gamepad1, GamepadKeys.Button.A);

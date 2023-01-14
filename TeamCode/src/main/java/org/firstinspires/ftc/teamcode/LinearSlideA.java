@@ -27,10 +27,10 @@ public class LinearSlideA {
 
     // Junction heights
     public static volatile Integer SLIDE_POS_GROUND = SLIDE_POS_BOTTOM + 100;
-    public static volatile Integer SLIDE_POS_LOW = SLIDE_POS_BOTTOM + 1161;
-    public static volatile Integer SLIDE_POS_MED = SLIDE_POS_BOTTOM + 1500;
-    public static volatile Integer SLIDE_POS_HIGH = SLIDE_POS_BOTTOM + 2200;
-    public static List<Integer> SLIDE_POSITIONS = Arrays.asList(SLIDE_POS_GROUND, SLIDE_POS_LOW, SLIDE_POS_MED, SLIDE_POS_HIGH);
+    public static volatile Integer SLIDE_POS_LOW = SLIDE_POS_BOTTOM + 1100;
+    public static volatile Integer SLIDE_POS_MED = SLIDE_POS_BOTTOM + 1550;
+    public static volatile Integer SLIDE_POS_HIGH = SLIDE_POS_BOTTOM + 1900;
+    public static List<Integer> SLIDE_POSITIONS = Arrays.asList(SLIDE_POS_LOW, SLIDE_POS_MED);
 
     // In linear slide ticks
     public static List<Integer> CONE_STACK_HEIGHTS = Arrays.asList(130, 110, 90, 70, 50);
@@ -73,6 +73,9 @@ public class LinearSlideA {
         clawActive = false;
     }
 
+    public static Double WINCH_SPEED = 0.5;
+    public static Double WINCH_LAND_SPEED = 0.1;
+
     public void update()
     {
         if (!within(claw.getAngle(), clawTarget, 1) && clawActive && !clawManualMode) {
@@ -93,21 +96,24 @@ public class LinearSlideA {
         }
 
         if (winch.atTargetPosition() && !winchActive) {
-            if (!within(winch.getCurrentPosition(), currentWinchTarget, 50)) {
-                setCurrentWinchTarget(currentWinchTarget);
-            }
-            else {
+            //if (!within(winch.getCurrentPosition(), currentWinchTarget, 50)) {
+            //    setCurrentWinchTarget(currentWinchTarget);
+            //}
+            /*else {
                 winch.setTargetPosition(winch.getCurrentPosition());
                 winch.set(0.5);
-            }
+            }*/
         }
 
         if (!winch.atTargetPosition() && winchActive && !winchManualMode) {
-            if (within(winch.getCurrentPosition(), currentWinchTarget, 150)) {
-                winch.set(0.5);
+            if (winch.getCurrentPosition() < 200 && currentWinchTarget == SLIDE_POS_BOTTOM) {
+                winch.set(WINCH_LAND_SPEED);
+            }
+            else if (within(winch.getCurrentPosition(), currentWinchTarget, 150)) {
+                winch.set(WINCH_SPEED);
             }
             else {
-                winch.set(1.0);
+                winch.set(WINCH_SPEED);
             }
         }
         else if (!winchManualMode && winchActive) {

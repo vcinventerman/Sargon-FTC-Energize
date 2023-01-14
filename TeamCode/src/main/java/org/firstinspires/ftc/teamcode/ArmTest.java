@@ -1,19 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.hardware.ServoEx;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
-import com.karrmedia.ftchotpatch.Supervised;
-import com.karrmedia.ftchotpatch.SupervisedOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.karrmedia.ftchotpatch.SupervisedLinearOpMode;
 
 //@Supervised(name="ArmTest", autonomous=false)
-public class ArmTest extends SupervisedOpMode {
+public class ArmTest extends SupervisedLinearOpMode {
     MotorEx winch;
     ServoEx claw;
 

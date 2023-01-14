@@ -8,28 +8,26 @@ import static org.firstinspires.ftc.teamcode.TeamConf.ROBOT_CLAW_OFFSET;
 import static org.firstinspires.ftc.teamcode.TeamConf.START_POSITIONS;
 import static org.firstinspires.ftc.teamcode.TeamConf.TILE_SIZE;
 import static org.firstinspires.ftc.teamcode.TeamConf.nop;
-import static org.firstinspires.ftc.teamcode.TeamConf.sleep;
 import static org.firstinspires.ftc.teamcode.TeamConf.stringToStartPose;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
 import com.karrmedia.ftchotpatch.Supervised;
-import com.karrmedia.ftchotpatch.SupervisedOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.karrmedia.ftchotpatch.SupervisedLinearOpMode;
 
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 //todo: MUST construct trajectories in another thread and keep winch ticking in any way
 @Supervised(name="?Auto", group="!CompAuto", autonomous=true, linear=true, variations={"RedLeft", "RedRight", "BlueLeft", "BlueRight"}, next="TeleOp")
-public class Auto extends SupervisedOpMode {
+@Config
+public class Auto extends SupervisedLinearOpMode {
     RobotA robot;
     AprilTagDetector detector;
     Trajectory[] trajectories = null;
@@ -38,9 +36,9 @@ public class Auto extends SupervisedOpMode {
     static Trajectory[][] allTrajectories = new Trajectory[4][10];
     static BulkTrajectoryBuilder builder = null;
 
-    static Thread trajCreationThread = new Thread(Auto::createTrajectories);
-    static AtomicBoolean ranTrajBuilder = new AtomicBoolean(false);
-    static Semaphore trajBuilderDone = new Semaphore(0, true);
+    static public Boolean FALLBACK_AUTO = false;
+
+    static public int targetAutoJunctionHeight = LinearSlideA.SLIDE_POS_MED;
 
     // Run when the RobotController app is first started, and after the OpMode is stopped and started
     public Auto() {
@@ -101,7 +99,7 @@ public class Auto extends SupervisedOpMode {
         robot.slide.setClawState(LinearSlideA.CLAW_POS_OPEN);
         robot.slide.setClawState(LinearSlideA.CLAW_POS_CLOSED);
         robot.slide.setClawState(LinearSlideA.CLAW_POS_CLOSED);
-        robot.slide.setCurrentWinchTarget(LinearSlideA.SLIDE_POS_HIGH);
+        robot.slide.setCurrentWinchTarget(targetAutoJunctionHeight);
 
         // Run to a high junction to drop the first cone
         //todo: combine into one
@@ -118,7 +116,7 @@ public class Auto extends SupervisedOpMode {
             runTrajectory(trajectories[3]);
 
             robot.slide.setClawState(LinearSlideA.CLAW_POS_CLOSED);
-            robot.slide.setCurrentWinchTarget(LinearSlideA.SLIDE_POS_HIGH);
+            robot.slide.setCurrentWinchTarget(targetAutoJunctionHeight);
 
             // Wait so the cone doesn't knock over the stack when it drives away
             robot.slide.waitToPassConeStack();
@@ -133,34 +131,6 @@ public class Auto extends SupervisedOpMode {
 
         // Park
         runTrajectory(trajectories[5]);
-
-
-
-        /*
-        // Grab the preload cone
-        robot.slide.setClawState(robot.slide.CLAW_POS_OPEN);
-        robot.slide.setClawState(robot.slide.CLAW_POS_CLOSED);
-        robot.slide.setCurrentWinchTarget(robot.slide.SLIDE_POS_HIGH);
-
-        // Get the signal sleeve out of the way
-        runTrajectory(trajectories[0]);
-        runTrajectory(trajectories[1]);
-
-        robot.slide.waitToReachWinchTarget();
-
-        // Go above the high junction
-        runTrajectory(trajectories[2]);
-
-        // Drop the cone and start going back down
-        robot.slide.setClawState(robot.slide.CLAW_POS_OPEN);
-        robot.slide.setCurrentWinchTarget(robot.slide.SLIDE_POS_BOTTOM);
-
-        // Go to the indicated parking space
-        runTrajectory(trajectories[3]);
-        runTrajectory(trajectories[4]);
-
-        robot.slide.waitToReachWinchTarget();
-        */
 // fix waitToReachWinchTarget
     }
 
@@ -278,9 +248,9 @@ public class Auto extends SupervisedOpMode {
         return addClawOffset(new Pose2d(pos, heading)).vec();
     }
 
-    static Vector2d addClawOffsetVec(Vector2d pos) {
+    /*static Vector2d addClawOffsetVec(Vector2d pos) {
         return addClawOffset(new Pose2d(pos, 0.0)).vec();
-    }
+    }*/
 
     static Pose2d addClawOffset(Pose2d pos) {
         return pos.plus(new Pose2d(ROBOT_CLAW_OFFSET.rotated(pos.getHeading()), 0));
@@ -290,9 +260,9 @@ public class Auto extends SupervisedOpMode {
         return poses.stream().map(Auto::addClawOffset).collect(Collectors.toList());
     }
 
-    static List<Vector2d> addClawOffsetListVec(List<Vector2d> poses) {
+    /*static List<Vector2d> addClawOffsetListVec(List<Vector2d> poses) {
         return poses.stream().map(Auto::addClawOffsetVec).collect(Collectors.toList());
-    }
+    }*/
 
     static void makeParkingTrajectories(BulkTrajectoryBuilder builder) {
         parkingTrajectories = builder.multiApply((trajBuilder, version, code) -> trajBuilder.lineToLinearHeading(getSignalSpot(version, code)), 3);
@@ -314,34 +284,29 @@ public class Auto extends SupervisedOpMode {
 
         // trajectories[2]: Go to cone stack
         //todo: line up with claw, don't hit stack
-        add(builder.splineToSplineHeadingVec(addClawOffsetListVec(CONE_STACK_POSITIONS)));
+        add(builder.splineToSplineHeading(addClawOffsetList(CONE_STACK_POSITIONS)));
 
-        List<Vector2d> targetAutoJunctions = Arrays.asList(
-                TeamConf.JUNCTIONS.get(2), TeamConf.JUNCTIONS.get(3),
-                TeamConf.JUNCTIONS.get(2), TeamConf.JUNCTIONS.get(3));
-        targetAutoJunctions.forEach(Auto::addClawOffsetVec);
+        List<Pose2d> targetAutoJunctions = Arrays.asList(
+                new Pose2d(TeamConf.JUNCTIONS.get(7).getX(), TeamConf.JUNCTIONS.get(7).getY(), 0),
+                new Pose2d(TeamConf.JUNCTIONS.get(5).getX(), TeamConf.JUNCTIONS.get(5).getY(), Math.PI),
+                new Pose2d(TeamConf.JUNCTIONS.get(4).getX(), TeamConf.JUNCTIONS.get(4).getY(), Math.PI),
+                new Pose2d(TeamConf.JUNCTIONS.get(6).getX(), TeamConf.JUNCTIONS.get(6).getY(), 0));
+        targetAutoJunctions.forEach(Auto::addClawOffset);
 
         // trajectories[3]: Go to drop point (loop part 1)
         //todo: line up with claw, don't hit junction, tune based on drive speed for max points
-        add(builder.splineToSplineHeadingVec(targetAutoJunctions));
+        add(builder.splineToSplineHeading(targetAutoJunctions));
 
         // trajectories[4]: Return to cone stack to repeat pickup (loop part 2)
         //todo: line up with claw, don't hit junction, tune based on drive speed for max points
-        add(builder.splineToSplineHeadingVec(addClawOffsetListVec(CONE_STACK_POSITIONS)));
+        add(builder.splineToSplineHeading(addClawOffsetList(CONE_STACK_POSITIONS)));
 
         // Park
         makeParkingTrajectories(builder);
-
-        trajBuilderDone.release();
     }
 
     // Pick a system of trajectories to follow based on what OpMode and barcode were picked
     void assignTrajectories(int tag) {
-        // Wait up to 5 seconds for the creation thread to die off
-        //todo: incremental, wait on non-parking trajectories first
-        try { trajCreationThread.join(500); } catch (Exception e) {
-            nop();
-        }
 
         if (variation.equals("RedLeft")) {
             trajectories = allTrajectories[0];
