@@ -22,12 +22,15 @@ public class LinearSlideA {
     public static volatile double WINCH_TOLERANCE = 40.0;
     public static volatile Integer SLIDE_POS_BOTTOM = 0;
 
+    public static boolean ENABLE_BOTTOM_HEIGHT = false;
+    public static boolean CAN_REACH_HIGH = true;
+
     // Junction heights
-    public static volatile Integer SLIDE_POS_GROUND = SLIDE_POS_BOTTOM + 1000;
-    public static volatile Integer SLIDE_POS_LOW = SLIDE_POS_BOTTOM + 7800;
-    public static volatile Integer SLIDE_POS_MED = SLIDE_POS_BOTTOM + 12500;
-    public static volatile Integer SLIDE_POS_HIGH = SLIDE_POS_BOTTOM + 17000;
-    public static List<Integer> SLIDE_POSITIONS = Arrays.asList(SLIDE_POS_BOTTOM, SLIDE_POS_GROUND, SLIDE_POS_LOW, SLIDE_POS_MED, SLIDE_POS_HIGH);
+    public static volatile Integer SLIDE_POS_GROUND = SLIDE_POS_BOTTOM + 100;
+    public static volatile Integer SLIDE_POS_LOW = SLIDE_POS_BOTTOM + 1161;
+    public static volatile Integer SLIDE_POS_MED = SLIDE_POS_BOTTOM + 1500;
+    public static volatile Integer SLIDE_POS_HIGH = SLIDE_POS_BOTTOM + 2200;
+    public static List<Integer> SLIDE_POSITIONS = Arrays.asList(SLIDE_POS_GROUND, SLIDE_POS_LOW, SLIDE_POS_MED, SLIDE_POS_HIGH);
 
     // In linear slide ticks
     public static List<Integer> CONE_STACK_HEIGHTS = Arrays.asList(130, 110, 90, 70, 50);
@@ -55,6 +58,8 @@ public class LinearSlideA {
 
     public LinearSlideA(HardwareMap hardwareMap)
     {
+        if (!CAN_REACH_HIGH) { SLIDE_POSITIONS.remove(SLIDE_POSITIONS.size() - 1); }
+
         winch = new MotorEx(hardwareMap, "winch");
         winch.setRunMode(Motor.RunMode.PositionControl);
         winch.setPositionCoefficient(WINCH_COEFFICIENT);
@@ -83,11 +88,27 @@ public class LinearSlideA {
         // Emergency failsafe
         if ((winch.getCurrentPosition() > (SLIDE_POS_HIGH + 100)) && !winchManualMode) {
             setCurrentWinchTarget(SLIDE_POS_LOW);
+            winchActive = false;
             return;
         }
 
+        if (winch.atTargetPosition() && !winchActive) {
+            if (!within(winch.getCurrentPosition(), currentWinchTarget, 50)) {
+                setCurrentWinchTarget(currentWinchTarget);
+            }
+            else {
+                winch.setTargetPosition(winch.getCurrentPosition());
+                winch.set(0.5);
+            }
+        }
+
         if (!winch.atTargetPosition() && winchActive && !winchManualMode) {
-            winch.set(1.0);
+            if (within(winch.getCurrentPosition(), currentWinchTarget, 150)) {
+                winch.set(0.5);
+            }
+            else {
+                winch.set(1.0);
+            }
         }
         else if (!winchManualMode && winchActive) {
             // Currently at target

@@ -45,11 +45,11 @@ public class Auto extends SupervisedOpMode {
     // Run when the RobotController app is first started, and after the OpMode is stopped and started
     public Auto() {
         // Creating the trajectories takes a long time, so perform it before the OpMode is started and cache the result
-        if (!ranTrajBuilder.get()) {
+        /*if (!ranTrajBuilder.get()) {
             ranTrajBuilder.set(true);
             trajCreationThread = new Thread(Auto::createTrajectories);
             trajCreationThread.start();
-        }
+        }*/
     }
 
     // Code that runs when the INIT button is pressed
@@ -59,7 +59,11 @@ public class Auto extends SupervisedOpMode {
         // Construct and run AprilTag detector, but don't read from it yet: the field has not yet been randomized
         detector = new AprilTagDetector(hardwareMap, Arrays.asList(21, 22, 23));
 
-        if (!ranTrajBuilder.get()) {
+        if (builder == null) {
+            createTrajectories();
+        }
+
+        /*if (!ranTrajBuilder.get()) {
             ranTrajBuilder.set(true);
             trajCreationThread = new Thread(Auto::createTrajectories);
             trajCreationThread.setPriority(Thread.MAX_PRIORITY);
@@ -69,7 +73,7 @@ public class Auto extends SupervisedOpMode {
             try { trajBuilderDone.acquire(); } catch(InterruptedException e) {
                 nop(); }
             trajBuilderDone.release();
-        }
+        }*/
     }
 
     public void initLoop() {
@@ -94,6 +98,8 @@ public class Auto extends SupervisedOpMode {
         telemetry.update();
 
         // Close on preload cone
+        robot.slide.setClawState(LinearSlideA.CLAW_POS_OPEN);
+        robot.slide.setClawState(LinearSlideA.CLAW_POS_CLOSED);
         robot.slide.setClawState(LinearSlideA.CLAW_POS_CLOSED);
         robot.slide.setCurrentWinchTarget(LinearSlideA.SLIDE_POS_HIGH);
 
@@ -108,7 +114,7 @@ public class Auto extends SupervisedOpMode {
 
         int CONE_TRANSFER_ITERATIONS = 5;
         for (int i = 0; i < CONE_TRANSFER_ITERATIONS; i++) {
-            // Run to cone stack
+            // Run to junction
             runTrajectory(trajectories[3]);
 
             robot.slide.setClawState(LinearSlideA.CLAW_POS_CLOSED);
@@ -295,7 +301,7 @@ public class Auto extends SupervisedOpMode {
     static void createTrajectories() {
         //allTrajectories.add((List<Trajectory>) new ArrayList<Trajectory>());
 
-        builder = new BulkTrajectoryBuilder(START_POSITIONS, t -> TrajectoryCache.set(t));
+        builder = new BulkTrajectoryBuilder(START_POSITIONS.stream().collect(Collectors.toList()), t -> TrajectoryCache.set(t));
 
         // trajectories[0]: Get the signal cone out of the way
         add(builder.apply((t, p) -> t.forward(TILE_SIZE * (5.0 / 2.0))));

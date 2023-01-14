@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.button.GamepadButton;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
@@ -23,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.FileHandler;
 
 //@Supervised(name="?TeleOp", group="Iterative Opmode", autonomous=false, variations={"Red", "Blue"})
+@Config
 @Supervised(name="TeleOp", group="!CompTeleOp", autonomous=false, linear=false)
 public class TeleOp extends SupervisedOpMode {
     RobotA robot;
@@ -53,6 +55,12 @@ public class TeleOp extends SupervisedOpMode {
         elapsedRuntime.reset();
     }
 
+    public static double DRIVE_SLOW_MULTIPLIER = 3.0;
+    public static double DRIVE_SLOW_TURN_MULTIPLIER = 3.0;
+    public double triggerValue(double unadjusted) {
+        return (unadjusted - 0.05) / (1.0 - 0.05);
+    }
+
     // Code that runs repeatedly after the PLAY button is pressed (optional)
     public void loop() {
         count();
@@ -62,9 +70,6 @@ public class TeleOp extends SupervisedOpMode {
         fineControls.readValue();
 
         if (fineControls.stateJustChanged()) { robot.drive.setZeroPowerBehavior(fineControls.getState() ? DcMotor.ZeroPowerBehavior.BRAKE : DcMotor.ZeroPowerBehavior.FLOAT); }
-
-        double DRIVE_SLOW_MULTIPLIER = 3.0;
-        double DRIVE_SLOW_TURN_MULTIPLIER = 3.0;
 
         //todo: adapt for deadzone/ps4
         if (fineControls.getState()) {
@@ -82,8 +87,8 @@ public class TeleOp extends SupervisedOpMode {
                     new Pose2d(
                             gamepad1.getLeftY(),
                             -gamepad1.getLeftX(),
-                            ((-gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) +
-                                    gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)) * 5.0) / 3.0
+                            -triggerValue(gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) +
+                                    triggerValue(gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER))
                     )
             );
         }

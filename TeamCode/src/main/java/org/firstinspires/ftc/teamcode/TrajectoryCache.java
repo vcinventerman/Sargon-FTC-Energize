@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +15,7 @@ public class TrajectoryCache {
 
     static class TrajNotFoundException extends Exception {}
 
-    static private Map<String, Trajectory> cache;
+    static private Map<String, Trajectory> cache = new HashMap<>();
 
     static private String createKey(Pose2d begin, Pose2d end) {
         return begin.toString() + ";" + end.toString();

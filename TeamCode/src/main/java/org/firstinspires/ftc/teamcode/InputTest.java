@@ -35,7 +35,7 @@ public class InputTest extends LinearOpMode {
                 nop();
             }
 
-            telemetry.addData("A", gamepad1.a ? 1 : 0);
+            telemetry.addData("LeftTrigger", gamepad1.left_trigger);
             telemetry.update();
         }
     }

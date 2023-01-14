@@ -41,7 +41,7 @@ public class TeamConf {
     // Senior team robot
     public static double ROBOTA_LENGTH = 18;
     public static double ROBOTA_WIDTH = 17;
-    public static String ROBOTA_IMU_DEFAULT = "imu0"; // imu0 is in control hub, imu1 is in expansion hub
+    public static String ROBOTA_IMU_DEFAULT = "imu1"; // imu0 is in control hub, imu1 is in expansion hub
     public static Vector2d ROBOTA_CLAW_OFFSET = new Vector2d(0.0, 10.0);
 
     // Choose current robot here
