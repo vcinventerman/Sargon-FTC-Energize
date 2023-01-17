@@ -5,9 +5,8 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.button.GamepadButton;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.arcrobotics.ftclib.gamepad.ToggleButtonReader;
-import com.karrmedia.ftchotpatch.SupervisedLinearOpMode;
+import com.karrmedia.ftchotpatch.SupervisedOpMode;
 import com.karrmedia.ftchotpatch.Supervised;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.wpi.first.math.filter.LinearFilter;
 
@@ -18,10 +17,11 @@ import java.util.concurrent.TimeUnit;
 //@Supervised(name="?TeleOp", group="Iterative Opmode", autonomous=false, variations={"Red", "Blue"})
 @Config
 @Supervised(name="TeleOp", group="!CompTeleOp", autonomous=false, linear=false)
-public class TeleOp extends SupervisedLinearOpMode {
+public class TeleOp extends SupervisedOpMode {
     RobotA robot;
     GamepadButton liftButton;
     GamepadButton liftCloseButton;
+    GamepadButton turnAroundButton;
     ToggleButtonReader clawButton;
     ToggleButtonReader fineControls;
 
@@ -30,7 +30,7 @@ public class TeleOp extends SupervisedLinearOpMode {
 
     // Code that runs when the INIT button is pressed (mandatory)
     public void init() {
-        robot = new RobotA(hardwareMap);
+        robot = TeamConf.getRobot(hardwareMap);
 
         robot.slide.claw.setPosition(robot.slide.claw.getPosition() + 10);
         robot.slide.claw.setPosition(robot.slide.claw.getPosition() - 10);
@@ -40,6 +40,7 @@ public class TeleOp extends SupervisedLinearOpMode {
         //liftButton = new GamepadButton(gamepad1, GamepadKeys.Button.A);
         //liftCloseButton = new GamepadButton(gamepad1, GamepadKeys.Button.B);
         //liftButton = new GamepadButton(gamepad1, GamepadKeys.Button.X);
+        turnAroundButton = new GamepadButton(gamepad1, GamepadKeys.Button.RIGHT_BUMPER);
         clawButton = new ToggleButtonReader(gamepad1, GamepadKeys.Button.X);
         fineControls = new ToggleButtonReader(gamepad1, GamepadKeys.Button.Y);
 
@@ -49,9 +50,13 @@ public class TeleOp extends SupervisedLinearOpMode {
 
     public void start() {
         elapsedRuntime.reset();
+
+        while (super.opModeIsActive()) {
+            loop();
+        }
     }
 
-    public static double DRIVE_SLOW_MULTIPLIER = 3.0;
+    public static double DRIVE_SLOW_MULTIPLIER = 20.0;
     public static double DRIVE_SLOW_TURN_MULTIPLIER = 3.0;
     public double triggerValue(double unadjusted) {
         return (unadjusted - 0.05) / (1.0 - 0.05);
@@ -65,28 +70,44 @@ public class TeleOp extends SupervisedLinearOpMode {
         clawButton.readValue();
         fineControls.readValue();
 
-        if (fineControls.stateJustChanged()) { robot.drive.setZeroPowerBehavior(fineControls.getState() ? DcMotor.ZeroPowerBehavior.BRAKE : DcMotor.ZeroPowerBehavior.FLOAT); }
+        //if (fineControls.stateJustChanged()) { robot.drive.setZeroPowerBehavior(fineControls.getState() ? DcMotor.ZeroPowerBehavior.BRAKE : DcMotor.ZeroPowerBehavior.FLOAT); }
 
         //todo: adapt for deadzone/ps4
-        if (fineControls.getState()) {
-            robot.drive.setWeightedDrivePower(
-                    new Pose2d(
-                            gamepad1.getLeftY() / DRIVE_SLOW_MULTIPLIER,
-                            -gamepad1.getLeftX() / DRIVE_SLOW_MULTIPLIER,
-                            ((-gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) +
-                                    gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)) * 5.0) / DRIVE_SLOW_TURN_MULTIPLIER
-                    )
-            );
-        }
+        /*if (Math.abs(gamepad1.getLeftX()) > 0.01 || Math.abs(gamepad1.getLeftX()) > 0.01
+                || Math.abs(gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) > 0.01
+                || Math.abs(gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)) > 0.01) {*/
+
+            //robot.drive.cancelFollowing();
+            robot.drive.updatePoseEstimate();
+
+            if (fineControls.isDown()) {
+                robot.drive.setWeightedDrivePower(
+                        new Pose2d(
+                                gamepad1.getLeftY() / DRIVE_SLOW_MULTIPLIER,
+                                -gamepad1.getLeftX() / DRIVE_SLOW_MULTIPLIER,
+                                ((-gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) +
+                                        gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)) * 5.0) / DRIVE_SLOW_TURN_MULTIPLIER
+                        )
+                );
+            } else {
+                robot.drive.setWeightedDrivePower(
+                        new Pose2d(
+                                gamepad1.getLeftY(),
+                                -gamepad1.getLeftX(),
+                                -triggerValue(gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) +
+                                        triggerValue(gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER))
+                        )
+                );
+            }
+        /*}
         else {
-            robot.drive.setWeightedDrivePower(
-                    new Pose2d(
-                            gamepad1.getLeftY(),
-                            -gamepad1.getLeftX(),
-                            -triggerValue(gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) +
-                                    triggerValue(gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER))
-                    )
-            );
+            if (robot.drive.isBusy()) {
+                robot.drive.update();
+            }
+        }*/
+
+        if (turnAroundButton.get()) {
+            robot.drive.turnAsync(Math.PI, true);
         }
 
         //robot.slide.winch.set(-gamepad1.right_stick_y);
@@ -102,7 +123,9 @@ public class TeleOp extends SupervisedLinearOpMode {
             robot.slide.currentWinchTarget = 0;
         }
 
-        if (gamepad1.isDown(GamepadKeys.Button.DPAD_LEFT)) {
+        robot.slide.winch.set(-gamepad1.getRightY());
+
+        /*if (gamepad1.isDown(GamepadKeys.Button.DPAD_LEFT)) {
             if (gamepad1.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
                 robot.slide.disableAutomaticWinch();
             }
@@ -111,7 +134,7 @@ public class TeleOp extends SupervisedLinearOpMode {
         }
         if (gamepad1.wasJustReleased(GamepadKeys.Button.DPAD_LEFT)) {
             robot.slide.enableAutomaticWinch();
-        }
+        }*/
 
         if (gamepad1.wasJustPressed(GamepadKeys.Button.A)) {
             robot.slide.goToNextSlidePos();

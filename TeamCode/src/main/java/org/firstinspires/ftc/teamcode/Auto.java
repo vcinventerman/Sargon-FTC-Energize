@@ -7,6 +7,7 @@ import static org.firstinspires.ftc.teamcode.TeamConf.JUNCTIONS;
 import static org.firstinspires.ftc.teamcode.TeamConf.ROBOT_CLAW_OFFSET;
 import static org.firstinspires.ftc.teamcode.TeamConf.START_POSITIONS;
 import static org.firstinspires.ftc.teamcode.TeamConf.TILE_SIZE;
+import static org.firstinspires.ftc.teamcode.TeamConf.getRobot;
 import static org.firstinspires.ftc.teamcode.TeamConf.nop;
 import static org.firstinspires.ftc.teamcode.TeamConf.stringToStartPose;
 
@@ -16,7 +17,7 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
 import com.karrmedia.ftchotpatch.Supervised;
-import com.karrmedia.ftchotpatch.SupervisedLinearOpMode;
+import com.karrmedia.ftchotpatch.SupervisedOpMode;
 
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
@@ -27,7 +28,7 @@ import java.util.stream.Collectors;
 //todo: MUST construct trajectories in another thread and keep winch ticking in any way
 @Supervised(name="?Auto", group="!CompAuto", autonomous=true, linear=true, variations={"RedLeft", "RedRight", "BlueLeft", "BlueRight"}, next="TeleOp")
 @Config
-public class Auto extends SupervisedLinearOpMode {
+public class Auto extends SupervisedOpMode {
     RobotA robot;
     AprilTagDetector detector;
     Trajectory[] trajectories = null;
@@ -52,7 +53,7 @@ public class Auto extends SupervisedLinearOpMode {
 
     // Code that runs when the INIT button is pressed
     public void init() {
-        robot = new RobotA(hardwareMap, stringToStartPose(variation));
+        robot = getRobot(hardwareMap, stringToStartPose(variation));
 
         // Construct and run AprilTag detector, but don't read from it yet: the field has not yet been randomized
         detector = new AprilTagDetector(hardwareMap, Arrays.asList(21, 22, 23));

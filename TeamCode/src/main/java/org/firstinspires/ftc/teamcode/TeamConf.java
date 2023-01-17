@@ -6,6 +6,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.sun.tools.javac.util.List;
 
 import org.firstinspires.ftc.robotcore.external.Func;
@@ -22,9 +23,6 @@ import java.util.Map;
 
 @com.acmerobotics.dashboard.config.Config
 public class TeamConf {
-
-
-
 
 
     // Field is 11ft 9in
@@ -115,7 +113,7 @@ public class TeamConf {
             new Vector2d(TILE_SIZE * -2, TILE_SIZE * -2)
     );
 
-    public static Map<Vector2d, JunctionHeight> junctionHeights = new Function<Integer, Map<Vector2d, JunctionHeight>>(){
+    public static Map<Vector2d, JunctionHeight> junctionHeights = new Function<Integer, Map<Vector2d, JunctionHeight>>() {
         @Override
         public Map<Vector2d, JunctionHeight> apply(Integer ignore) {
             Map<Vector2d, JunctionHeight> ret = new HashMap<>();
@@ -132,7 +130,8 @@ public class TeamConf {
             }
 
             return ret;
-        } }.apply(null);
+        }
+    }.apply(null);
 
     public static AprilTagDetectorJNI.TagFamily TAG_FAMILY = AprilTagDetectorJNI.TagFamily.TAG_25h9;
     // Offset to get from our tag values to the signal values [1,2,3]
@@ -175,16 +174,9 @@ public class TeamConf {
     }
 
 
-
-
-
-
-
-
-
-
     // Does nothing - put a breakpoint on it
-    public static void nop() {}
+    public static void nop() {
+    }
 
     public static boolean contains(int[] array, int value) {
         for (int i : array) {
@@ -194,31 +186,42 @@ public class TeamConf {
     }
 
     public static SignalZone[] getAvailableSignalZones(StartSpace space) {
-        switch (space)
-        {
-            case A5: return new SignalZone[]{SignalZone.A5_1, SignalZone.A5_2, SignalZone.A5_3};
-            case A2: return new SignalZone[]{SignalZone.A2_1, SignalZone.A2_2, SignalZone.A2_3};
-            case F5: return new SignalZone[]{SignalZone.F5_1, SignalZone.F5_2, SignalZone.F5_3};
-            case F2: return new SignalZone[]{SignalZone.F2_1, SignalZone.F2_2, SignalZone.F2_3};
+        switch (space) {
+            case A5:
+                return new SignalZone[]{SignalZone.A5_1, SignalZone.A5_2, SignalZone.A5_3};
+            case A2:
+                return new SignalZone[]{SignalZone.A2_1, SignalZone.A2_2, SignalZone.A2_3};
+            case F5:
+                return new SignalZone[]{SignalZone.F5_1, SignalZone.F5_2, SignalZone.F5_3};
+            case F2:
+                return new SignalZone[]{SignalZone.F2_1, SignalZone.F2_2, SignalZone.F2_3};
         }
 
         return null;
     }
 
-    public static Alliance tileToAlliance(String tile)
-    {
+    public static Alliance tileToAlliance(String tile) {
         String col = tile.substring(1);
 
-        if (col.equals("A") || col.equals("B") || col.equals("C")) { return Alliance.BLUE; }
-        else if (col.equals("D") || col.equals("E") || col.equals("F")) { return Alliance.RED; }
-        else { return Alliance.NONE; }
+        if (col.equals("A") || col.equals("B") || col.equals("C")) {
+            return Alliance.BLUE;
+        } else if (col.equals("D") || col.equals("E") || col.equals("F")) {
+            return Alliance.RED;
+        } else {
+            return Alliance.NONE;
+        }
     }
 
     public static Pose2d stringToStartPose(String start) {
-        if (start.equals("RedLeft")) { return START_POSITIONS.get(0); }
-        else if (start.equals("RedRight")) { return START_POSITIONS.get(1); }
-        else if (start.equals("BlueLeft")) { return START_POSITIONS.get(2); }
-        else /* if (start.equals("BlueRight")) */ { return START_POSITIONS.get(3); }
+        if (start.equals("RedLeft")) {
+            return START_POSITIONS.get(0);
+        } else if (start.equals("RedRight")) {
+            return START_POSITIONS.get(1);
+        } else if (start.equals("BlueLeft")) {
+            return START_POSITIONS.get(2);
+        } else /* if (start.equals("BlueRight")) */ {
+            return START_POSITIONS.get(3);
+        }
     }
 
     // Our default telemetry is just ftc-dashboard bundled with the default instance
@@ -239,21 +242,44 @@ public class TeamConf {
 
                 return Enum.valueOf(SignalZone.class, startSpace + "_" + barcodeData.substring(barcodeData.length() - 1));
             }
+        } catch (Exception e) {
+            return null;
         }
-        catch (Exception e) { return null; }
     }
 
-    public static void sleep(int ms){
+    public static void sleep(int ms) {
         try {
             Thread.sleep(ms);
-        } catch (Exception e){}
+        } catch (Exception e) {
+        }
     }
 
 
     public static boolean within(double val, double target, double range) {
         return Math.abs(val - target) < range;
     }
+
     public static boolean within(long val, long target, long range) {
         return Math.abs(val - target) < range;
+    }
+
+
+    static RobotA robotSingleton = null;
+
+    public static RobotA getRobot(HardwareMap map) {
+        if (robotSingleton == null) {
+            robotSingleton = new RobotA(map);
+        }
+        return robotSingleton;
+    }
+
+    public static RobotA getRobot(HardwareMap map, Pose2d startingPose) {
+        if (robotSingleton == null) {
+            robotSingleton = new RobotA(map, startingPose);
+        }
+        else {
+            robotSingleton.drive.setPoseEstimate(startingPose);
+        }
+        return robotSingleton;
     }
 }

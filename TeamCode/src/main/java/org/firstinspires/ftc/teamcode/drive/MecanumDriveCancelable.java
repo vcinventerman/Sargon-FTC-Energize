@@ -2,7 +2,9 @@ package org.firstinspires.ftc.teamcode.drive;
 
 import static org.firstinspires.ftc.teamcode.drive.DriveConstants.MAX_ACCEL;
 import static org.firstinspires.ftc.teamcode.drive.DriveConstants.MAX_ANG_ACCEL;
+import static org.firstinspires.ftc.teamcode.drive.DriveConstants.MAX_ANG_ACCEL_FAST;
 import static org.firstinspires.ftc.teamcode.drive.DriveConstants.MAX_ANG_VEL;
+import static org.firstinspires.ftc.teamcode.drive.DriveConstants.MAX_ANG_VEL_FAST;
 import static org.firstinspires.ftc.teamcode.drive.DriveConstants.MAX_VEL;
 import static org.firstinspires.ftc.teamcode.drive.DriveConstants.MOTOR_VELO_PID;
 import static org.firstinspires.ftc.teamcode.drive.DriveConstants.RUN_USING_ENCODER;
@@ -47,6 +49,8 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
+import org.firstinspires.ftc.teamcode.TeamConf;
+import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceRunner;
 import org.firstinspires.ftc.teamcode.util.AxisDirection;
 import org.firstinspires.ftc.teamcode.util.BNO055IMUUtil;
 import org.firstinspires.ftc.teamcode.util.DashboardUtil;
@@ -63,14 +67,19 @@ import java.util.List;
  */
 @Config
 public class MecanumDriveCancelable extends MecanumDrive {
-    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(4, 0, 0);
-    public static PIDCoefficients HEADING_PID = new PIDCoefficients(1, 0, 0);
+    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(8, 0, 0.4);
+    public static PIDCoefficients HEADING_PID = new PIDCoefficients(9, 0, 0.01);
 
     public static double LATERAL_MULTIPLIER = 1;
 
     public static double VX_WEIGHT = 1;
     public static double VY_WEIGHT = 1;
     public static double OMEGA_WEIGHT = 1;
+
+    private TrajectorySequenceRunner trajectorySequenceRunner;
+
+    public static TrajectoryVelocityConstraint velConstraint = getVelocityConstraint(MAX_VEL, MAX_ANG_VEL, TRACK_WIDTH);
+    public static TrajectoryAccelerationConstraint accelConstraint = getAccelerationConstraint(MAX_ACCEL);
 
     public static int POSE_HISTORY_LIMIT = 100;
 
@@ -89,19 +98,17 @@ public class MecanumDriveCancelable extends MecanumDrive {
     private MotionProfile turnProfile;
     private double turnStart;
 
-    private TrajectoryVelocityConstraint velConstraint;
-    private TrajectoryAccelerationConstraint accelConstraint;
     private TrajectoryFollower follower;
 
     private LinkedList<Pose2d> poseHistory;
 
     public DcMotorEx leftFront, leftRear, rightRear, rightFront;
-    private List<DcMotorEx> motors;
-    private BNO055IMU imu;
+    public List<DcMotorEx> motors;
+    public BNO055IMU imu;
 
     private VoltageSensor batteryVoltageSensor;
 
-    private Pose2d lastPoseOnTurn;
+    public Pose2d lastPoseOnTurn;
 
     public MecanumDriveCancelable(HardwareMap hardwareMap) {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
@@ -132,7 +139,7 @@ public class MecanumDriveCancelable extends MecanumDrive {
         }
 
         // TODO: adjust the names of the following hardware devices to match your configuration
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu = hardwareMap.get(BNO055IMU.class, TeamConf.ROBOT_IMU_DEFAULT);
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
         imu.initialize(parameters);
@@ -140,21 +147,12 @@ public class MecanumDriveCancelable extends MecanumDrive {
         // TODO: if your hub is mounted vertically, remap the IMU axes so that the z-axis points
         // upward (normal to the floor) using a command like the following:
         // BNO055IMUUtil.remapAxes(imu, AxesOrder.XYZ, AxesSigns.NPN);
-        BNO055IMUUtil.remapZAxis(imu, AxisDirection.POS_Y);
+        BNO055IMUUtil.remapZAxis(imu, AxisDirection.POS_X);
 
-        /*rightRear = hardwareMap.get(DcMotorEx.class, "driveBackRight");
+        rightRear = hardwareMap.get(DcMotorEx.class, "driveBackRight");
         rightFront = hardwareMap.get(DcMotorEx.class, "driveFrontRight");
         leftFront = hardwareMap.get(DcMotorEx.class, "driveFrontLeft");
-        leftRear = hardwareMap.get(DcMotorEx.class, "driveBackLeft");*/
-
-        rightRear = hardwareMap.get(DcMotorEx.class, "driveFrontLeft");
-        rightFront = hardwareMap.get(DcMotorEx.class, "driveBackLeft");
-        leftFront = hardwareMap.get(DcMotorEx.class, "driveFrontRight");
-        leftRear = hardwareMap.get(DcMotorEx.class, "driveBackRight");
-
-        //rightRear.setDirection(DcMotorSimple.Direction.REVERSE);
-        //rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
-
+        leftRear = hardwareMap.get(DcMotorEx.class, "driveBackLeft");
 
         motors = Arrays.asList(leftFront, leftRear, rightRear, rightFront);
 
@@ -175,11 +173,13 @@ public class MecanumDriveCancelable extends MecanumDrive {
         }
 
         // TODO: reverse any motors using DcMotor.setDirection()
-        rightFront.setDirection(DcMotorEx.Direction.REVERSE);
-        rightRear.setDirection(DcMotorEx.Direction.REVERSE);
+        rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // TODO: if desired, use setLocalizer() to change the localization method
         // for instance, setLocalizer(new ThreeTrackingWheelLocalizer(...));
+        setLocalizer(new TwoWheelTrackingLocalizer(hardwareMap, this));
+
     }
 
     public TrajectoryBuilder trajectoryBuilder(Pose2d startPose) {
@@ -194,24 +194,34 @@ public class MecanumDriveCancelable extends MecanumDrive {
         return new TrajectoryBuilder(startPose, startHeading, velConstraint, accelConstraint);
     }
 
-    public void turnAsync(double angle) {
+    public void turnAsync(double angle, boolean fast) {
         double heading = getPoseEstimate().getHeading();
 
         lastPoseOnTurn = getPoseEstimate();
 
-        turnProfile = MotionProfileGenerator.generateSimpleMotionProfile(
-                new MotionState(heading, 0, 0, 0),
-                new MotionState(heading + angle, 0, 0, 0),
-                MAX_ANG_VEL,
-                MAX_ANG_ACCEL
-        );
+        if (fast) {
+            turnProfile = MotionProfileGenerator.generateSimpleMotionProfile(
+                    new MotionState(heading, 0, 0, 0),
+                    new MotionState(heading + angle, 0, 0, 0),
+                    MAX_ANG_VEL_FAST,
+                    MAX_ANG_ACCEL_FAST
+            );
+        }
+        else {
+            turnProfile = MotionProfileGenerator.generateSimpleMotionProfile(
+                    new MotionState(heading, 0, 0, 0),
+                    new MotionState(heading + angle, 0, 0, 0),
+                    MAX_ANG_VEL,
+                    MAX_ANG_ACCEL
+            );
+        }
 
         turnStart = clock.seconds();
         mode = Mode.TURN;
     }
 
     public void turn(double angle) {
-        turnAsync(angle);
+        turnAsync(angle, false);
         waitForIdle();
     }
 

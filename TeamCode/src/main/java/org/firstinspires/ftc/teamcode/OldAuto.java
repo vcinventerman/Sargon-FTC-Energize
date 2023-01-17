@@ -11,14 +11,14 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.karrmedia.ftchotpatch.Supervised;
-import com.karrmedia.ftchotpatch.SupervisedLinearOpMode;
+import com.karrmedia.ftchotpatch.SupervisedOpMode;
 import com.sun.tools.javac.util.List;
-import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
+
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceBuilder;
 
 //todo: MUST construct trajectories in another thread or keep winch ticking in any way
 @Supervised(name="Old?Auto", group="!CompAuto", autonomous=true, linear=true, variations={"RedLeft", "RedRight", "BlueLeft", "BlueRight"}, next="TeleOp")
-public class OldAuto extends SupervisedLinearOpMode {
+public class OldAuto extends SupervisedOpMode {
     RobotA robot;
     AprilTagDetector detector;
 
@@ -34,7 +34,7 @@ public class OldAuto extends SupervisedLinearOpMode {
     Trajectory[] trajectories = null;
     // Code that runs when the INIT button is pressed (mandatory)
     public void init() {
-        robot = new RobotA(hardwareMap);
+        robot = new RobotA(hardwareMap,false);
         // Detect AprilTags
         detector = new AprilTagDetector(hardwareMap, List.of(21, 22, 23));
     }
@@ -83,7 +83,7 @@ public class OldAuto extends SupervisedLinearOpMode {
 // fix waitToReachWinchTarget
     }
     public void runTrajectory(Trajectory trajectory) {
-        robot.drive.followTrajectory(trajectory);
+        robot.drive.followTrajectoryAsync(trajectory);
         while (robot.drive.isBusy()) {
             robot.update();
         }

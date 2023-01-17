@@ -4,10 +4,10 @@ import com.arcrobotics.ftclib.hardware.ServoEx;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
-import com.karrmedia.ftchotpatch.SupervisedLinearOpMode;
+import com.karrmedia.ftchotpatch.SupervisedOpMode;
 
 //@Supervised(name="ArmTest", autonomous=false)
-public class ArmTest extends SupervisedLinearOpMode {
+public class ArmTest extends SupervisedOpMode {
     MotorEx winch;
     ServoEx claw;
 
