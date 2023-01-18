@@ -4,8 +4,10 @@ import static java.lang.Thread.yield;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.acmerobotics.roadrunner.drive.Drive;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.sun.tools.javac.util.List;
 
@@ -42,11 +44,19 @@ public class TeamConf {
     public static String ROBOTA_IMU_DEFAULT = "imu1"; // imu0 is in control hub, imu1 is in expansion hub
     public static Vector2d ROBOTA_CLAW_OFFSET = new Vector2d(0.0, 8.5);
 
+    // Freshman team robot
+    public static double ROBOTB_LENGTH = 18;
+    public static double ROBOTB_WIDTH = 17;
+    public static String ROBOTB_IMU_DEFAULT = "imu"; // imu0 is in control hub, imu1 is in expansion hub
+    public static Vector2d ROBOTB_CLAW_OFFSET = new Vector2d(0.0, 8.5);
+
     // Choose current robot here
     public static double ROBOT_LENGTH = ROBOTA_LENGTH;
     public static double ROBOT_WIDTH = ROBOTA_WIDTH;
     public static String ROBOT_IMU_DEFAULT = ROBOTA_IMU_DEFAULT;
-    public static SampleMecanumDrive ROBOT_DRIVE = null;
+    public static Class ROBOT_DRIVE = RobotA.class;
+    public static MecanumDriveCancelable ROBOT_DRIVE_INST = null;
+    public static Class ROBOT_MANUAL_DRIVE = MecanumDrive.class;
     // Distance from center to claw
     public static Vector2d ROBOT_CLAW_OFFSET = ROBOTA_CLAW_OFFSET;
 
@@ -56,6 +66,7 @@ public class TeamConf {
     public static Pose2d START_POS_BLUE_RIGHT = new Pose2d(-35, (FIELD_WIDTH / 2) - (ROBOT_LENGTH / 2), FIELD_BEARING_SOUTH);
     public static List<Pose2d> START_POSITIONS = List.of(START_POS_RED_LEFT, START_POS_RED_RIGHT, START_POS_BLUE_LEFT, START_POS_BLUE_RIGHT);
 
+    public static Pose2d START_POSE_DEFAULT = START_POS_RED_LEFT;
 
     // Measurements from https://cdn.andymark.com/media/W1siZiIsIjIwMjIvMDkvMDYvMTYvMzYvNTUvODgxZjAzNDctNThhYS00MzNhLTkwMTEtYTFiYWIwMTIwNzg5L2FtLTQ4MDFfYmx1ZSBhbS00ODAxX3JlZCBDb25lIFJFVjIucGRmIl1d/am-4801_blue%20am-4801_red%20Cone%20REV2.pdf?sha=593981254c44ff81
     public static double CONE_DIAMETER = 4.0;

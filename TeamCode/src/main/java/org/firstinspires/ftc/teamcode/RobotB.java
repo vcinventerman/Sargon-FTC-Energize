@@ -6,7 +6,11 @@ import static org.firstinspires.ftc.teamcode.drive.MecanumDriveCancelable.getVel
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.arcrobotics.ftclib.drivebase.HDrive;
+import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.outoftheboxrobotics.photoncore.PhotonCore;
+import com.qualcomm.robotcore.hardware.DcMotorControllerEx;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.drive.MecanumDriveCancelable;
@@ -16,6 +20,8 @@ import org.firstinspires.ftc.teamcode.drive.SampleTankDrive;
 public class RobotB {
     public SampleTankDrive drive;
     public LinearSlideA slide;
+
+    public HDrive manualDrive;
 
     public static String NAME_CLAW = "claw";
     public static String NAME_SLIDE = "lift";
@@ -30,8 +36,14 @@ public class RobotB {
         PhotonCore.enable();
         //PhotonCore.experimental.setSinglethreadedOptimized(false);
 
-        drive = new SampleTankDrive(hardwareMap);
+        drive = null;
         slide = new LinearSlideA(hardwareMap);
+
+        manualDrive = new HDrive(
+                new Motor(hardwareMap, NAME_LEFT),
+                new Motor(hardwareMap, NAME_RIGHT),
+                new Motor(hardwareMap, NAME_CENTER),
+                0.0, 0.0, Math.PI);
     }
 
     public RobotB(HardwareMap hardwareMap, Pose2d startPose) {

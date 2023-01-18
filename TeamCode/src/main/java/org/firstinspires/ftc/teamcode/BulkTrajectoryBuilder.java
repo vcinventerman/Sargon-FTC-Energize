@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import static org.firstinspires.ftc.teamcode.TeamConf.ROBOT_DRIVE;
+import static org.firstinspires.ftc.teamcode.TeamConf.ROBOT_DRIVE_INST;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
@@ -27,7 +28,7 @@ public class BulkTrajectoryBuilder {
         List<Trajectory> trajectories = new ArrayList<Trajectory>(heads.size());
 
         for (int i = 0; i < heads.size(); i++) {
-            TrajectoryBuilder builder = new TrajectoryBuilder(heads.get(i), ROBOT_DRIVE.VEL_CONSTRAINT, ROBOT_DRIVE.ACCEL_CONSTRAINT);
+            TrajectoryBuilder builder = new TrajectoryBuilder(heads.get(i), ROBOT_DRIVE_INST.VEL_CONSTRAINT, ROBOT_DRIVE_INST.ACCEL_CONSTRAINT);
             trajectories.add(func.apply(builder, heads.get(i)).build());
             //todo:test
             // Advance head by pose's movement
@@ -42,7 +43,7 @@ public class BulkTrajectoryBuilder {
         List<Trajectory> trajectories = new ArrayList<>(heads.size());
 
         for (int i = 0; i < heads.size(); i++) {
-            TrajectoryBuilder builder = new TrajectoryBuilder(heads.get(i), ROBOT_DRIVE.VEL_CONSTRAINT, ROBOT_DRIVE.ACCEL_CONSTRAINT);
+            TrajectoryBuilder builder = new TrajectoryBuilder(heads.get(i), ROBOT_DRIVE_INST.VEL_CONSTRAINT, ROBOT_DRIVE_INST.ACCEL_CONSTRAINT);
             trajectories.add(builder.splineToSplineHeading(end.get(i), 0).build());
             heads.set(i, trajectories.get(i).getPath().end());
             cacher.cache(trajectories.get(i));
@@ -55,7 +56,7 @@ public class BulkTrajectoryBuilder {
         List<Trajectory> trajectories = new ArrayList<>(heads.size());
 
         for (int i = 0; i < heads.size(); i++) {
-            TrajectoryBuilder builder = new TrajectoryBuilder(heads.get(i), ROBOT_DRIVE.VEL_CONSTRAINT, ROBOT_DRIVE.ACCEL_CONSTRAINT);
+            TrajectoryBuilder builder = new TrajectoryBuilder(heads.get(i), ROBOT_DRIVE_INST.VEL_CONSTRAINT, ROBOT_DRIVE_INST.ACCEL_CONSTRAINT);
             trajectories.add(builder.splineToSplineHeading(new Pose2d(end.get(i), heads.get(i).getHeading()), 0).build());
             heads.set(i, trajectories.get(i).getPath().end());
             cacher.cache(trajectories.get(i));;
@@ -71,7 +72,7 @@ public class BulkTrajectoryBuilder {
 
         for (int i = 0; i < heads.size(); i++) {
             for (int j = 0; j < innerVariations; j++) {
-                TrajectoryBuilder builder = new TrajectoryBuilder(heads.get(i), ROBOT_DRIVE.VEL_CONSTRAINT, ROBOT_DRIVE.ACCEL_CONSTRAINT);
+                TrajectoryBuilder builder = new TrajectoryBuilder(heads.get(i), ROBOT_DRIVE_INST.VEL_CONSTRAINT, ROBOT_DRIVE_INST.ACCEL_CONSTRAINT);
                 trajectories[i][j] = func.apply(builder, Arrays.asList("RedLeft", "RedRight", "BlueLeft", "BlueRight").get(i), j + 1).build();
                 cacher.cache(trajectories[i][j]);
             }

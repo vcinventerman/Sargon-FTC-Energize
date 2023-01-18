@@ -24,28 +24,24 @@ public class TeleOp extends SupervisedOpMode {
     GamepadButton turnAroundButton;
     ToggleButtonReader clawButton;
     ToggleButtonReader fineControls;
-
-    LinearFilter driveXFilter;
-    LinearFilter driveYFilter;
+    ToggleButtonReader fieldCentric;
 
     // Code that runs when the INIT button is pressed (mandatory)
     public void init() {
         robot = TeamConf.getRobot(hardwareMap);
 
-        robot.slide.claw.setPosition(robot.slide.claw.getPosition() + 10);
-        robot.slide.claw.setPosition(robot.slide.claw.getPosition() - 10);
+        robot.slide.claw.turnToAngle(robot.slide.claw.getAngle() + 10);
+        robot.slide.claw.turnToAngle(robot.slide.claw.getAngle() - 10);
 
         //robot.slide.winch.setRunMode(Motor.RunMode.RawPower);
 
         //liftButton = new GamepadButton(gamepad1, GamepadKeys.Button.A);
         //liftCloseButton = new GamepadButton(gamepad1, GamepadKeys.Button.B);
         //liftButton = new GamepadButton(gamepad1, GamepadKeys.Button.X);
-        turnAroundButton = new GamepadButton(gamepad1, GamepadKeys.Button.RIGHT_BUMPER);
+        turnAroundButton = new GamepadButton(gamepad1, GamepadKeys.Button.LEFT_BUMPER);
         clawButton = new ToggleButtonReader(gamepad1, GamepadKeys.Button.X);
         fineControls = new ToggleButtonReader(gamepad1, GamepadKeys.Button.Y);
-
-        driveXFilter = LinearFilter.singlePoleIIR(0.1, 0.03); //todo: tune period as robot changes
-        driveYFilter = LinearFilter.singlePoleIIR(0.1, 0.03); //todo: add artificial limiter to .03
+        fieldCentric = new ToggleButtonReader(gamepad1, GamepadKeys.Button.RIGHT_BUMPER);
     }
 
     public void start() {
@@ -67,38 +63,30 @@ public class TeleOp extends SupervisedOpMode {
         count();
 
         gamepad1.readButtons();
+
         clawButton.readValue();
         fineControls.readValue();
+        fieldCentric.readValue();
 
-        //if (fineControls.stateJustChanged()) { robot.drive.setZeroPowerBehavior(fineControls.getState() ? DcMotor.ZeroPowerBehavior.BRAKE : DcMotor.ZeroPowerBehavior.FLOAT); }
+        //robot.drive.cancelFollowing();
+        robot.drive.updatePoseEstimate();
 
-        //todo: adapt for deadzone/ps4
-        /*if (Math.abs(gamepad1.getLeftX()) > 0.01 || Math.abs(gamepad1.getLeftX()) > 0.01
-                || Math.abs(gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) > 0.01
-                || Math.abs(gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)) > 0.01) {*/
+        double mult = fineControls.getState() ? DRIVE_SLOW_MULTIPLIER : 1.0;
+        double turnMult = fineControls.getState() ? DRIVE_SLOW_TURN_MULTIPLIER : 1.0;
+        if (!fieldCentric.getState()) {
+            robot.manualDrive.driveRobotCentric(gamepad1.getLeftY() * mult, gamepad1.getLeftX() * mult,
+                    (-triggerValue(gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) +
+                            triggerValue(gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER))) * turnMult,
+                    true);
+        }
+        else {
+            robot.manualDrive.driveFieldCentric(gamepad1.getLeftY() * mult, gamepad1.getLeftX() * mult,
+                    (-triggerValue(gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) +
+                    triggerValue(gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER))) * mult,
+                            robot.drive.getExternalHeadingVelocity(), true);
+        }
 
-            //robot.drive.cancelFollowing();
-            robot.drive.updatePoseEstimate();
 
-            if (fineControls.isDown()) {
-                robot.drive.setWeightedDrivePower(
-                        new Pose2d(
-                                gamepad1.getLeftY() / DRIVE_SLOW_MULTIPLIER,
-                                -gamepad1.getLeftX() / DRIVE_SLOW_MULTIPLIER,
-                                ((-gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) +
-                                        gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)) * 5.0) / DRIVE_SLOW_TURN_MULTIPLIER
-                        )
-                );
-            } else {
-                robot.drive.setWeightedDrivePower(
-                        new Pose2d(
-                                gamepad1.getLeftY(),
-                                -gamepad1.getLeftX(),
-                                -triggerValue(gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) +
-                                        triggerValue(gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER))
-                        )
-                );
-            }
         /*}
         else {
             if (robot.drive.isBusy()) {
