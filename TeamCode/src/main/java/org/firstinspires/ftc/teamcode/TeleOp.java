@@ -60,7 +60,7 @@ public class TeleOp extends SupervisedOpMode {
 
     // Code that runs repeatedly after the PLAY button is pressed (optional)
     public void loop() {
-        count();
+        //count();
 
         gamepad1.readButtons();
 

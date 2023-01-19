@@ -22,6 +22,8 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 @com.acmerobotics.dashboard.config.Config
 public class TeamConf {
@@ -293,4 +295,6 @@ public class TeamConf {
         }
         return robotSingleton;
     }
+
+    public static Executor executor = Executors.newFixedThreadPool(8);
 }
