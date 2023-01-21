@@ -73,6 +73,22 @@ public class LinearSlideA {
         clawActive = false;
     }
 
+    public LinearSlideA(HardwareMap hardwareMap, String winchName, String clawName) {
+        if (!CAN_REACH_HIGH) { SLIDE_POSITIONS.remove(SLIDE_POSITIONS.size() - 1); }
+
+        winch = new MotorEx(hardwareMap, winchName);
+        winch.setRunMode(Motor.RunMode.PositionControl);
+        winch.setPositionCoefficient(WINCH_COEFFICIENT);
+        winch.setPositionTolerance(WINCH_TOLERANCE);
+        winch.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        winchActive = false;
+
+        //claw = hardwareMap.get(Servo.class, "claw");
+        claw = new SimpleServo(hardwareMap, clawName, 0, 360);
+        clawManualMode = false;
+        clawActive = false;
+    }
+
     public static Double WINCH_SPEED = 0.5;
     public static Double WINCH_LAND_SPEED = 0.1;
 
@@ -152,18 +168,6 @@ public class LinearSlideA {
         setCurrentWinchTarget(CONE_STACK_HEIGHTS.get(coneStackState));
 
         coneStackState = coneStackState >= CONE_STACK_HEIGHTS.size() - 1 ? 0 : coneStackState + 1;
-    }
-
-    public void waitToPassConeStack() {
-        int safeHeight = CONE_STACK_HEIGHTS.get(coneStackState - 1) + CONE_STACK_OFFSET;
-
-        if (currentWinchTarget <= CONE_STACK_HEIGHTS.get(coneStackState - 1)) {
-            RobotLog.e("Invalid invocation of waitToPassConeStack!");
-        }
-
-        while (winch.getCurrentPosition() < safeHeight) {
-            update();
-        }
     }
 
     public void disableAutomaticWinch() {

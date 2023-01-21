@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleTankDrive;
 
 @Config
 public class RobotB {
-    public SampleTankDrive drive;
+    public org.firstinspires.ftc.teamcode.drive.HDrive drive;
     public LinearSlideA slide;
 
     public HDrive manualDrive;
@@ -26,9 +26,12 @@ public class RobotB {
     public static String NAME_CLAW = "claw";
     public static String NAME_SLIDE = "lift";
 
-    public static String NAME_LEFT = "left";
-    public static String NAME_RIGHT = "right";
-    public static String NAME_CENTER = "center";
+    public static String NAME_LEFT = "BackLeft";
+    public static String NAME_RIGHT = "BackRight";
+    public static String NAME_CENTER = "H drive";
+
+    public static String WINCH_NAME = "Lift 1";
+    public static String CLAW_NAME = "Servo";
 
 
 
@@ -36,14 +39,14 @@ public class RobotB {
         PhotonCore.enable();
         //PhotonCore.experimental.setSinglethreadedOptimized(false);
 
-        drive = null;
-        slide = new LinearSlideA(hardwareMap);
+        drive = new org.firstinspires.ftc.teamcode.drive.HDrive(hardwareMap);
+        slide = new LinearSlideA(hardwareMap, WINCH_NAME, CLAW_NAME);
 
         manualDrive = new HDrive(
                 new Motor(hardwareMap, NAME_LEFT),
                 new Motor(hardwareMap, NAME_RIGHT),
                 new Motor(hardwareMap, NAME_CENTER),
-                0.0, 0.0, Math.PI);
+                0.0, 0.0, 3 * Math.PI / 2);
     }
 
     public RobotB(HardwareMap hardwareMap, Pose2d startPose) {

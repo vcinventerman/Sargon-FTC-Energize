@@ -10,6 +10,8 @@ import static org.firstinspires.ftc.teamcode.TeamConf.TILE_SIZE;
 import static org.firstinspires.ftc.teamcode.TeamConf.getRobot;
 import static org.firstinspires.ftc.teamcode.TeamConf.nop;
 import static org.firstinspires.ftc.teamcode.TeamConf.stringToStartPose;
+import static org.firstinspires.ftc.teamcode.util.PathTools.getNearestJunction;
+import static org.firstinspires.ftc.teamcode.util.PathTools.getSignalSpot;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
@@ -18,6 +20,7 @@ import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
 import com.karrmedia.ftchotpatch.Supervised;
 import com.karrmedia.ftchotpatch.SupervisedOpMode;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
@@ -79,6 +82,18 @@ public class Auto extends SupervisedOpMode {
 
     }
 
+    public void waitToPassConeStack() {
+        int safeHeight = robot.slide.CONE_STACK_HEIGHTS.get(robot.slide.coneStackState - 1) + robot.slide.CONE_STACK_OFFSET;
+
+        if (robot.slide.currentWinchTarget <= robot.slide.CONE_STACK_HEIGHTS.get(robot.slide.coneStackState - 1)) {
+            RobotLog.e("Invalid invocation of waitToPassConeStack!");
+        }
+
+        while (robot.slide.winch.getCurrentPosition() < safeHeight) {
+            robot.update();
+        }
+    }
+
     public void start() {
         elapsedRuntime.reset();
 
@@ -120,7 +135,7 @@ public class Auto extends SupervisedOpMode {
             robot.slide.setCurrentWinchTarget(targetAutoJunctionHeight);
 
             // Wait so the cone doesn't knock over the stack when it drives away
-            robot.slide.waitToPassConeStack();
+            waitToPassConeStack();
 
             // Run to drop junction
             runTrajectory(trajectories[4]);
@@ -158,83 +173,6 @@ public class Auto extends SupervisedOpMode {
 
     }
 
-    static public Pose2d getSignalSpot(String variation, int tag) {
-
-        if (variation.contains("Red")) {
-            // Tile F5 start
-            if (variation.contains("Right")) {
-                if (tag == 1) {
-                    return new Pose2d(TILE_SIZE / 2, -TILE_SIZE / 2, FIELD_BEARING_NORTH);
-                } else if (tag == 2) {
-                    return new Pose2d(TILE_SIZE * (3.0/2.0), -TILE_SIZE / 2, FIELD_BEARING_NORTH);
-                } else if (tag == 3) {
-                    return new Pose2d(TILE_SIZE * (5.0/2.0), -TILE_SIZE / 2, FIELD_BEARING_NORTH);
-                }
-            }
-            // Tile F2 start
-            else {
-                if (tag == 1) {
-                    return new Pose2d(-TILE_SIZE * (5.0/2.0), -TILE_SIZE / 2, FIELD_BEARING_NORTH);
-                } else if (tag == 2) {
-                    return new Pose2d(-TILE_SIZE * (3.0/2.0), -TILE_SIZE / 2, FIELD_BEARING_NORTH);
-                } else if (tag == 3) {
-                    return new Pose2d(-TILE_SIZE / 2, -TILE_SIZE / 2, FIELD_BEARING_NORTH);
-                }
-            }
-        }
-        else {
-            // Tile A2 start
-            if (variation.contains("Right")) {
-                if (tag == 1) {
-                    return new Pose2d(-TILE_SIZE / 2, TILE_SIZE / 2, FIELD_BEARING_SOUTH);
-                } else if (tag == 2) {
-                    return new Pose2d(-TILE_SIZE * (3.0/2.0), TILE_SIZE / 2, FIELD_BEARING_SOUTH);
-                } else if (tag == 3) {
-                    return new Pose2d(-TILE_SIZE * (5.0/2.0), TILE_SIZE / 2, FIELD_BEARING_SOUTH);
-                }
-            }
-            // Tile A5 start
-            else {
-                if (tag == 1) {
-                    return new Pose2d(TILE_SIZE * (5.0/2.0), TILE_SIZE / 2, FIELD_BEARING_SOUTH);
-                } else if (tag == 2) {
-                    return new Pose2d(TILE_SIZE * (3.0/2.0), TILE_SIZE / 2, FIELD_BEARING_SOUTH);
-                } else if (tag == 3) {
-                    return new Pose2d(TILE_SIZE / 2, TILE_SIZE / 2, FIELD_BEARING_SOUTH);
-                }
-            }
-        }
-
-
-        // Do nothing on error
-        return null;
-        //return robot.drive.getPoseEstimate();
-    }
-
-    static Vector2d getNearestJunction(Vector2d pos) {
-        //todo: include claw pos in calculation (check centerConeOverJunction)
-        Vector2d nearest = JUNCTIONS.get(0);
-        double nearestDist = 99999;
-        for (Vector2d j : JUNCTIONS) {
-            double dist = j.distTo(pos);
-
-            if (dist < nearestDist) {
-                nearest = j;
-                nearestDist = dist;
-            }
-        }
-        return nearest;
-    }
-    static Vector2d getNearestJunction(Pose2d pos) { return getNearestJunction(pos.vec()); }
-
-    Trajectory trajToNearestJunction(Pose2d robotPos) {
-        //todo: pole avoidance, offset to claw
-        TrajectoryBuilder builder = new TrajectoryBuilder(robotPos, SampleMecanumDrive.VEL_CONSTRAINT, SampleMecanumDrive.ACCEL_CONSTRAINT);
-        builder.splineToSplineHeading(new Pose2d(getNearestJunction(robotPos), robotPos.getHeading()), 0);
-
-        // This part takes a while
-        return builder.build();
-    }
 
     static int trajSlot = 0;
     static void add(List<Trajectory> list) {
@@ -249,10 +187,6 @@ public class Auto extends SupervisedOpMode {
         return addClawOffset(new Pose2d(pos, heading)).vec();
     }
 
-    /*static Vector2d addClawOffsetVec(Vector2d pos) {
-        return addClawOffset(new Pose2d(pos, 0.0)).vec();
-    }*/
-
     static Pose2d addClawOffset(Pose2d pos) {
         return pos.plus(new Pose2d(ROBOT_CLAW_OFFSET.rotated(pos.getHeading()), 0));
     }
@@ -260,10 +194,6 @@ public class Auto extends SupervisedOpMode {
     static List<Pose2d> addClawOffsetList(List<Pose2d> poses) {
         return poses.stream().map(Auto::addClawOffset).collect(Collectors.toList());
     }
-
-    /*static List<Vector2d> addClawOffsetListVec(List<Vector2d> poses) {
-        return poses.stream().map(Auto::addClawOffsetVec).collect(Collectors.toList());
-    }*/
 
     static void makeParkingTrajectories(BulkTrajectoryBuilder builder) {
         parkingTrajectories = builder.multiApply((trajBuilder, version, code) -> trajBuilder.lineToLinearHeading(getSignalSpot(version, code)), 3);

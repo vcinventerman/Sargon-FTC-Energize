@@ -28,7 +28,7 @@ public class TeleOp extends SupervisedOpMode {
 
     // Code that runs when the INIT button is pressed (mandatory)
     public void init() {
-        robot = TeamConf.getRobot(hardwareMap);
+        robot = new RobotA(hardwareMap); /*TeamConf.getRobot(hardwareMap);*/
 
         robot.slide.claw.turnToAngle(robot.slide.claw.getAngle() + 10);
         robot.slide.claw.turnToAngle(robot.slide.claw.getAngle() - 10);
@@ -74,16 +74,15 @@ public class TeleOp extends SupervisedOpMode {
         double mult = fineControls.getState() ? DRIVE_SLOW_MULTIPLIER : 1.0;
         double turnMult = fineControls.getState() ? DRIVE_SLOW_TURN_MULTIPLIER : 1.0;
         if (!fieldCentric.getState()) {
-            robot.manualDrive.driveRobotCentric(gamepad1.getLeftY() * mult, gamepad1.getLeftX() * mult,
-                    (-triggerValue(gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) +
-                            triggerValue(gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER))) * turnMult,
-                    true);
+            robot.manualDrive.driveRobotCentric(gamepad1.getLeftX() * mult, gamepad1.getLeftY() * mult,
+                    (triggerValue(gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) -
+                            triggerValue(gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER))) * turnMult);
         }
         else {
-            robot.manualDrive.driveFieldCentric(gamepad1.getLeftY() * mult, gamepad1.getLeftX() * mult,
-                    (-triggerValue(gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) +
+            robot.manualDrive.driveFieldCentric(gamepad1.getLeftX() * mult, gamepad1.getLeftY() * mult,
+                    (triggerValue(gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) -
                     triggerValue(gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER))) * mult,
-                            robot.drive.getExternalHeadingVelocity(), true);
+                            robot.drive.getExternalHeading() * (180.0 / Math.PI));
         }
 
 
@@ -95,7 +94,7 @@ public class TeleOp extends SupervisedOpMode {
         }*/
 
         if (turnAroundButton.get()) {
-            robot.drive.turnAsync(Math.PI, true);
+            //robot.drive.turnAsync(Math.PI, true);
         }
 
         //robot.slide.winch.set(-gamepad1.right_stick_y);

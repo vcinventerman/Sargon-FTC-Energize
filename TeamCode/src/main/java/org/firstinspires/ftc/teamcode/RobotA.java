@@ -33,8 +33,8 @@ public class RobotA {
         MotorEx leftFront = new MotorEx(hardwareMap,  "driveFrontLeft");
         MotorEx leftRear = new MotorEx(hardwareMap,  "driveBackLeft");
 
-        rightFront.setInverted(true);
-        leftFront.setInverted(true);
+        //rightFront.setInverted(true);
+        //leftFront.setInverted(true);
 
         manualDrive = new MecanumDrive(false, leftFront, rightFront, leftRear, rightRear);
     }

@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.util;
 
+import static org.firstinspires.ftc.teamcode.TeamConf.FIELD_BEARING_NORTH;
+import static org.firstinspires.ftc.teamcode.TeamConf.FIELD_BEARING_SOUTH;
+import static org.firstinspires.ftc.teamcode.TeamConf.JUNCTIONS;
 import static org.firstinspires.ftc.teamcode.TeamConf.ROBOT_DRIVE_INST;
 import static org.firstinspires.ftc.teamcode.TeamConf.TILE_SIZE;
 
@@ -7,6 +10,8 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
+
+import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +72,85 @@ public class PathTools {
         builder.splineToSplineHeading(end, 0);
 
 
+        return builder.build();
+    }
+
+
+    static public Pose2d getSignalSpot(String variation, int tag) {
+
+        if (variation.contains("Red")) {
+            // Tile F5 start
+            if (variation.contains("Right")) {
+                if (tag == 1) {
+                    return new Pose2d(TILE_SIZE / 2, -TILE_SIZE / 2, FIELD_BEARING_NORTH);
+                } else if (tag == 2) {
+                    return new Pose2d(TILE_SIZE * (3.0/2.0), -TILE_SIZE / 2, FIELD_BEARING_NORTH);
+                } else if (tag == 3) {
+                    return new Pose2d(TILE_SIZE * (5.0/2.0), -TILE_SIZE / 2, FIELD_BEARING_NORTH);
+                }
+            }
+            // Tile F2 start
+            else {
+                if (tag == 1) {
+                    return new Pose2d(-TILE_SIZE * (5.0/2.0), -TILE_SIZE / 2, FIELD_BEARING_NORTH);
+                } else if (tag == 2) {
+                    return new Pose2d(-TILE_SIZE * (3.0/2.0), -TILE_SIZE / 2, FIELD_BEARING_NORTH);
+                } else if (tag == 3) {
+                    return new Pose2d(-TILE_SIZE / 2, -TILE_SIZE / 2, FIELD_BEARING_NORTH);
+                }
+            }
+        }
+        else {
+            // Tile A2 start
+            if (variation.contains("Right")) {
+                if (tag == 1) {
+                    return new Pose2d(-TILE_SIZE / 2, TILE_SIZE / 2, FIELD_BEARING_SOUTH);
+                } else if (tag == 2) {
+                    return new Pose2d(-TILE_SIZE * (3.0/2.0), TILE_SIZE / 2, FIELD_BEARING_SOUTH);
+                } else if (tag == 3) {
+                    return new Pose2d(-TILE_SIZE * (5.0/2.0), TILE_SIZE / 2, FIELD_BEARING_SOUTH);
+                }
+            }
+            // Tile A5 start
+            else {
+                if (tag == 1) {
+                    return new Pose2d(TILE_SIZE * (5.0/2.0), TILE_SIZE / 2, FIELD_BEARING_SOUTH);
+                } else if (tag == 2) {
+                    return new Pose2d(TILE_SIZE * (3.0/2.0), TILE_SIZE / 2, FIELD_BEARING_SOUTH);
+                } else if (tag == 3) {
+                    return new Pose2d(TILE_SIZE / 2, TILE_SIZE / 2, FIELD_BEARING_SOUTH);
+                }
+            }
+        }
+
+
+        // Do nothing on error
+        return null;
+        //return robot.drive.getPoseEstimate();
+    }
+
+    public static Vector2d getNearestJunction(Vector2d pos) {
+        //todo: include claw pos in calculation (check centerConeOverJunction)
+        Vector2d nearest = JUNCTIONS.get(0);
+        double nearestDist = 99999;
+        for (Vector2d j : JUNCTIONS) {
+            double dist = j.distTo(pos);
+
+            if (dist < nearestDist) {
+                nearest = j;
+                nearestDist = dist;
+            }
+        }
+        return nearest;
+    }
+    public static Vector2d getNearestJunction(Pose2d pos) { return getNearestJunction(pos.vec()); }
+
+    public static Trajectory trajToNearestJunction(Pose2d robotPos) {
+        //todo: pole avoidance, offset to claw
+        TrajectoryBuilder builder = new TrajectoryBuilder(robotPos, SampleMecanumDrive.VEL_CONSTRAINT, SampleMecanumDrive.ACCEL_CONSTRAINT);
+        builder.splineToSplineHeading(new Pose2d(getNearestJunction(robotPos), robotPos.getHeading()), 0);
+
+        // This part takes a while
         return builder.build();
     }
 }

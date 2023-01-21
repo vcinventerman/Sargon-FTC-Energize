@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@Supervised(name="WiiDemo", autonomous=false, linear=false)
+//@Supervised(name="WiiDemo", autonomous=false, linear=false)
 public class WiiDemo extends SupervisedOpMode {
 
     RobotA robot;
@@ -40,6 +40,11 @@ public class WiiDemo extends SupervisedOpMode {
             Trajectory traj = PathTools.safeTrajTo(robot.drive.getPoseEstimate(),
                     new Pose2d(gamepad1.gamepad.touchpad_finger_1_x, gamepad1.gamepad.touchpad_finger_1_y, 0));
         }
+
+        telemetry.addData("x", gamepad1.gamepad.touchpad_finger_1_x);
+        telemetry.addData("y", gamepad1.gamepad.touchpad_finger_1_y);
+        telemetry.addData("heading", 0);
+        telemetry.update();
 
         robot.update();
     }
