@@ -1,13 +1,13 @@
-package org.firstinspires.ftc.teamcode.util;
+package com.vcinventerman.pathvisualizer;
 
-import static org.firstinspires.ftc.teamcode.TeamConf.FIELD_BEARING_NORTH;
-import static org.firstinspires.ftc.teamcode.TeamConf.FIELD_BEARING_SOUTH;
-import static org.firstinspires.ftc.teamcode.TeamConf.JUNCTIONS;
-import static org.firstinspires.ftc.teamcode.TeamConf.ROBOT_CLAW_OFFSET;
-import static org.firstinspires.ftc.teamcode.TeamConf.ROBOT_DRIVE_INST;
-import static org.firstinspires.ftc.teamcode.TeamConf.TILE_SIZE;
 
-import com.acmerobotics.roadrunner.drive.Drive;
+import static com.vcinventerman.pathvisualizer.TeamConf.FIELD_BEARING_NORTH;
+import static com.vcinventerman.pathvisualizer.TeamConf.FIELD_BEARING_SOUTH;
+import static com.vcinventerman.pathvisualizer.TeamConf.JUNCTIONS;
+import static com.vcinventerman.pathvisualizer.TeamConf.ROBOT_CLAW_OFFSET;
+import static com.vcinventerman.pathvisualizer.TeamConf.ROBOT_DRIVE_INST;
+import static com.vcinventerman.pathvisualizer.TeamConf.TILE_SIZE;
+
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
@@ -16,10 +16,9 @@ import com.acmerobotics.roadrunner.trajectory.constraints.AngularVelocityConstra
 import com.acmerobotics.roadrunner.trajectory.constraints.MecanumVelocityConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.MinVelocityConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.ProfileAccelerationConstraint;
+import com.noahbres.meepmeep.roadrunner.Constraints;
+import com.noahbres.meepmeep.roadrunner.SampleMecanumDrive;
 
-import org.firstinspires.ftc.teamcode.Auto;
-import org.firstinspires.ftc.teamcode.drive.DriveConstants;
-import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,16 +49,19 @@ public class PathTools {
 
     public static TrajectoryBuilder getTrajBuilder(Pose2d start) {
         return new TrajectoryBuilder(start, new MinVelocityConstraint(Arrays.asList(
-                new AngularVelocityConstraint(DriveConstants.MAX_ANG_VEL),
-                new MecanumVelocityConstraint(DriveConstants.MAX_VEL, DriveConstants.TRACK_WIDTH)
-        )), new ProfileAccelerationConstraint(DriveConstants.MAX_ACCEL));
+                new AngularVelocityConstraint(4.1059),
+                new MecanumVelocityConstraint(40.956837, 11.67)
+        )), new ProfileAccelerationConstraint(41.065033847087705));
     }
 
     // Go to the nearest center of a cell
     // Move to the row, then the col of the target
     //
     public static Trajectory safeTrajTo(Pose2d start, Pose2d end) {
-        TrajectoryBuilder builder = new TrajectoryBuilder(start, ROBOT_DRIVE_INST.VEL_CONSTRAINT, ROBOT_DRIVE_INST.ACCEL_CONSTRAINT);
+        TrajectoryBuilder builder = new TrajectoryBuilder(start, 	new MinVelocityConstraint(Arrays.asList(
+                new AngularVelocityConstraint(4.1059),
+                new MecanumVelocityConstraint(40.956837, 11.67)
+        )), new ProfileAccelerationConstraint(41.065033847087705));
 
         final double[] safe = new double[]{
                 -TILE_SIZE * (5.0 / 2.0), -TILE_SIZE * (3.0 / 2.0), -TILE_SIZE * (1.0 / 2.0),
@@ -77,17 +79,20 @@ public class PathTools {
         Vector2d safeEndCell = nearestTo(end.vec(), safeCells);
 
         // Drive to a safe position that may be easily driven from
-        builder.splineToSplineHeading(new Pose2d(safeCell.getX(), safeCell.getY(), end.getHeading()), 0);
+        builder.lineTo(safeCell);
 
         // Drive to x position of end safe cell
-        builder.splineToSplineHeading(new Pose2d(safeEndCell.getX(), end.getY(), end.getHeading()), 0);
+        builder.lineToLinearHeading(new Pose2d(safeEndCell.getX(), end.getY(), end.getHeading()));
 
-        // Drive to safe end cell
-        builder.splineToSplineHeading(new Pose2d(safeEndCell.getX(), safeEndCell.getY(), end.getHeading()), 0);
+        if (!safeEndCell.epsilonEquals(new Vector2d(safeEndCell.getX(), end.getY()))) {
+            // Drive to safe end cell
+            builder.lineTo(safeEndCell);
+        }
 
-        // Drive to end
-        builder.splineToSplineHeading(end, 0);
-
+        if (!end.vec().epsilonEquals(new Vector2d(safeEndCell.getX(), end.getY()))) {
+            // Drive to end
+            builder.lineToLinearHeading(end);
+        }
 
         return builder.build();
     }
@@ -164,7 +169,10 @@ public class PathTools {
 
     public static Trajectory trajToNearestJunction(Pose2d robotPos) {
         //todo: pole avoidance, offset to claw
-        TrajectoryBuilder builder = new TrajectoryBuilder(robotPos, SampleMecanumDrive.VEL_CONSTRAINT, SampleMecanumDrive.ACCEL_CONSTRAINT);
+        TrajectoryBuilder builder = new TrajectoryBuilder(robotPos, new MinVelocityConstraint(Arrays.asList(
+                new AngularVelocityConstraint(4.1059),
+                new MecanumVelocityConstraint(40.956837, 11.67)
+        )), new ProfileAccelerationConstraint(41.065033847087705));
         builder.splineToSplineHeading(new Pose2d(getNearestJunction(robotPos), robotPos.getHeading()), 0);
 
         // This part takes a while

@@ -10,6 +10,8 @@ import static org.firstinspires.ftc.teamcode.TeamConf.TILE_SIZE;
 import static org.firstinspires.ftc.teamcode.TeamConf.getRobot;
 import static org.firstinspires.ftc.teamcode.TeamConf.nop;
 import static org.firstinspires.ftc.teamcode.TeamConf.stringToStartPose;
+import static org.firstinspires.ftc.teamcode.util.PathTools.addClawOffset;
+import static org.firstinspires.ftc.teamcode.util.PathTools.addClawOffsetList;
 import static org.firstinspires.ftc.teamcode.util.PathTools.getNearestJunction;
 import static org.firstinspires.ftc.teamcode.util.PathTools.getSignalSpot;
 
@@ -23,6 +25,7 @@ import com.karrmedia.ftchotpatch.SupervisedOpMode;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.util.PathTools;
 
 import java.util.Arrays;
 import java.util.List;
@@ -183,17 +186,7 @@ public class Auto extends SupervisedOpMode {
         trajSlot++;
     }
 
-    static Vector2d addClawOffsetVec(Vector2d pos, double heading) {
-        return addClawOffset(new Pose2d(pos, heading)).vec();
-    }
 
-    static Pose2d addClawOffset(Pose2d pos) {
-        return pos.plus(new Pose2d(ROBOT_CLAW_OFFSET.rotated(pos.getHeading()), 0));
-    }
-
-    static List<Pose2d> addClawOffsetList(List<Pose2d> poses) {
-        return poses.stream().map(Auto::addClawOffset).collect(Collectors.toList());
-    }
 
     static void makeParkingTrajectories(BulkTrajectoryBuilder builder) {
         parkingTrajectories = builder.multiApply((trajBuilder, version, code) -> trajBuilder.lineToLinearHeading(getSignalSpot(version, code)), 3);
@@ -222,7 +215,7 @@ public class Auto extends SupervisedOpMode {
                 new Pose2d(TeamConf.JUNCTIONS.get(5).getX(), TeamConf.JUNCTIONS.get(5).getY(), Math.PI),
                 new Pose2d(TeamConf.JUNCTIONS.get(4).getX(), TeamConf.JUNCTIONS.get(4).getY(), Math.PI),
                 new Pose2d(TeamConf.JUNCTIONS.get(6).getX(), TeamConf.JUNCTIONS.get(6).getY(), 0));
-        targetAutoJunctions.forEach(Auto::addClawOffset);
+        targetAutoJunctions.forEach(PathTools::addClawOffset);
 
         // trajectories[3]: Go to drop point (loop part 1)
         //todo: line up with claw, don't hit junction, tune based on drive speed for max points

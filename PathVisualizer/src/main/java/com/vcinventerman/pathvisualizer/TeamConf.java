@@ -1,23 +1,9 @@
-package org.firstinspires.ftc.teamcode;
+package com.vcinventerman.pathvisualizer;
 
-import static java.lang.Thread.yield;
-
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.acmerobotics.roadrunner.drive.Drive;
+import com.acmerobotics.roadrunner.drive.MecanumDrive;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
-import com.arcrobotics.ftclib.drivebase.MecanumDrive;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-
-import org.firstinspires.ftc.robotcore.external.Func;
-import org.firstinspires.ftc.robotcore.external.Function;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.drive.MecanumDriveCancelable;
-import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
-import org.jetbrains.annotations.Contract;
-import org.openftc.apriltag.AprilTagDetectorJNI;
-import org.openftc.easyopencv.OpenCvCameraRotation;
+import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -25,8 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.function.Function;
 
-@com.acmerobotics.dashboard.config.Config
+
 public class TeamConf {
 
 
@@ -58,7 +45,7 @@ public class TeamConf {
     public static double ROBOT_WIDTH = ROBOTA_WIDTH;
     public static String ROBOT_IMU_DEFAULT = ROBOTA_IMU_DEFAULT;
     public static Class ROBOT_DRIVE = RobotA.class;
-    public static MecanumDriveCancelable ROBOT_DRIVE_INST = null;
+    public static RoadRunnerBotEntity ROBOT_DRIVE_INST = null;
     public static Class ROBOT_MANUAL_DRIVE = MecanumDrive.class;
     // Distance from center to claw
     public static Vector2d ROBOT_CLAW_OFFSET = ROBOTA_CLAW_OFFSET;
@@ -76,7 +63,7 @@ public class TeamConf {
     public static double CONE_HEIGHT = 3.65 + 1.23;
 
     public static Pose2d CONE_STACK_POS_RED_LEFT = new Pose2d(-FIELD_WIDTH + CONE_DIAMETER / 2.0, -TILE_SIZE / 2.0, Math.PI);
-    public static Pose2d CONE_STACK_POS_RED_RIGHT = new Pose2d(FIELD_WIDTH + CONE_DIAMETER / 2.0, -TILE_SIZE / 2.0, 0);
+    public static Pose2d CONE_STACK_POS_RED_RIGHT = new Pose2d((TILE_SIZE * 3) - CONE_DIAMETER / 2.0, -TILE_SIZE / 2.0, 0);
     public static Pose2d CONE_STACK_POS_BLUE_LEFT = new Pose2d(FIELD_WIDTH + CONE_DIAMETER / 2.0, TILE_SIZE / 2.0, 0);
     public static Pose2d CONE_STACK_POS_BLUE_RIGHT = new Pose2d(-FIELD_WIDTH - CONE_DIAMETER / 2.0, TILE_SIZE / 2.0, Math.PI);
     public static List<Pose2d> CONE_STACK_POSITIONS = Arrays.asList(CONE_STACK_POS_RED_LEFT, CONE_STACK_POS_RED_RIGHT, CONE_STACK_POS_BLUE_LEFT, CONE_STACK_POS_BLUE_RIGHT);
@@ -89,7 +76,7 @@ public class TeamConf {
         HIGH
     }
 
-    public static List<Vector2d> JUNCTIONS = Arrays.asList(
+    public static List<Vector2d> JUNCTIONS = List.of(
             // High
             new Vector2d(0, TILE_SIZE * 1),
             new Vector2d(0, TILE_SIZE * -1),
@@ -232,11 +219,6 @@ public class TeamConf {
         }
     }
 
-    // Our default telemetry is just ftc-dashboard bundled with the default instance
-    public static Telemetry getDefaultTelemetry(Telemetry current) {
-        return new MultipleTelemetry(current, FtcDashboard.getInstance().getTelemetry());
-    }
-
     public static SignalZone barcodeToSignalZone(String barcodeData, StartSpace startSpace) {
         try {
             if (barcodeData.length() == 0) {
@@ -272,35 +254,4 @@ public class TeamConf {
     }
 
 
-
-
-
-    // Android only
-
-    public static AprilTagDetectorJNI.TagFamily TAG_FAMILY = AprilTagDetectorJNI.TagFamily.TAG_25h9;
-    // Offset to get from our tag values to the signal values [1,2,3]
-    public static int TAG_OFFSET = 20;
-
-    public static OpenCvCameraRotation ROBOT_CAMERA_ORIENTATION = OpenCvCameraRotation.UPRIGHT;
-
-    static RobotA robotSingleton = null;
-
-    public static RobotA getRobot(HardwareMap map) {
-        if (robotSingleton == null) {
-            robotSingleton = new RobotA(map);
-        }
-        return robotSingleton;
-    }
-
-    public static RobotA getRobot(HardwareMap map, Pose2d startingPose) {
-        if (robotSingleton == null) {
-            robotSingleton = new RobotA(map, startingPose);
-        }
-        else {
-            robotSingleton.drive.setPoseEstimate(startingPose);
-        }
-        return robotSingleton;
-    }
-
-    public static Executor executor = Executors.newFixedThreadPool(8);
 }

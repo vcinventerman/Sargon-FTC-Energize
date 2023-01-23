@@ -1,44 +1,35 @@
 package com.vcinventerman.pathvisualizer;
 
+import static com.vcinventerman.pathvisualizer.PathTools.addClawOffset;
+import static com.vcinventerman.pathvisualizer.PathTools.addClawOffsetVec;
+import static com.vcinventerman.pathvisualizer.PathTools.getTrajBuilder;
+import static com.vcinventerman.pathvisualizer.PathTools.safeTrajTo;
+import static com.vcinventerman.pathvisualizer.TeamConf.CONE_STACK_POS_RED_RIGHT;
+import static com.vcinventerman.pathvisualizer.TeamConf.FIELD_BEARING_EAST;
+import static com.vcinventerman.pathvisualizer.TeamConf.FIELD_BEARING_NORTH;
+import static com.vcinventerman.pathvisualizer.TeamConf.FIELD_BEARING_SOUTH;
+import static com.vcinventerman.pathvisualizer.TeamConf.FIELD_BEARING_WEST;
+import static com.vcinventerman.pathvisualizer.TeamConf.JUNCTIONS;
+import static com.vcinventerman.pathvisualizer.TeamConf.ROBOT_LENGTH;
+import static com.vcinventerman.pathvisualizer.TeamConf.ROBOT_WIDTH;
+import static com.vcinventerman.pathvisualizer.TeamConf.START_POS_BLUE_LEFT;
+import static com.vcinventerman.pathvisualizer.TeamConf.START_POS_RED_RIGHT;
+import static com.vcinventerman.pathvisualizer.TeamConf.TILE_SIZE;
+
+import com.acmerobotics.roadrunner.drive.MecanumDrive;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.noahbres.meepmeep.MeepMeep;
 import com.noahbres.meepmeep.roadrunner.DefaultBotBuilder;
 import com.noahbres.meepmeep.roadrunner.DriveTrainType;
 import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
+import com.sun.tools.javac.util.List;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
 
 public class PathVisualizer {
-
-
-    // Field is 11ft 9in
-    public static double FIELD_WIDTH = 141;
-    // Tiles are 2ft
-    public static double TILE_SIZE = 24;
-
-    // Field from the point of view of the red alliance: +y is towards blue, -y is towards red, +x is towards red right
-    public static double FIELD_BEARING_NORTH = Math.PI / 2;
-    public static double FIELD_BEARING_SOUTH = Math.PI * (3.0 / 2.0);
-    public static double FIELD_BEARING_EAST = 0.0;
-    public static double FIELD_BEARING_WEST = Math.PI;
-
-    // Senior team robot
-    public static double ROBOTA_LENGTH = 18;
-    public static double ROBOTA_WIDTH = 17;
-
-    // Choose current robot here
-    public static double ROBOT_LENGTH = ROBOTA_LENGTH;
-    public static double ROBOT_WIDTH = ROBOTA_WIDTH;
-
-    public static Pose2d START_POS_RED_LEFT = new Pose2d(-35, -(FIELD_WIDTH / 2) + (ROBOT_LENGTH / 2), FIELD_BEARING_NORTH);
-    public static Pose2d START_POS_RED_RIGHT = new Pose2d(35, -(FIELD_WIDTH / 2) + (ROBOT_LENGTH / 2), FIELD_BEARING_NORTH);
-    public static Pose2d START_POS_BLUE_LEFT = new Pose2d(35, (FIELD_WIDTH / 2) - (ROBOT_LENGTH / 2), FIELD_BEARING_SOUTH);
-    public static Pose2d START_POS_BLUE_RIGHT = new Pose2d(-35, (FIELD_WIDTH / 2) - (ROBOT_LENGTH / 2), FIELD_BEARING_SOUTH);
-
-
-
-
-
-
 
     public static void main(String[] args) {
         System.setProperty("sun.java2d.opengl", "true");
@@ -72,12 +63,64 @@ public class PathVisualizer {
                 .addEntity(myBot)
                 .start();
 
-        myBot.followTrajectorySequence(myBot.getDrive().trajectorySequenceBuilder(START_POS_RED_LEFT)
-                .forward(TILE_SIZE * (5.0 / 2.0)) // Get the signal cone out of the way
-                .back(TILE_SIZE / 2)
-                .lineToLinearHeading(centerConeOverJunction(new Vector2d(-TILE_SIZE, 0), new Vector2d(START_POS_RED_LEFT.getX(), START_POS_RED_LEFT.getY() - TILE_SIZE * 2)))
-                .strafeTo(new Vector2d(START_POS_RED_LEFT.getX(), START_POS_RED_LEFT.getY() + TILE_SIZE * 2))
-                .lineToLinearHeading(getSignalSpot(3))
+        //RedRight
+        myBot.followTrajectorySequence(myBot.getDrive().trajectorySequenceBuilder(addClawOffset(CONE_STACK_POS_RED_RIGHT))
+                .addTrajectory(getTrajBuilder(START_POS_RED_RIGHT) // Forward junction
+                        .lineTo(new Vector2d(START_POS_RED_RIGHT.getX() - TILE_SIZE / 2, START_POS_RED_RIGHT.getY()))
+                        .splineToLinearHeading(new Pose2d(START_POS_RED_RIGHT.getX() - TILE_SIZE, START_POS_RED_RIGHT.getY() + TILE_SIZE, FIELD_BEARING_NORTH), FIELD_BEARING_NORTH)
+                        .splineToLinearHeading(addClawOffsetVec(JUNCTIONS.get(1), FIELD_BEARING_NORTH), FIELD_BEARING_NORTH)
+                        .build())
+
+                .addTrajectory(getTrajBuilder(addClawOffsetVec(JUNCTIONS.get(1), FIELD_BEARING_NORTH)) // Cone stack
+                        .back(TILE_SIZE / 16)
+                        .splineToLinearHeading(new Pose2d(START_POS_RED_RIGHT.getX() - TILE_SIZE, START_POS_RED_RIGHT.getY() + TILE_SIZE, FIELD_BEARING_NORTH), FIELD_BEARING_NORTH)
+                        .splineToSplineHeading(new Pose2d(START_POS_RED_RIGHT.getX() - TILE_SIZE, START_POS_RED_RIGHT.getY() + TILE_SIZE * 2, FIELD_BEARING_NORTH), FIELD_BEARING_NORTH)
+                        .splineToConstantHeading(new Vector2d(TILE_SIZE * (3.0 / 2.0), -TILE_SIZE / 2.0), FIELD_BEARING_EAST)
+                        .splineToSplineHeading(addClawOffset(CONE_STACK_POS_RED_RIGHT), FIELD_BEARING_EAST)
+                        .build())
+
+
+                .addTrajectory(getTrajBuilder(addClawOffset(CONE_STACK_POS_RED_RIGHT)) // Low junction adjacent to cone stack
+                        .back(TILE_SIZE / 16)
+                        .splineToSplineHeading(addClawOffsetVec(JUNCTIONS.get(11), Math.PI * (5.0 / 4.0)), Math.PI * (5.0 / 4.0))
+                        .build())
+
+                .addTrajectory(getTrajBuilder(addClawOffsetVec(JUNCTIONS.get(11), Math.PI * (5.0 / 4.0))) // Low junction adjacent to cone stack return to cone stack
+                        .back(TILE_SIZE / 16)
+                        .splineToSplineHeading(addClawOffset(CONE_STACK_POS_RED_RIGHT), 0)
+                        //todo: straight approach to let claw lower
+                        .build())
+
+
+                .addTrajectory(getTrajBuilder(addClawOffset(CONE_STACK_POS_RED_RIGHT)) // Medium junction inline with cone stack
+                        .back(TILE_SIZE / 16)
+                        .splineToSplineHeading(addClawOffsetVec(JUNCTIONS.get(5), Math.PI * (5.0 / 4.0)), Math.PI * (5.0 / 4.0))
+                        .build())
+
+                .addTrajectory(getTrajBuilder(addClawOffsetVec(JUNCTIONS.get(5), Math.PI * (5.0 / 4.0))) // Medium junction inline with cone stack return
+                        .back(TILE_SIZE / 16)
+                        .splineToSplineHeading(addClawOffset(CONE_STACK_POS_RED_RIGHT), 0)
+                        //todo: straight approach to let claw lower
+                        .build())
+
+
+                .addTrajectory(getTrajBuilder(addClawOffset(CONE_STACK_POS_RED_RIGHT)) // High junction inline with cone stack
+                        .back(TILE_SIZE / 16)
+                        .splineToSplineHeading(addClawOffsetVec(JUNCTIONS.get(2), Math.PI * (3.0 / 4.0)), Math.PI * (3.0 / 4.0))
+                        .build())
+
+                .addTrajectory(getTrajBuilder(addClawOffsetVec(JUNCTIONS.get(2), Math.PI * (3.0 / 4.0))) // Medium junction inline with cone stack return
+                        .back(TILE_SIZE / 16)
+                        .splineToSplineHeading(addClawOffset(CONE_STACK_POS_RED_RIGHT), 0)
+                        //todo: straight approach to let claw lower
+                        .build())
+
+                //.splineToLinearHeading(addClawOffset(CONE_STACK_POS_RED_RIGHT), FIELD_BEARING_EAST) // Stack
+
+
+
+
+                //.addTrajectory(safeTrajTo(addClawOffset(CONE_STACK_POS_RED_RIGHT), new Pose2d(TILE_SIZE / 2.0, -TILE_SIZE / 2.0, 0)))
                 .build());
 
 
@@ -91,68 +134,4 @@ public class PathVisualizer {
     static String variation = "RedLeft";
     static RoadRunnerBotEntity myBot;
 
-    static public Pose2d getSignalSpot(int tag) {
-        tag = tag; // Will be 1, 2, or 3
-
-        if (true) {
-            // Tile F5 start
-            if (variation.contains("Right")) {
-                if (tag == 1) {
-                    return new Pose2d(TILE_SIZE / 2, -TILE_SIZE / 2, FIELD_BEARING_NORTH);
-                } else if (tag == 2) {
-                    return new Pose2d(TILE_SIZE * (3.0/2.0), -TILE_SIZE / 2, FIELD_BEARING_NORTH);
-                } else if (tag == 3) {
-                    return new Pose2d(TILE_SIZE * (5.0/2.0), -TILE_SIZE / 2, FIELD_BEARING_NORTH);
-                }
-            }
-            // Tile F2 start
-            else {
-                if (tag == 1) {
-                    return new Pose2d(-TILE_SIZE * (5.0/2.0), -TILE_SIZE / 2, FIELD_BEARING_NORTH);
-                } else if (tag == 2) {
-                    return new Pose2d(-TILE_SIZE * (3.0/2.0), -TILE_SIZE / 2, FIELD_BEARING_NORTH);
-                } else if (tag == 3) {
-                    return new Pose2d(-TILE_SIZE / 2, -TILE_SIZE / 2, FIELD_BEARING_NORTH);
-                }
-            }
-        }
-        else {
-            // Tile A2 start
-            if (variation.contains("Right")) {
-                if (tag == 1) {
-                    return new Pose2d(TILE_SIZE / 2, TILE_SIZE / 2, FIELD_BEARING_SOUTH);
-                } else if (tag == 2) {
-                    return new Pose2d(TILE_SIZE * (3.0/2.0), TILE_SIZE / 2, FIELD_BEARING_SOUTH);
-                } else if (tag == 3) {
-                    return new Pose2d(TILE_SIZE * (5.0/2.0), TILE_SIZE / 2, FIELD_BEARING_SOUTH);
-                }
-            }
-            // Tile A5 start
-            else {
-                if (tag == 1) {
-                    return new Pose2d(-TILE_SIZE * (5.0/2.0), -TILE_SIZE / 2, FIELD_BEARING_SOUTH);
-                } else if (tag == 2) {
-                    return new Pose2d(-TILE_SIZE * (3.0/2.0), -TILE_SIZE / 2, FIELD_BEARING_SOUTH);
-                } else if (tag == 3) {
-                    return new Pose2d(-TILE_SIZE / 2, -TILE_SIZE / 2, FIELD_BEARING_SOUTH);
-                }
-            }
-        }
-
-        // Do nothing on error
-        return null;
-    }
-
-    // Returns the angle the robot needs to turn to before moving forward and the point it needs to drive to
-    //todo: claw probably isn't even in the center
-    static Pose2d centerConeOverJunction(Vector2d junctionPos, Vector2d robotPos) {
-        //Vector2d robotPos = myBot.getPose().vec(); //robot.drive.getPoseEstimate().vec();
-        double angle = Math.atan((junctionPos.getY() - robotPos.getY()) / (junctionPos.getX() - robotPos.getX()));
-        double hyp = Math.sqrt(Math.pow(junctionPos.getX() - robotPos.getX(), 2) + Math.pow(junctionPos.getY() - robotPos.getY(), 2))
-                - 10.5; // distance from center of robot to claw which is on a horizontal center axis
-        double offsetX = hyp * Math.cos(angle);
-        double offsetY = hyp * Math.sin(angle);
-
-        return new Pose2d(robotPos.plus(new Vector2d(offsetX, offsetY)), angle);
-    }
 }
