@@ -68,20 +68,22 @@ public class PathVisualizer {
                 .addTrajectory(getTrajBuilder(START_POS_RED_RIGHT) // Forward junction
                         .lineTo(new Vector2d(START_POS_RED_RIGHT.getX() - TILE_SIZE / 2, START_POS_RED_RIGHT.getY()))
                         .splineToLinearHeading(new Pose2d(START_POS_RED_RIGHT.getX() - TILE_SIZE, START_POS_RED_RIGHT.getY() + TILE_SIZE, FIELD_BEARING_NORTH), FIELD_BEARING_NORTH)
-                        .splineToLinearHeading(addClawOffsetVec(JUNCTIONS.get(1), FIELD_BEARING_NORTH), FIELD_BEARING_NORTH)
+                        .splineToSplineHeading(addClawOffsetVec(JUNCTIONS.get(1), FIELD_BEARING_NORTH + Math.PI / 4), FIELD_BEARING_NORTH + Math.PI / 4)
                         .build())
 
-                .addTrajectory(getTrajBuilder(addClawOffsetVec(JUNCTIONS.get(1), FIELD_BEARING_NORTH)) // Cone stack
+                .addTrajectory(getTrajBuilder(addClawOffsetVec(JUNCTIONS.get(1), FIELD_BEARING_NORTH + Math.PI / 4)) // Cone stack
                         .back(TILE_SIZE / 16)
-                        .splineToLinearHeading(new Pose2d(START_POS_RED_RIGHT.getX() - TILE_SIZE, START_POS_RED_RIGHT.getY() + TILE_SIZE, FIELD_BEARING_NORTH), FIELD_BEARING_NORTH)
+                        .splineToConstantHeading(new Vector2d(START_POS_RED_RIGHT.getX() - TILE_SIZE, START_POS_RED_RIGHT.getY() + TILE_SIZE), FIELD_BEARING_NORTH)
+                        .splineToSplineHeading(new Pose2d(START_POS_RED_RIGHT.getX() - TILE_SIZE, START_POS_RED_RIGHT.getY() + TILE_SIZE * (3.0 / 4.0), FIELD_BEARING_NORTH), FIELD_BEARING_NORTH)
                         .splineToSplineHeading(new Pose2d(START_POS_RED_RIGHT.getX() - TILE_SIZE, START_POS_RED_RIGHT.getY() + TILE_SIZE * 2, FIELD_BEARING_NORTH), FIELD_BEARING_NORTH)
+                        .splineToConstantHeading(new Vector2d(TILE_SIZE, -TILE_SIZE / 2.0), FIELD_BEARING_EAST)
                         .splineToConstantHeading(new Vector2d(TILE_SIZE * (3.0 / 2.0), -TILE_SIZE / 2.0), FIELD_BEARING_EAST)
                         .splineToSplineHeading(addClawOffset(CONE_STACK_POS_RED_RIGHT), FIELD_BEARING_EAST)
                         .build())
 
 
-                .addTrajectory(getTrajBuilder(addClawOffset(CONE_STACK_POS_RED_RIGHT)) // Low junction adjacent to cone stack
-                        .back(TILE_SIZE / 16)
+                /*.addTrajectory(getTrajBuilder(addClawOffset(CONE_STACK_POS_RED_RIGHT)) // Low junction adjacent to cone stack
+                        .back(TILE_SIZE / 64)
                         .splineToSplineHeading(addClawOffsetVec(JUNCTIONS.get(11), Math.PI * (5.0 / 4.0)), Math.PI * (5.0 / 4.0))
                         .build())
 
@@ -113,7 +115,7 @@ public class PathVisualizer {
                         .back(TILE_SIZE / 16)
                         .splineToSplineHeading(addClawOffset(CONE_STACK_POS_RED_RIGHT), 0)
                         //todo: straight approach to let claw lower
-                        .build())
+                        .build())*/
 
                 //.splineToLinearHeading(addClawOffset(CONE_STACK_POS_RED_RIGHT), FIELD_BEARING_EAST) // Stack
 

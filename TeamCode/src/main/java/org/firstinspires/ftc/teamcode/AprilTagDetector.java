@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class AprilTagDetector extends SignalSleeveDetector {
+public class AprilTagDetector {
     OpenCvCamera camera;
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
     Timing.Timer runTimer = new Timing.Timer(100, TimeUnit.MILLISECONDS); // Restrict to scanning every 100ms
@@ -81,7 +81,6 @@ public class AprilTagDetector extends SignalSleeveDetector {
         runTimer.start();
     }
 
-    @Override
     void detect() {
         //if (detectFail || !runTimer.done()) { return; }
 

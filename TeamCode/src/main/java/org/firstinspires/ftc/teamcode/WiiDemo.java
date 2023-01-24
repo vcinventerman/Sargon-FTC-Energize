@@ -11,6 +11,7 @@ import com.arcrobotics.ftclib.command.button.GamepadButton;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.karrmedia.ftchotpatch.Supervised;
 import com.karrmedia.ftchotpatch.SupervisedOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -21,6 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 
 //@Supervised(name="WiiDemo", autonomous=false, linear=false)
+@Disabled
 public class WiiDemo extends SupervisedOpMode {
 
     RobotA robot;

@@ -7,7 +7,6 @@ import static org.firstinspires.ftc.teamcode.TeamConf.ROBOT_CLAW_OFFSET;
 import static org.firstinspires.ftc.teamcode.TeamConf.ROBOT_DRIVE_INST;
 import static org.firstinspires.ftc.teamcode.TeamConf.TILE_SIZE;
 
-import com.acmerobotics.roadrunner.drive.Drive;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
@@ -17,7 +16,6 @@ import com.acmerobotics.roadrunner.trajectory.constraints.MecanumVelocityConstra
 import com.acmerobotics.roadrunner.trajectory.constraints.MinVelocityConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.ProfileAccelerationConstraint;
 
-import org.firstinspires.ftc.teamcode.Auto;
 import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 

@@ -37,7 +37,7 @@ public class ClawAlignmentTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         Pose2d adjustedEnd = PathTools.addClawOffset(endPose);
 
-        Trajectory traj = getTrajBuilder(startPose).lineTo(endPose.vec()).build();
+        Trajectory traj = getTrajBuilder(startPose).lineTo(adjustedEnd.vec()).build();
 
         robot = getRobot(hardwareMap);
         robot.drive.setPoseEstimate(startPose);

@@ -42,7 +42,7 @@ public class TeamConf {
     public static double FIELD_BEARING_WEST = Math.PI;
 
     // Senior team robot
-    public static double ROBOTA_LENGTH = 18;
+    public static double ROBOTA_LENGTH = 15;
     public static double ROBOTA_WIDTH = 14;
     public static String ROBOTA_IMU_DEFAULT = "imu1"; // imu0 is in control hub, imu1 is in expansion hub
     public static Vector2d ROBOTA_CLAW_OFFSET = new Vector2d(8.5, 0.0);
@@ -76,7 +76,7 @@ public class TeamConf {
     public static double CONE_HEIGHT = 3.65 + 1.23;
 
     public static Pose2d CONE_STACK_POS_RED_LEFT = new Pose2d(-FIELD_WIDTH + CONE_DIAMETER / 2.0, -TILE_SIZE / 2.0, Math.PI);
-    public static Pose2d CONE_STACK_POS_RED_RIGHT = new Pose2d(FIELD_WIDTH + CONE_DIAMETER / 2.0, -TILE_SIZE / 2.0, 0);
+    public static Pose2d CONE_STACK_POS_RED_RIGHT = new Pose2d((TILE_SIZE * 3) - CONE_DIAMETER / 2.0, -TILE_SIZE / 2.0, 0);
     public static Pose2d CONE_STACK_POS_BLUE_LEFT = new Pose2d(FIELD_WIDTH + CONE_DIAMETER / 2.0, TILE_SIZE / 2.0, 0);
     public static Pose2d CONE_STACK_POS_BLUE_RIGHT = new Pose2d(-FIELD_WIDTH - CONE_DIAMETER / 2.0, TILE_SIZE / 2.0, Math.PI);
     public static List<Pose2d> CONE_STACK_POSITIONS = Arrays.asList(CONE_STACK_POS_RED_LEFT, CONE_STACK_POS_RED_RIGHT, CONE_STACK_POS_BLUE_LEFT, CONE_STACK_POS_BLUE_RIGHT);
@@ -286,20 +286,23 @@ public class TeamConf {
     static RobotA robotSingleton = null;
 
     public static RobotA getRobot(HardwareMap map) {
-        if (robotSingleton == null) {
+        /*if (robotSingleton == null) {
             robotSingleton = new RobotA(map);
         }
-        return robotSingleton;
+        return robotSingleton;*/
+        return new RobotA(map);
     }
 
     public static RobotA getRobot(HardwareMap map, Pose2d startingPose) {
+        return new RobotA(map);
+        /*
         if (robotSingleton == null) {
             robotSingleton = new RobotA(map, startingPose);
         }
         else {
             robotSingleton.drive.setPoseEstimate(startingPose);
         }
-        return robotSingleton;
+        return robotSingleton;*/
     }
 
     public static Executor executor = Executors.newFixedThreadPool(8);

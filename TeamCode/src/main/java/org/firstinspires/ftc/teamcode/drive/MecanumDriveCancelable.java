@@ -172,6 +172,8 @@ public class MecanumDriveCancelable extends MecanumDrive {
             setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID);
         }
 
+        //motors.get(0).setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(1.6548989898989899, 0.165489898989899, 0, 16.5489898989899));
+
         // TODO: reverse any motors using DcMotor.setDirection()
         rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
         leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -459,5 +461,11 @@ public class MecanumDriveCancelable extends MecanumDrive {
     public double getAccel()
     {
         return imu.getLinearAcceleration().xAccel + imu.getLinearAcceleration().yAccel + imu.getLinearAcceleration().zAccel;
+    }
+
+    public void setRawMode() {
+        for (DcMotorEx i : motors) {
+            i.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        }
     }
 }
