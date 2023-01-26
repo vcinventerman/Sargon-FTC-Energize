@@ -2,6 +2,9 @@ package org.firstinspires.ftc.teamcode;
 
 import static java.lang.Thread.yield;
 
+import android.annotation.SuppressLint;
+import android.os.Build;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.drive.Drive;
@@ -19,6 +22,7 @@ import org.jetbrains.annotations.Contract;
 import org.openftc.apriltag.AprilTagDetectorJNI;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -283,18 +287,28 @@ public class TeamConf {
 
     public static OpenCvCameraRotation ROBOT_CAMERA_ORIENTATION = OpenCvCameraRotation.UPRIGHT;
 
+    static public String ROBOTA_SERIAL = "5fdd41245958fd1f";
+    static public String ROBOTB_SERIAL = "d70d70756e460988";
+
     static RobotA robotSingleton = null;
 
-    public static RobotA getRobot(HardwareMap map) {
+    public static Robot getRobot(HardwareMap map) {
+
+        if (getSerialNumber().equals(ROBOTB_SERIAL)) {
+            return new RobotB(map);
+        }
+        else {
+            return new RobotA(map);
+        }
+
         /*if (robotSingleton == null) {
             robotSingleton = new RobotA(map);
         }
         return robotSingleton;*/
-        return new RobotA(map);
     }
 
-    public static RobotA getRobot(HardwareMap map, Pose2d startingPose) {
-        return new RobotA(map);
+    public static Robot getRobot(HardwareMap map, Pose2d startingPose) {
+        return getRobot(map);
         /*
         if (robotSingleton == null) {
             robotSingleton = new RobotA(map, startingPose);
@@ -306,4 +320,37 @@ public class TeamConf {
     }
 
     public static Executor executor = Executors.newFixedThreadPool(8);
+
+    @SuppressLint("HardwareIds")
+    public static String getSerialNumber() {
+        String serialNumber;
+
+        try {
+            @SuppressLint("PrivateApi") Class<?> c = Class.forName("android.os.SystemProperties");
+            Method get = c.getMethod("get", String.class);
+
+            serialNumber = (String) get.invoke(c, "gsm.sn1");
+            assert serialNumber != null;
+            if (serialNumber.equals(""))
+                serialNumber = (String) get.invoke(c, "ril.serialnumber");
+            assert serialNumber != null;
+            if (serialNumber.equals(""))
+                serialNumber = (String) get.invoke(c, "ro.serialno");
+            assert serialNumber != null;
+            if (serialNumber.equals(""))
+                serialNumber = (String) get.invoke(c, "sys.serialnumber");
+            assert serialNumber != null;
+            if (serialNumber.equals(""))
+                serialNumber = Build.SERIAL;
+
+            // If none of the methods above worked
+            if (serialNumber.equals(""))
+                serialNumber = null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            serialNumber = null;
+        }
+
+        return serialNumber;
+    }
 }

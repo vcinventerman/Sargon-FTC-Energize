@@ -11,6 +11,7 @@ import static org.firstinspires.ftc.teamcode.util.PathTools.getTrajBuilder;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
+import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -22,7 +23,7 @@ public class ClawAlignmentTest extends LinearOpMode {
     public static Pose2d startPose = START_POS_RED_RIGHT;
     public static Pose2d endPose = new Pose2d(TILE_SIZE, 0,  FIELD_BEARING_NORTH);
 
-    RobotA robot;
+    Robot robot;
 
 
     /**
@@ -40,22 +41,18 @@ public class ClawAlignmentTest extends LinearOpMode {
         Trajectory traj = getTrajBuilder(startPose).lineTo(adjustedEnd.vec()).build();
 
         robot = getRobot(hardwareMap);
-        robot.drive.setPoseEstimate(startPose);
+        robot.setPose(startPose);
 
         waitForStart();
 
-        robot.drive.followTrajectoryAsync(traj);
+        robot.followTrajectory(traj);
 
-        while (robot.drive.isBusy()) {
-            robot.update();
-        }
+        robot.waitToComplete();
 
         while (opModeIsActive()) {
-            robot.drive.setWeightedDrivePower(new Pose2d(
-                    gamepad1.left_stick_x,
-                    gamepad1.left_stick_y,
-                    -gamepad1.right_stick_x
-            ));
+            robot.driveFieldCentric(gamepad1.left_stick_x, gamepad1.left_stick_y,
+                    (gamepad1.right_trigger) -
+                            (gamepad1.left_trigger), 0.0);
         }
     }
 }

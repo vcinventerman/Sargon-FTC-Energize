@@ -1,7 +1,12 @@
 package org.firstinspires.ftc.teamcode;
 
+import static org.firstinspires.ftc.teamcode.TeamConf.getRobot;
+
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.kinematics.MecanumKinematics;
 import com.arcrobotics.ftclib.command.button.GamepadButton;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.arcrobotics.ftclib.gamepad.ToggleButtonReader;
@@ -18,7 +23,8 @@ import java.util.concurrent.TimeUnit;
 @Config
 @Supervised(name="TeleOp", group="!CompTeleOp", autonomous=false, linear=false)
 public class TeleOp extends SupervisedOpMode {
-    RobotA robot;
+    Robot robot;
+
     GamepadButton liftButton;
     GamepadButton liftCloseButton;
     GamepadButton turnAroundButton;
@@ -28,7 +34,9 @@ public class TeleOp extends SupervisedOpMode {
 
     // Code that runs when the INIT button is pressed (mandatory)
     public void init() {
-        robot = new RobotA(hardwareMap); /*TeamConf.getRobot(hardwareMap);*/
+        telemetry = new MultipleTelemetry(super.telemetry, FtcDashboard.getInstance().getTelemetry());
+
+        robot = getRobot(hardwareMap);
 
         robot.slide.claw.turnToAngle(robot.slide.claw.getAngle() + 10);
         robot.slide.claw.turnToAngle(robot.slide.claw.getAngle() - 10);
@@ -69,21 +77,14 @@ public class TeleOp extends SupervisedOpMode {
         fieldCentric.readValue();
 
         //robot.drive.cancelFollowing();
-        robot.drive.updatePoseEstimate();
+        robot.updatePose();
 
         double mult = fineControls.getState() ? DRIVE_SLOW_MULTIPLIER : 1.0;
         double turnMult = fineControls.getState() ? DRIVE_SLOW_TURN_MULTIPLIER : 1.0;
-        if (!fieldCentric.getState()) {
-            robot.manualDrive.driveRobotCentric(gamepad1.getLeftX() * mult, gamepad1.getLeftY() * mult,
-                    (triggerValue(gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) -
-                            triggerValue(gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER))) * turnMult);
-        }
-        else {
-            robot.manualDrive.driveFieldCentric(gamepad1.getLeftX() * mult, gamepad1.getLeftY() * mult,
-                    (triggerValue(gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) -
-                    triggerValue(gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER))) * mult,
-                            robot.drive.getExternalHeading() * (180.0 / Math.PI));
-        }
+        robot.driveFieldCentric(gamepad1.getLeftX() * mult, gamepad1.getLeftY() * mult,
+                (triggerValue(gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) -
+                        triggerValue(gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER))) * turnMult,
+                fieldCentric.getState() ? 0.0 : robot.getHeading() * (180.0 / Math.PI));
 
 
         /*}
@@ -112,7 +113,7 @@ public class TeleOp extends SupervisedOpMode {
 
         robot.slide.winch.set(-gamepad1.getRightY());
 
-        /*if (gamepad1.isDown(GamepadKeys.Button.DPAD_LEFT)) {
+        if (gamepad1.isDown(GamepadKeys.Button.DPAD_LEFT)) {
             if (gamepad1.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
                 robot.slide.disableAutomaticWinch();
             }
@@ -121,24 +122,24 @@ public class TeleOp extends SupervisedOpMode {
         }
         if (gamepad1.wasJustReleased(GamepadKeys.Button.DPAD_LEFT)) {
             robot.slide.enableAutomaticWinch();
-        }*/
+        }
 
         if (gamepad1.wasJustPressed(GamepadKeys.Button.A)) {
             robot.slide.goToNextSlidePos();
         }
 
         if (gamepad1.wasJustPressed(GamepadKeys.Button.B)) {
-            robot.slide.setCurrentWinchTarget(robot.slide.SLIDE_POS_BOTTOM);
+            robot.slide.setCurrentWinchTarget(robot.slide.p.SLIDE_POS_BOTTOM);
         }
 
         if (clawButton.stateJustChanged()) {
             if (clawButton.getState()) {
                 //robot.slide.claw.turnToAngle(robot.slide.CLAW_POS_CLOSED);
-                robot.slide.setClawTarget(robot.slide.CLAW_POS_CLOSED);
+                robot.slide.setClawTarget(robot.slide.p.CLAW_POS_CLOSED);
             }
             else {
                 //robot.slide.claw.turnToAngle(robot.slide.CLAW_POS_OPEN);
-                robot.slide.setClawTarget(robot.slide.CLAW_POS_OPEN);
+                robot.slide.setClawTarget(robot.slide.p.CLAW_POS_OPEN);
             }
         }
 
@@ -146,6 +147,11 @@ public class TeleOp extends SupervisedOpMode {
         telemetry.addData("Claw Angle", robot.slide.claw.getAngle());
         telemetry.addData("Winch Level", robot.slide.winch.getCurrentPosition());
         telemetry.addData("Winch Target", robot.slide.currentWinchTarget);
+
+        Pose2d poseEstimate = robot.getPoseEstimate();
+        telemetry.addData("x", poseEstimate.getX());
+        telemetry.addData("y", poseEstimate.getY());
+        telemetry.addData("heading", poseEstimate.getHeading());
 
 
 

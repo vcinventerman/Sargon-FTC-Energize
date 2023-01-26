@@ -12,7 +12,9 @@ import static org.firstinspires.ftc.teamcode.util.PathTools.addClawOffset;
 import static org.firstinspires.ftc.teamcode.util.PathTools.addClawOffsetVec;
 import static org.firstinspires.ftc.teamcode.util.PathTools.getTrajBuilder;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
@@ -26,10 +28,12 @@ import org.firstinspires.ftc.teamcode.util.PathTools;
 public class RightAuto extends LinearOpMode {
     public static Pose2d startPose = START_POS_RED_RIGHT;
 
-    RobotA robot;
+    Robot robot;
 
     @Override
     public void runOpMode() throws InterruptedException {
+        telemetry = new MultipleTelemetry(super.telemetry, FtcDashboard.getInstance().getTelemetry());
+
         Trajectory[] trajectories = new Trajectory[9];
 
         trajectories[0] = getTrajBuilder(START_POS_RED_RIGHT) // Forward junction
@@ -82,7 +86,7 @@ public class RightAuto extends LinearOpMode {
                 .build();
 
         robot = getRobot(hardwareMap);
-        robot.drive.setPoseEstimate(startPose);
+        robot.setPose(startPose);
 
         waitForStart();
 
@@ -100,11 +104,11 @@ public class RightAuto extends LinearOpMode {
     }
 
     public void runTrajectory(Trajectory trajectory) {
-        robot.drive.followTrajectoryAsync(trajectory);
-        while (robot.drive.isBusy() && opModeIsActive()) {
+        robot.followTrajectory(trajectory);
+        while (robot.isBusy() && opModeIsActive()) {
             robot.update();
 
-            Pose2d poseEstimate = robot.drive.getPoseEstimate();
+            Pose2d poseEstimate = robot.getPoseEstimate();
             telemetry.addData("x", poseEstimate.getX());
             telemetry.addData("y", poseEstimate.getY());
             telemetry.addData("heading", poseEstimate.getHeading());

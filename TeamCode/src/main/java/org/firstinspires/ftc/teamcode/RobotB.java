@@ -5,10 +5,14 @@ import static org.firstinspires.ftc.teamcode.drive.MecanumDriveCancelable.getAcc
 import static org.firstinspires.ftc.teamcode.drive.MecanumDriveCancelable.getVelocityConstraint;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.roadrunner.drive.Drive;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.arcrobotics.ftclib.drivebase.HDrive;
+import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
+import com.arcrobotics.ftclib.hardware.motors.MotorGroup;
 import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.hardware.motors.RevRoboticsCoreHexMotor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -17,18 +21,15 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.drive.MecanumDriveCancelable;
 import org.firstinspires.ftc.teamcode.drive.SampleTankDrive;
 
 @Config
-public class RobotB {
+public class RobotB extends Robot {
     public org.firstinspires.ftc.teamcode.drive.HDrive drive;
-    public LinearSlideA slide;
 
     public HDrive manualDrive;
-
-    public static String NAME_CLAW = "claw";
-    public static String NAME_SLIDE = "lift";
 
     public static String NAME_LEFT = "BackLeft";
     public static String NAME_RIGHT = "BackRight";
@@ -37,8 +38,9 @@ public class RobotB {
     public static int CENTER_CPR = 288;
     public static int CENTER_RPM = 137;
 
-    public static String WINCH_NAME = "Lift 1";
-    public static String CLAW_NAME = "Servo";
+    public static String NAME_LIFT = "Lift 1";
+    public static String NAME_LIFT_AUX = "lift2";
+    public static String NAME_CLAW = "Servo";
 
 
 
@@ -47,7 +49,15 @@ public class RobotB {
         //PhotonCore.experimental.setSinglethreadedOptimized(false);
 
         drive = new org.firstinspires.ftc.teamcode.drive.HDrive(hardwareMap);
-        slide = new LinearSlideA(hardwareMap, WINCH_NAME, CLAW_NAME);
+
+        MotorEx leader = new MotorEx(hardwareMap, NAME_LIFT);
+        leader.setInverted(false);
+        MotorEx follower = new MotorEx(hardwareMap, NAME_LIFT_AUX);
+        follower.setInverted(true);
+        Motor liftMotor = new MotorGroup(leader, follower);
+
+        liftMotor.encoder = liftMotor.new Encoder(hardwareMap.get(DcMotorEx.class, NAME_LIFT)::getCurrentPosition);
+        slide = new LinearSlideA(hardwareMap, liftMotor, new SimpleServo(hardwareMap, NAME_CLAW, 0, 360, AngleUnit.DEGREES));
 
         MotorEx leftMotor = new MotorEx(hardwareMap, NAME_LEFT);
         leftMotor.setRunMode(MotorEx.RunMode.RawPower);
@@ -83,5 +93,45 @@ public class RobotB {
     {
         slide.update();
         drive.update();
+    }
+
+    @Override
+    public void setPose(Pose2d newPose) {
+        drive.setPoseEstimate(newPose);
+    }
+
+    @Override
+    public void updatePose() {
+        drive.updatePoseEstimate();
+    }
+
+    @Override
+    Drive getDrive() {
+        return drive;
+    }
+
+    @Override
+    public void driveFieldCentric(double strafeSpeed, double forwardSpeed, double turnSpeed, double gyroAngle) {
+        manualDrive.driveFieldCentric(strafeSpeed, forwardSpeed, turnSpeed, gyroAngle);
+    }
+
+    @Override
+    public double getHeading() {
+        return drive.getExternalHeading();
+    }
+
+    @Override
+    public Pose2d getPoseEstimate() {
+        return drive.getPoseEstimate();
+    }
+
+    @Override
+    public void followTrajectory(Trajectory traj) {
+        drive.followTrajectoryAsync(traj);
+    }
+
+    @Override
+    public boolean isBusy() {
+        return drive.isBusy();
     }
 }
