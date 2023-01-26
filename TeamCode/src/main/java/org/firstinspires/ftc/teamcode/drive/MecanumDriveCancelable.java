@@ -2,9 +2,7 @@ package org.firstinspires.ftc.teamcode.drive;
 
 import static org.firstinspires.ftc.teamcode.drive.DriveConstants.MAX_ACCEL;
 import static org.firstinspires.ftc.teamcode.drive.DriveConstants.MAX_ANG_ACCEL;
-import static org.firstinspires.ftc.teamcode.drive.DriveConstants.MAX_ANG_ACCEL_FAST;
 import static org.firstinspires.ftc.teamcode.drive.DriveConstants.MAX_ANG_VEL;
-import static org.firstinspires.ftc.teamcode.drive.DriveConstants.MAX_ANG_VEL_FAST;
 import static org.firstinspires.ftc.teamcode.drive.DriveConstants.MAX_VEL;
 import static org.firstinspires.ftc.teamcode.drive.DriveConstants.MOTOR_VELO_PID;
 import static org.firstinspires.ftc.teamcode.drive.DriveConstants.RUN_USING_ENCODER;
@@ -201,7 +199,7 @@ public class MecanumDriveCancelable extends MecanumDrive {
 
         lastPoseOnTurn = getPoseEstimate();
 
-        if (fast) {
+        /*if (fast) {
             turnProfile = MotionProfileGenerator.generateSimpleMotionProfile(
                     new MotionState(heading, 0, 0, 0),
                     new MotionState(heading + angle, 0, 0, 0),
@@ -209,14 +207,14 @@ public class MecanumDriveCancelable extends MecanumDrive {
                     MAX_ANG_ACCEL_FAST
             );
         }
-        else {
+        else {*/
             turnProfile = MotionProfileGenerator.generateSimpleMotionProfile(
                     new MotionState(heading, 0, 0, 0),
                     new MotionState(heading + angle, 0, 0, 0),
                     MAX_ANG_VEL,
                     MAX_ANG_ACCEL
             );
-        }
+        //}
 
         turnStart = clock.seconds();
         mode = Mode.TURN;

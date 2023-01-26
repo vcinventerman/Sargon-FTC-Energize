@@ -14,8 +14,6 @@ import org.firstinspires.ftc.robotcore.internal.system.Misc;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.drive.StandardTrackingWheelLocalizer;
 
-import java.lang.reflect.Field;
-
 /**
  * This routine determines the effective forward offset for the lateral tracking wheel.
  * The procedure executes a point turn at a given angle for a certain number of trials,
