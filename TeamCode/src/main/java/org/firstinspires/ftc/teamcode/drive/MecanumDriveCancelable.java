@@ -65,14 +65,19 @@ import java.util.List;
  */
 @Config
 public class MecanumDriveCancelable extends MecanumDrive {
-    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(0, 0, 0);
-    public static PIDCoefficients HEADING_PID = new PIDCoefficients(0, 0, 0);
+    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(2, 0, 0.1);
+    public static PIDCoefficients HEADING_PID = new PIDCoefficients(2, 0, 0.1);
 
-    public static double LATERAL_MULTIPLIER = 1;
+    public static double LATERAL_MULTIPLIER = 1.28;
 
     public static double VX_WEIGHT = 1;
     public static double VY_WEIGHT = 1;
     public static double OMEGA_WEIGHT = 1;
+
+    public static double FOLLOWER_TIMEOUT = 1;
+    public static double ADMISSIBLE_ERROR_X = 1;
+    public static double ADMISSIBLE_ERROR_Y = 1;
+    public static double ADMISSIBLE_ERROR_HEADING = Math.toRadians(10);
 
     private TrajectorySequenceRunner trajectorySequenceRunner;
 
@@ -124,7 +129,7 @@ public class MecanumDriveCancelable extends MecanumDrive {
         VEL_CONSTRAINT = getVelocityConstraint(MAX_VEL, MAX_ANG_VEL, TRACK_WIDTH);
         ACCEL_CONSTRAINT = getAccelerationConstraint(MAX_ACCEL);
         follower = new HolonomicPIDVAFollower(TRANSLATIONAL_PID, TRANSLATIONAL_PID, HEADING_PID,
-                new Pose2d(0.5, 0.5, Math.toRadians(5.0)), 0.5);
+                new Pose2d(ADMISSIBLE_ERROR_X, ADMISSIBLE_ERROR_Y, ADMISSIBLE_ERROR_HEADING), FOLLOWER_TIMEOUT);
 
         poseHistory = new LinkedList<>();
 

@@ -41,8 +41,8 @@ public class TeamConf {
     public static double FIELD_BEARING_WEST = Math.PI;
 
     // Senior team robot
-    public static double ROBOTA_LENGTH = 15;
-    public static double ROBOTA_WIDTH = 14;
+    public static double ROBOTA_LENGTH = 14.5;
+    public static double ROBOTA_WIDTH = 13;
     public static String ROBOTA_IMU_DEFAULT = "imu1"; // imu0 is in control hub, imu1 is in expansion hub
     public static Vector2d ROBOTA_CLAW_OFFSET = new Vector2d(8.5, 0.0);
 

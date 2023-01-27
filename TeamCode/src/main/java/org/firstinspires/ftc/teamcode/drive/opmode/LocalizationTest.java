@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.drive.opmode;
 
+import static org.firstinspires.ftc.teamcode.TeamConf.START_POS_RED_RIGHT;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
@@ -24,6 +26,8 @@ public class LocalizationTest extends LinearOpMode {
         telemetry = new MultipleTelemetry(super.telemetry, FtcDashboard.getInstance().getTelemetry());
 
         MecanumDriveCancelable drive = new MecanumDriveCancelable(hardwareMap);
+
+        drive.setPoseEstimate(START_POS_RED_RIGHT);
 
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
