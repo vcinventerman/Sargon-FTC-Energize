@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import static org.firstinspires.ftc.teamcode.TeamConf.FIELD_BEARING_NORTH;
 import static org.firstinspires.ftc.teamcode.TeamConf.getRobot;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -31,6 +32,7 @@ public class TeleOp extends SupervisedOpMode {
     ToggleButtonReader clawButton;
     ToggleButtonReader fineControls;
     ToggleButtonReader fieldCentric;
+    GamepadButton resetHeadingButton;
 
     // Code that runs when the INIT button is pressed (mandatory)
     public void init() {
@@ -50,6 +52,14 @@ public class TeleOp extends SupervisedOpMode {
         clawButton = new ToggleButtonReader(gamepad1, GamepadKeys.Button.X);
         fineControls = new ToggleButtonReader(gamepad1, GamepadKeys.Button.Y);
         fieldCentric = new ToggleButtonReader(gamepad1, GamepadKeys.Button.RIGHT_BUMPER);
+
+        resetHeadingButton = new GamepadButton(gamepad2, GamepadKeys.Button.A);
+        resetHeadingButton.whenPressed(new Runnable() {
+            @Override
+            public void run() {
+                robot.getDrive().setPoseEstimate(new Pose2d(robot.getDrive().getPoseEstimate().vec(), FIELD_BEARING_NORTH));
+            }
+        });
     }
 
     public void start() {
@@ -79,11 +89,11 @@ public class TeleOp extends SupervisedOpMode {
         //robot.drive.cancelFollowing();
         robot.updatePose();
 
-        double mult = fineControls.getState() ? DRIVE_SLOW_MULTIPLIER : 1.0;
+        double driveMult = fineControls.getState() ? DRIVE_SLOW_MULTIPLIER : 1.0;
+        double strafeMult = fineControls.getState() ? DRIVE_SLOW_MULTIPLIER : 1.0;
         double turnMult = fineControls.getState() ? DRIVE_SLOW_TURN_MULTIPLIER : 1.0;
-        robot.driveFieldCentric(gamepad1.getLeftX() * mult, gamepad1.getLeftY() * mult,
-                (triggerValue(gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) -
-                        triggerValue(gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER))) * turnMult,
+        robot.driveFieldCentric(gamepad1.getLeftX() * driveMult, gamepad1.getLeftY() * strafeMult,
+                gamepad1.getRightX() * turnMult,
                 fieldCentric.getState() ? 0.0 : robot.getHeading() * (180.0 / Math.PI));
 
 
@@ -135,11 +145,11 @@ public class TeleOp extends SupervisedOpMode {
         if (clawButton.stateJustChanged()) {
             if (clawButton.getState()) {
                 //robot.slide.claw.turnToAngle(robot.slide.CLAW_POS_CLOSED);
-                robot.slide.setClawTarget(robot.slide.p.CLAW_POS_CLOSED);
+                robot.slide.setClawTarget(robot.slide.CLAW_POS_CLOSED);
             }
             else {
                 //robot.slide.claw.turnToAngle(robot.slide.CLAW_POS_OPEN);
-                robot.slide.setClawTarget(robot.slide.p.CLAW_POS_OPEN);
+                robot.slide.setClawTarget(robot.slide.CLAW_POS_OPEN);
             }
         }
 

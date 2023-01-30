@@ -32,6 +32,10 @@ public class LinearSlideA {
     public boolean clawActive = false;
     public boolean clawManualMode = false;
 
+    public static double CLAW_POS_FIT = 210; // To fit inside the size box
+    public static double CLAW_POS_CLOSED = 95;
+    public static double CLAW_POS_OPEN = 180;
+
     public static class SlideConstants {
         public double WINCH_TOLERANCE = 40.0;
         public Integer SLIDE_POS_BOTTOM = 0;
@@ -43,12 +47,12 @@ public class LinearSlideA {
 
         public List<Integer> CONE_STACK_HEIGHTS = Arrays.asList(130, 110, 90, 70, 50);
 
-        public double CLAW_POS_FIT = 210; // To fit inside the size box
+        /*public double CLAW_POS_FIT = 210; // To fit inside the size box
         public double CLAW_POS_CLOSED = 110;
-        public double CLAW_POS_OPEN = 180;
+        public double CLAW_POS_OPEN = 180;*/
     }
 
-    SlideConstants p; // Slide specific parameters
+    public static SlideConstants p; // Slide specific parameters
 
 
     public LinearSlideA(HardwareMap hardwareMap)
@@ -56,7 +60,7 @@ public class LinearSlideA {
         p = new SlideConstants();
 
         currentWinchTarget = p.SLIDE_POS_BOTTOM;
-        clawTarget = p.CLAW_POS_OPEN;
+        clawTarget = CLAW_POS_OPEN;
 
         winch = new MotorEx(hardwareMap, "winch");
         winch.setRunMode(Motor.RunMode.PositionControl);
@@ -75,7 +79,7 @@ public class LinearSlideA {
         p = new SlideConstants();
 
         currentWinchTarget = p.SLIDE_POS_BOTTOM;
-        clawTarget = p.CLAW_POS_OPEN;
+        clawTarget = CLAW_POS_OPEN;
 
         /*winch = new MotorEx(hardwareMap, "winch");
         winch.setRunMode(Motor.RunMode.PositionControl);
@@ -104,7 +108,7 @@ public class LinearSlideA {
         p = new SlideConstants();
 
         currentWinchTarget = p.SLIDE_POS_BOTTOM;
-        clawTarget = p.CLAW_POS_OPEN;
+        clawTarget = CLAW_POS_OPEN;
 
         winch = new MotorEx(hardwareMap, winchName);
         winch.setRunMode(Motor.RunMode.PositionControl);

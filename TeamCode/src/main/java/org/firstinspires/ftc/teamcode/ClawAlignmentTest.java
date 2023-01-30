@@ -12,13 +12,14 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.util.PathTools;
 
 @Config
-@TeleOp
+@Autonomous
 public class ClawAlignmentTest extends LinearOpMode {
     public static Pose2d startPose = START_POS_RED_RIGHT;
     public static Pose2d endPose = new Pose2d(TILE_SIZE, 0,  FIELD_BEARING_NORTH);

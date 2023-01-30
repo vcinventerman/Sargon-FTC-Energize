@@ -17,8 +17,8 @@ import com.sun.tools.javac.util.List;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceBuilder;
 
 //todo: MUST construct trajectories in another thread or keep winch ticking in any way
-@Supervised(name="Old?Auto", group="!CompAuto", autonomous=true, linear=true, variations={"RedLeft", "RedRight", "BlueLeft", "BlueRight"}, next="TeleOp")
-public class OldAuto extends SupervisedOpMode {
+@Supervised(name="Simple?Auto", group="!CompAuto", autonomous=true, linear=true, variations={"RedLeft", "RedRight", "BlueLeft", "BlueRight"}, next="TeleOp")
+public class SimpleAuto extends SupervisedOpMode {
     RobotA robot;
     AprilTagDetector detector;
 
@@ -57,7 +57,7 @@ public class OldAuto extends SupervisedOpMode {
         }
         telemetry.addData("!", "Found tag " + Integer.toString(detector.tagSeen));
         telemetry.update();
-        robot.slide.setClawState(robot.slide.p.CLAW_POS_OPEN);
+        robot.slide.setClawState(robot.slide.CLAW_POS_OPEN);
         runTrajectory(trajectories[0]);
         runTrajectory(trajectories[1]);
         runTrajectory(trajectories[4]);
