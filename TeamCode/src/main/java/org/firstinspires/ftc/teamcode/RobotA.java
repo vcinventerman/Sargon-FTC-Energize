@@ -18,11 +18,33 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.drive.MecanumDriveCancelable;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 @Config
 public class RobotA extends Robot {
     public MecanumDriveCancelable drive;
 
     public MecanumDrive manualDrive;
+
+
+    public static Double WINCH_TOLERANCE = 20.0;
+    public static Double WINCH_TICKS_PER_INCH = (1390.0 / 24.0);
+    public static Integer SLIDE_POS_BOTTOM = 0;
+    public static Integer SLIDE_POS_GROUND = SLIDE_POS_BOTTOM + 100;
+    public static Integer SLIDE_POS_LOW = SLIDE_POS_BOTTOM + 1100;
+    public static Integer SLIDE_POS_MED = SLIDE_POS_BOTTOM + 1550;
+    public static Integer SLIDE_POS_HIGH = SLIDE_POS_BOTTOM + 1950;
+    public static List<Integer> SLIDE_POSITIONS = Arrays.asList(SLIDE_POS_HIGH, SLIDE_POS_MED, SLIDE_POS_LOW, 0);
+
+    public static List<Integer> CONE_STACK_HEIGHTS = Stream.of(130, 110, 90, 70, 50).collect(Collectors.toList());
+
+    public static Double CLAW_POS_FIT = 210.0; // To fit inside the size box
+    public static Double CLAW_POS_CLOSED = 160.0;
+    public static Double CLAW_POS_OPEN = 250.0;
+
 
     public RobotA(HardwareMap hardwareMap) {
         PhotonCore.enable();
@@ -31,7 +53,23 @@ public class RobotA extends Robot {
         drive = new MecanumDriveCancelable(hardwareMap);
         drive.setPoseEstimate(START_POSE_DEFAULT);
 
-        slide = new LinearSlideA(hardwareMap);
+        LinearSlideA.SlideConstants constants = new LinearSlideA.SlideConstants();
+        constants.WINCH_TOLERANCE = WINCH_TOLERANCE;
+        constants.WINCH_TICKS_PER_INCH = WINCH_TICKS_PER_INCH;
+        constants.SLIDE_POS_BOTTOM = SLIDE_POS_BOTTOM;
+        constants.SLIDE_POS_GROUND = SLIDE_POS_GROUND;
+        constants.SLIDE_POS_LOW = SLIDE_POS_LOW;
+        constants.SLIDE_POS_MED = SLIDE_POS_MED;
+        constants.SLIDE_POS_HIGH = SLIDE_POS_HIGH;
+        constants.SLIDE_POSITIONS = SLIDE_POSITIONS;
+
+        constants.CONE_STACK_HEIGHTS = CONE_STACK_HEIGHTS;
+
+        constants.CLAW_POS_FIT = CLAW_POS_FIT; // To fit inside the size box
+        constants.CLAW_POS_CLOSED = CLAW_POS_CLOSED;
+        constants.CLAW_POS_OPEN = CLAW_POS_OPEN;
+
+        slide = new LinearSlideA(hardwareMap, constants);
 
         MotorEx rightRear = new MotorEx(hardwareMap,  "driveBackRight");
         MotorEx rightFront = new MotorEx(hardwareMap,  "driveFrontRight");

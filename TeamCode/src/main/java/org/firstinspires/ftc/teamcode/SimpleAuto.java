@@ -57,7 +57,7 @@ public class SimpleAuto extends SupervisedOpMode {
         }
         telemetry.addData("!", "Found tag " + Integer.toString(detector.tagSeen));
         telemetry.update();
-        robot.slide.setClawState(robot.slide.CLAW_POS_OPEN);
+        robot.slide.setClawTarget(robot.slide.p.CLAW_POS_OPEN);
         runTrajectory(trajectories[0]);
         runTrajectory(trajectories[1]);
         runTrajectory(trajectories[4]);

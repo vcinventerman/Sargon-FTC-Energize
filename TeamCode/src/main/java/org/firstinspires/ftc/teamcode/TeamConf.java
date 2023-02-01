@@ -73,6 +73,7 @@ public class TeamConf {
     // Measurements from https://cdn.andymark.com/media/W1siZiIsIjIwMjIvMDkvMDYvMTYvMzYvNTUvODgxZjAzNDctNThhYS00MzNhLTkwMTEtYTFiYWIwMTIwNzg5L2FtLTQ4MDFfYmx1ZSBhbS00ODAxX3JlZCBDb25lIFJFVjIucGRmIl1d/am-4801_blue%20am-4801_red%20Cone%20REV2.pdf?sha=593981254c44ff81
     public static double CONE_DIAMETER = 4.0;
     public static double CONE_HEIGHT = 3.65 + 1.23;
+    public static double CONE_STACK_OFFSET = 1.25;
 
     public static Pose2d CONE_STACK_POS_RED_LEFT = new Pose2d(-FIELD_WIDTH + CONE_DIAMETER / 2.0, -TILE_SIZE / 2.0, Math.PI);
     public static Pose2d CONE_STACK_POS_RED_RIGHT = new Pose2d((TILE_SIZE * 3) - CONE_DIAMETER / 2.0, -TILE_SIZE / 2.0, 0);

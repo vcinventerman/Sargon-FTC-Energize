@@ -14,6 +14,7 @@ import com.arcrobotics.ftclib.gamepad.ToggleButtonReader;
 import com.karrmedia.ftchotpatch.SupervisedOpMode;
 import com.karrmedia.ftchotpatch.Supervised;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.wpi.first.math.filter.LinearFilter;
 
 import java.util.ArrayList;
@@ -118,10 +119,9 @@ public class TeleOp extends SupervisedOpMode {
 
         if (gamepad1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
             robot.slide.winch.resetEncoder();
-            robot.slide.currentWinchTarget = 0;
+            //robot.slide.currentWinchTarget = 0;
+            //robot.slide.winchActive = false;
         }
-
-        robot.slide.winch.set(-gamepad1.getRightY());
 
         if (gamepad1.isDown(GamepadKeys.Button.DPAD_LEFT)) {
             if (gamepad1.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
@@ -142,21 +142,21 @@ public class TeleOp extends SupervisedOpMode {
             robot.slide.setCurrentWinchTarget(robot.slide.p.SLIDE_POS_BOTTOM);
         }
 
-        if (clawButton.stateJustChanged()) {
-            if (clawButton.getState()) {
-                //robot.slide.claw.turnToAngle(robot.slide.CLAW_POS_CLOSED);
-                robot.slide.setClawTarget(robot.slide.CLAW_POS_CLOSED);
-            }
-            else {
-                //robot.slide.claw.turnToAngle(robot.slide.CLAW_POS_OPEN);
-                robot.slide.setClawTarget(robot.slide.CLAW_POS_OPEN);
-            }
+        if (clawButton.wasJustPressed()) {
+            robot.slide.setClawTarget(
+                    robot.slide.claw.getAngle(AngleUnit.DEGREES) == robot.slide.p.CLAW_POS_CLOSED ?
+                            robot.slide.p.CLAW_POS_OPEN : robot.slide.p.CLAW_POS_CLOSED);
+        }
+
+        if (gamepad1.wasJustPressed(GamepadKeys.Button.START)) {
+            robot.slide.goToNextConeStackHeight();
         }
 
         telemetry.addData("Claw Position", robot.slide.claw.getPosition());
         telemetry.addData("Claw Angle", robot.slide.claw.getAngle());
         telemetry.addData("Winch Level", robot.slide.winch.getCurrentPosition());
         telemetry.addData("Winch Target", robot.slide.currentWinchTarget);
+        telemetry.addData("winchPower", robot.slide.winch.get());
 
         Pose2d poseEstimate = robot.getPoseEstimate();
         telemetry.addData("x", poseEstimate.getX());
