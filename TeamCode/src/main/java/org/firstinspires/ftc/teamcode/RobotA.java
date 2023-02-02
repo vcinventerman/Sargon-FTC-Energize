@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import static com.outoftheboxrobotics.photoncore.PhotonCore.CONTROL_HUB;
+import static com.outoftheboxrobotics.photoncore.PhotonCore.EXPANSION_HUB;
 import static org.firstinspires.ftc.teamcode.TeamConf.START_POSE_DEFAULT;
 import static org.firstinspires.ftc.teamcode.drive.DriveConstants.TRACK_WIDTH;
 import static org.firstinspires.ftc.teamcode.drive.MecanumDriveCancelable.getAccelerationConstraint;
@@ -14,6 +16,7 @@ import com.arcrobotics.ftclib.drivebase.RobotDrive;
 import com.arcrobotics.ftclib.geometry.Vector2d;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.outoftheboxrobotics.photoncore.PhotonCore;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.drive.MecanumDriveCancelable;
@@ -30,7 +33,7 @@ public class RobotA extends Robot {
     public MecanumDrive manualDrive;
 
 
-    public static Double WINCH_TOLERANCE = 20.0;
+    public static Double WINCH_TOLERANCE = 30.0;
     public static Double WINCH_TICKS_PER_INCH = (1390.0 / 24.0);
     public static Integer SLIDE_POS_BOTTOM = 0;
     public static Integer SLIDE_POS_GROUND = SLIDE_POS_BOTTOM + 100;
@@ -48,7 +51,13 @@ public class RobotA extends Robot {
 
     public RobotA(HardwareMap hardwareMap) {
         PhotonCore.enable();
-        //PhotonCore.experimental.setSinglethreadedOptimized(false);
+
+        if(CONTROL_HUB.getBulkCachingMode() == LynxModule.BulkCachingMode.OFF){
+            CONTROL_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        }
+        if(EXPANSION_HUB != null && EXPANSION_HUB.getBulkCachingMode() == LynxModule.BulkCachingMode.OFF){
+            EXPANSION_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        }
 
         drive = new MecanumDriveCancelable(hardwareMap);
         drive.setPoseEstimate(START_POSE_DEFAULT);
@@ -95,6 +104,9 @@ public class RobotA extends Robot {
 
     public void update()
     {
+        CONTROL_HUB.clearBulkCache();
+        EXPANSION_HUB.clearBulkCache();
+
         slide.update();
         drive.update();
     }

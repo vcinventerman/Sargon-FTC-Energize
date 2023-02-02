@@ -13,6 +13,7 @@ import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.arcrobotics.ftclib.util.InterpLUT;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import com.acmerobotics.dashboard.config.Config;
@@ -26,7 +27,7 @@ import java.util.List;
 
 @Config
 public class LinearSlideA {
-    public Motor winch;
+    public WinchMotor winch;
     public int currentWinchTarget;
     public boolean winchActive = false;
     public boolean winchManualMode = false;
@@ -65,7 +66,7 @@ public class LinearSlideA {
 
         currentWinchTarget = p.SLIDE_POS_BOTTOM;
 
-        winch = new MotorEx(hardwareMap, "winch");
+        winch = new WinchMotor(hardwareMap, "winch");
         winch.setRunMode(Motor.RunMode.PositionControl);
         //winch.setPositionCoefficient(p.WINCH_COEFFICIENT);
         winch.setPositionTolerance(p.WINCH_TOLERANCE);
@@ -94,7 +95,7 @@ public class LinearSlideA {
         clawManualMode = false;
         clawActive = false;*/
 
-        this.winch = liftMotor;
+        //this.winch = liftMotor;
         //winch.setRunMode(Motor.RunMode.PositionControl);
         winch.setRunMode(Motor.RunMode.RawPower);
         winch.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
@@ -109,7 +110,7 @@ public class LinearSlideA {
 
         currentWinchTarget = p.SLIDE_POS_BOTTOM;
 
-        winch = new MotorEx(hardwareMap, winchName);
+        winch = new WinchMotor(hardwareMap, winchName);
         winch.setRunMode(Motor.RunMode.PositionControl);
         winch.setPositionTolerance(p.WINCH_TOLERANCE);
         winch.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
@@ -148,29 +149,19 @@ public class LinearSlideA {
 
         if (winchActive && !winch.atTargetPosition() && !winchManualMode &&
                 currentWinchTarget == 0 && within(winch.getCurrentPosition(), 0, 250)) {
+            // Glide down near the bottom of the slide to help preserve the slides
             winch.set(0);
         }
         else if (!within(winch.getCurrentPosition(), currentWinchTarget, p.WINCH_TOLERANCE) && winchActive &&
                 !winchManualMode) {
             winch.setPositionTolerance(p.WINCH_TOLERANCE);
 
-            if (winch.getCurrentPosition() < 200 && currentWinchTarget == p.SLIDE_POS_BOTTOM) {
-                winch.set(0);
-            }
-            else if (within(winch.getCurrentPosition(), currentWinchTarget, 300)) {
-                winch.set(WINCH_NEAR_SPEED);
-            }
-            else if (winch.getCurrentPosition() > currentWinchTarget) {
-                winch.set(WINCH_LOWER_SPEED);
-            }
-            else {
-                winch.set(WINCH_SPEED);
-            }
+            winch.set(WINCH_SPEED);
         }
         else if (!winchManualMode) {
             // Currently at target?
-            //winch.set(0.0);
-            if (getWinchRunMode() != Motor.RunMode.RawPower) {
+            winch.set(0.0);
+            /*if (getWinchRunMode() != Motor.RunMode.RawPower) {
                 winch.setRunMode(Motor.RunMode.RawPower);
             }
 
@@ -180,7 +171,7 @@ public class LinearSlideA {
             }
             else {
                 setCurrentWinchTarget(currentWinchTarget);
-            }
+            }*/
 
             //RobotLog.e("Setting runmode to VelControl");
 

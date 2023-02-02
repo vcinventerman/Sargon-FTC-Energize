@@ -156,7 +156,10 @@ public class TeleOp extends SupervisedOpMode {
         telemetry.addData("Claw Angle", robot.slide.claw.getAngle());
         telemetry.addData("Winch Level", robot.slide.winch.getCurrentPosition());
         telemetry.addData("Winch Target", robot.slide.currentWinchTarget);
-        telemetry.addData("winchPower", robot.slide.winch.get());
+        telemetry.addData("Winch Power", robot.slide.winch.get());
+
+        count();
+        //telemetry.addData("Loop Time", robot.slide.winch.get());
 
         Pose2d poseEstimate = robot.getPoseEstimate();
         telemetry.addData("x", poseEstimate.getX());
@@ -209,6 +212,8 @@ public class TeleOp extends SupervisedOpMode {
             calledCounts.add(1.0 / called);
             called = 0;
             lastSec = now;
+
+            telemetry.addData("Loop Time", 1.0 / called);
 
             //telemetry.clear();
             //telemetry.addData("Loops per sec", calledCounts);

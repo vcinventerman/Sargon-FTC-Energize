@@ -13,19 +13,19 @@ import com.arcrobotics.ftclib.command.button.GamepadButton;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
+import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.arcrobotics.ftclib.util.InterpLUT;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.teamcode.util.PathTools;
 
 @Config
 @TeleOp
 public class SlideCalibrator extends LinearOpMode {
-    Robot robot;
-
-
     /**
      * Override this method and place your code here.
      * <p>
@@ -38,25 +38,22 @@ public class SlideCalibrator extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         GamepadEx g1 = new GamepadEx(gamepad1);
 
-        robot = getRobot(hardwareMap);
-
-        InterpLUT interpolator = robot.slide.p.STALL_POWER;
-
-        robot.slide.winch.setRunMode(Motor.RunMode.RawPower);
+        DcMotorEx winch = hardwareMap.get(DcMotorEx.class, "winch");
+        winch.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        winch.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        winch.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         waitForStart();
 
         while (opModeIsActive()) {
             g1.readButtons();
 
-            if (g1.wasJustPressed(GamepadKeys.Button.A)) {
-                interpolator.add(robot.slide.winch.getCurrentPosition(), g1.getLeftY());
+            if (g1.isDown(GamepadKeys.Button.DPAD_LEFT)) {
+                winch.setPower(g1.getLeftY());
             }
 
-            robot.slide.winch.set(g1.getLeftY());
-
-            telemetry.addData("y", robot.slide.winch.getCurrentPosition());
-            telemetry.addData("Power", g1.getLeftY());
+            telemetry.addData("y", winch.getCurrentPosition());
+            telemetry.addData("Power", winch.getPower());
             telemetry.update();
         }
     }
