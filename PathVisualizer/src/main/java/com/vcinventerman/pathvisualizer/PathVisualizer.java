@@ -68,8 +68,20 @@ public class PathVisualizer {
         //RedRight
         myBot.followTrajectorySequence(myBot.getDrive().trajectorySequenceBuilder(addClawOffset(CONE_STACK_POS_RED_RIGHT))
                 .addTrajectory(getTrajBuilder(addClawOffset(CONE_STACK_POS_RED_RIGHT)) // Low junction adjacent to cone stack
-                        .back(TILE_SIZE / 16)
-                        .splineToSplineHeading(addClawOffsetVec(JUNCTIONS.get(11), Math.PI * (5.0 / 4.0)), Math.PI * (5.0 / 4.0))
+                        .lineToLinearHeading(addClawOffsetVec(JUNCTIONS.get(11), Math.PI * (3.0 / 2)))
+
+
+                        //.back(TILE_SIZE / 16)
+                        //.splineToSplineHeading(addClawOffsetVec(JUNCTIONS.get(11), Math.PI * (3.0 / 2)), Math.PI * (3.0 / 2))
+
+
+                        //.lineToSplineHeading(new Pose2d(TILE_SIZE * (5.0 / 2), -TILE_SIZE / 2.0, 0))
+
+                        //.splineToSplineHeading(new Pose2d(TILE_SIZE * (5.0 / 2), -TILE_SIZE / 2.0, Math.PI * 1.75), 0)
+                        //.splineToSplineHeading(new Pose2d(TILE_SIZE * (5.0 / 2), -TILE_SIZE / 2.0, 0), 0)
+                        //.splineToSplineHeading(new Pose2d(TILE_SIZE * (5.0 / 2), -TILE_SIZE / 2.0, 0), PI/4)
+                        //.splineToSplineHeading(addClawOffsetVec(JUNCTIONS.get(11), Math.PI * (5.1 / 4.0)), -PI/4)
+                        //.splineToSplineHeading(addClawOffsetVec(JUNCTIONS.get(11), Math.PI * (5.0 / 4.0)), Math.PI * (5.0 / 4.0))
                         .build())
 
 

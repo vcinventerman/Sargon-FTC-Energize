@@ -66,8 +66,10 @@ public class RightAuto extends LinearOpMode {
                 .build();
 
         trajectories[2] = getTrajBuilder(addClawOffset(CONE_STACK_POS_RED_RIGHT)) // Low junction adjacent to cone stack
-                .back(TILE_SIZE / 16)
-                .splineToSplineHeading(addClawOffsetVec(JUNCTIONS.get(11), Math.PI * (5.0 / 4.0)), Math.PI * (5.0 / 4.0))
+                //.back(TILE_SIZE / 4)
+                //.splineToSplineHeading(addClawOffsetVec(JUNCTIONS.get(11), Math.PI * (3.0 / 2)), Math.PI * (3.0 / 2))
+                
+                .lineToLinearHeading(addClawOffsetVec(JUNCTIONS.get(11), Math.PI * (3.0 / 2)))
                 .build();
 
         trajectories[3] = getTrajBuilder(addClawOffsetVec(JUNCTIONS.get(11), Math.PI * (5.0 / 4.0))) // Low junction adjacent to cone stack return to cone stack
