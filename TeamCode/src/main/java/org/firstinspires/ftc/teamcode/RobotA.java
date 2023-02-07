@@ -33,11 +33,11 @@ public class RobotA extends Robot {
     public MecanumDrive manualDrive;
 
 
-    public static Double WINCH_TOLERANCE = 30.0;
+    public static Double WINCH_TOLERANCE = 50.0;
     public static Double WINCH_TICKS_PER_INCH = (1390.0 / 24.0);
     public static Integer SLIDE_POS_BOTTOM = 0;
     public static Integer SLIDE_POS_GROUND = SLIDE_POS_BOTTOM + 100;
-    public static Integer SLIDE_POS_LOW = SLIDE_POS_BOTTOM + 1100;
+    public static Integer SLIDE_POS_LOW = SLIDE_POS_BOTTOM + 950;
     public static Integer SLIDE_POS_MED = SLIDE_POS_BOTTOM + 1550;
     public static Integer SLIDE_POS_HIGH = SLIDE_POS_BOTTOM + 1950;
     public static List<Integer> SLIDE_POSITIONS = Arrays.asList(SLIDE_POS_HIGH, SLIDE_POS_MED, SLIDE_POS_LOW, 0);

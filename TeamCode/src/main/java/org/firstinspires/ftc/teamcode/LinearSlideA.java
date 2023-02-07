@@ -147,6 +147,10 @@ public class LinearSlideA {
             }*/
         //}
 
+        if (!winchManualMode) {
+            winch.set(WINCH_SPEED);
+        }
+
         if (winchActive && !winch.atTargetPosition() && !winchManualMode &&
                 currentWinchTarget == 0 && within(winch.getCurrentPosition(), 0, 250)) {
             // Glide down near the bottom of the slide to help preserve the slides
@@ -154,7 +158,7 @@ public class LinearSlideA {
         }
         else if (!within(winch.getCurrentPosition(), currentWinchTarget, p.WINCH_TOLERANCE) && winchActive &&
                 !winchManualMode) {
-            winch.setPositionTolerance(p.WINCH_TOLERANCE);
+            //winch.setPositionTolerance(p.WINCH_TOLERANCE);
 
             winch.set(WINCH_SPEED);
         }
@@ -240,6 +244,18 @@ public class LinearSlideA {
         setCurrentWinchTarget((int)(coneStackHeights.get(coneStackState) * p.WINCH_TICKS_PER_INCH));
 
         coneStackState = coneStackState >= p.CONE_STACK_HEIGHTS.size() - 1 ? 0 : coneStackState + 1;
+    }
+
+    public int getNextConeStackHeight() {
+        List<Double> coneStackHeights = Arrays.asList(CONE_HEIGHT + CONE_STACK_OFFSET * 4,
+                CONE_HEIGHT + CONE_STACK_OFFSET * 3, CONE_HEIGHT + CONE_STACK_OFFSET * 2,
+                CONE_HEIGHT + CONE_STACK_OFFSET * 1, CONE_HEIGHT);
+
+        int prevConeStackState = coneStackState;
+
+        coneStackState = coneStackState >= p.CONE_STACK_HEIGHTS.size() - 1 ? 0 : coneStackState + 1;
+
+        return ((int)(coneStackHeights.get(prevConeStackState) * p.WINCH_TICKS_PER_INCH));
     }
 
     public void disableAutomaticWinch() {

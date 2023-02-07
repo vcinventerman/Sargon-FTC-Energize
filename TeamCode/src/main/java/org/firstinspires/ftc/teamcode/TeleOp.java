@@ -41,11 +41,6 @@ public class TeleOp extends SupervisedOpMode {
 
         robot = getRobot(hardwareMap);
 
-        robot.slide.claw.turnToAngle(robot.slide.claw.getAngle() + 10);
-        robot.slide.claw.turnToAngle(robot.slide.claw.getAngle() - 10);
-
-        //robot.slide.winch.setRunMode(Motor.RunMode.RawPower);
-
         //liftButton = new GamepadButton(gamepad1, GamepadKeys.Button.A);
         //liftCloseButton = new GamepadButton(gamepad1, GamepadKeys.Button.B);
         //liftButton = new GamepadButton(gamepad1, GamepadKeys.Button.X);
@@ -71,17 +66,18 @@ public class TeleOp extends SupervisedOpMode {
         }
     }
 
-    public static double DRIVE_SLOW_MULTIPLIER = 20.0;
-    public static double DRIVE_SLOW_TURN_MULTIPLIER = 3.0;
+    public static double DRIVE_SLOW_MULTIPLIER = 0.5;
+    public static double DRIVE_SLOW_TURN_MULTIPLIER = 0.5;
     public double triggerValue(double unadjusted) {
         return (unadjusted - 0.05) / (1.0 - 0.05);
     }
 
     // Code that runs repeatedly after the PLAY button is pressed (optional)
     public void loop() {
-        //count();
+        robot.update();
 
         gamepad1.readButtons();
+        gamepad2.readButtons();
 
         clawButton.readValue();
         fineControls.readValue();
@@ -158,6 +154,8 @@ public class TeleOp extends SupervisedOpMode {
         telemetry.addData("Winch Target", robot.slide.currentWinchTarget);
         telemetry.addData("Winch Power", robot.slide.winch.get());
 
+        telemetry.addData("Loop Time", 1.0 / lastCalled);
+
         count();
         //telemetry.addData("Loop Time", robot.slide.winch.get());
 
@@ -181,8 +179,6 @@ public class TeleOp extends SupervisedOpMode {
 
         telemetry.addData("ClawAngle", claw.getAngle());*/
 
-        robot.update();
-
         telemetry.update();
     }
 
@@ -202,6 +198,7 @@ public class TeleOp extends SupervisedOpMode {
 
     long lastSec = 0;
     long called = 0;
+    long lastCalled;
     List<Double> calledCounts = new ArrayList<Double>();
 
     void count() {
@@ -210,10 +207,9 @@ public class TeleOp extends SupervisedOpMode {
 
         if (now > lastSec) {
             calledCounts.add(1.0 / called);
+            lastCalled = called;
             called = 0;
             lastSec = now;
-
-            telemetry.addData("Loop Time", 1.0 / called);
 
             //telemetry.clear();
             //telemetry.addData("Loops per sec", calledCounts);

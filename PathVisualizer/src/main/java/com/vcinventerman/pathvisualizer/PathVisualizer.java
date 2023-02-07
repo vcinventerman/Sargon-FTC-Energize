@@ -16,6 +16,8 @@ import static com.vcinventerman.pathvisualizer.TeamConf.START_POS_BLUE_LEFT;
 import static com.vcinventerman.pathvisualizer.TeamConf.START_POS_RED_RIGHT;
 import static com.vcinventerman.pathvisualizer.TeamConf.TILE_SIZE;
 
+import static java.lang.Math.PI;
+
 import com.acmerobotics.roadrunner.drive.MecanumDrive;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
@@ -65,12 +67,26 @@ public class PathVisualizer {
 
         //RedRight
         myBot.followTrajectorySequence(myBot.getDrive().trajectorySequenceBuilder(addClawOffset(CONE_STACK_POS_RED_RIGHT))
-                .addTrajectory(getTrajBuilder(START_POS_RED_RIGHT) // Forward junction
+                .addTrajectory(getTrajBuilder(addClawOffset(CONE_STACK_POS_RED_RIGHT)) // Low junction adjacent to cone stack
+                        .back(TILE_SIZE / 16)
+                        .splineToSplineHeading(addClawOffsetVec(JUNCTIONS.get(11), Math.PI * (5.0 / 4.0)), Math.PI * (5.0 / 4.0))
+                        .build())
+
+
+                /*.addTrajectory(getTrajBuilder(START_POS_RED_RIGHT) // Forward junction
+                        .splineToConstantHeading(new Vector2d(TILE_SIZE * (2.5 / 4.0), START_POS_RED_RIGHT.getY() + 3), FIELD_BEARING_NORTH)
+
+                        //.splineToSplineHeading(new Pose2d(TILE_SIZE * (1.0 / 4.0), START_POS_RED_RIGHT.getY() + TILE_SIZE, FIELD_BEARING_NORTH + PI/4), FIELD_BEARING_NORTH + PI/4)
+                        .splineTo(addClawOffsetVec(JUNCTIONS.get(1), FIELD_BEARING_NORTH + PI / 4).vec(), FIELD_BEARING_NORTH + PI / 4)
+                        .build())*/
+
+                /*.addTrajectory(getTrajBuilder(START_POS_RED_RIGHT) // Forward junction
                         .lineTo(new Vector2d(START_POS_RED_RIGHT.getX() - TILE_SIZE / 2, START_POS_RED_RIGHT.getY()))
                         .splineToLinearHeading(new Pose2d(START_POS_RED_RIGHT.getX() - TILE_SIZE, START_POS_RED_RIGHT.getY() + TILE_SIZE, FIELD_BEARING_NORTH), FIELD_BEARING_NORTH)
                         .splineToSplineHeading(addClawOffsetVec(JUNCTIONS.get(1), FIELD_BEARING_NORTH + Math.PI / 4), FIELD_BEARING_NORTH + Math.PI / 4)
-                        .build())
+                        .build())*/
 
+                /*
                 .addTrajectory(getTrajBuilder(addClawOffsetVec(JUNCTIONS.get(1), FIELD_BEARING_NORTH + Math.PI / 4)) // Cone stack
                         .back(TILE_SIZE / 16)
                         .splineToConstantHeading(new Vector2d(START_POS_RED_RIGHT.getX() - TILE_SIZE, START_POS_RED_RIGHT.getY() + TILE_SIZE), FIELD_BEARING_NORTH)

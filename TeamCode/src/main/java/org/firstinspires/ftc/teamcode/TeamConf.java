@@ -44,7 +44,7 @@ public class TeamConf {
     public static double ROBOTA_LENGTH = 14.5;
     public static double ROBOTA_WIDTH = 13;
     public static String ROBOTA_IMU_DEFAULT = "imu1"; // imu0 is in control hub, imu1 is in expansion hub
-    public static Vector2d ROBOTA_CLAW_OFFSET = new Vector2d(8.5, 0.0);
+    public static Vector2d ROBOTA_CLAW_OFFSET = new Vector2d(10, 0.0);
 
     // Freshman team robot
     public static double ROBOTB_LENGTH = 18;
@@ -62,10 +62,10 @@ public class TeamConf {
     // Distance from center to claw
     public static Vector2d ROBOT_CLAW_OFFSET = ROBOTA_CLAW_OFFSET;
 
-    public static Pose2d START_POS_RED_LEFT = new Pose2d(-35, -(FIELD_WIDTH / 2) + (ROBOT_LENGTH / 2), FIELD_BEARING_NORTH);
-    public static Pose2d START_POS_RED_RIGHT = new Pose2d(35, -(FIELD_WIDTH / 2) + (ROBOT_LENGTH / 2), FIELD_BEARING_NORTH);
-    public static Pose2d START_POS_BLUE_LEFT = new Pose2d(35, (FIELD_WIDTH / 2) - (ROBOT_LENGTH / 2), FIELD_BEARING_SOUTH);
-    public static Pose2d START_POS_BLUE_RIGHT = new Pose2d(-35, (FIELD_WIDTH / 2) - (ROBOT_LENGTH / 2), FIELD_BEARING_SOUTH);
+    public static Pose2d START_POS_RED_LEFT = new Pose2d(-30.5, -(FIELD_WIDTH / 2) + (ROBOT_LENGTH / 2), FIELD_BEARING_NORTH);
+    public static Pose2d START_POS_RED_RIGHT = new Pose2d(30.5, -(FIELD_WIDTH / 2) + (ROBOT_LENGTH / 2), FIELD_BEARING_NORTH);
+    public static Pose2d START_POS_BLUE_LEFT = new Pose2d(30.5, (FIELD_WIDTH / 2) - (ROBOT_LENGTH / 2), FIELD_BEARING_SOUTH);
+    public static Pose2d START_POS_BLUE_RIGHT = new Pose2d(-30.5, (FIELD_WIDTH / 2) - (ROBOT_LENGTH / 2), FIELD_BEARING_SOUTH);
     public static List<Pose2d> START_POSITIONS = Arrays.asList(START_POS_RED_LEFT, START_POS_RED_RIGHT, START_POS_BLUE_LEFT, START_POS_BLUE_RIGHT);
 
     public static Pose2d START_POSE_DEFAULT = START_POS_RED_LEFT;
@@ -292,9 +292,11 @@ public class TeamConf {
 
         if (getSerialNumber().equals(ROBOTB_SERIAL)) {
             return new RobotB(map);
+            //return robotSingleton != null ? robotSingleton : new RobotB(map);
         }
         else {
             return new RobotA(map);
+            //return robotSingleton != null ? robotSingleton : new RobotA(map);
         }
 
         /*if (robotSingleton == null) {

@@ -65,8 +65,8 @@ import java.util.List;
  */
 @Config
 public class MecanumDriveCancelable extends MecanumDrive {
-    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(2, 0, 0.1);
-    public static PIDCoefficients HEADING_PID = new PIDCoefficients(2, 0, 0.1);
+    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(5, 0, 0.1);
+    public static PIDCoefficients HEADING_PID = new PIDCoefficients(8, 0, 0.1);
 
     public static double LATERAL_MULTIPLIER = 1.28;
 
@@ -199,7 +199,7 @@ public class MecanumDriveCancelable extends MecanumDrive {
         return new TrajectoryBuilder(startPose, startHeading, VEL_CONSTRAINT, ACCEL_CONSTRAINT);
     }
 
-    public void turnAsync(double angle, boolean fast) {
+    public void turnAsync(double angle) {
         double heading = getPoseEstimate().getHeading();
 
         lastPoseOnTurn = getPoseEstimate();
@@ -225,7 +225,11 @@ public class MecanumDriveCancelable extends MecanumDrive {
         mode = Mode.TURN;
     }
 
-    public void turn(double angle) {
+    public void turnAsync(double angle, boolean fast) {
+        turnAsync(angle);
+    }
+
+        public void turn(double angle) {
         turnAsync(angle, false);
         waitForIdle();
     }
