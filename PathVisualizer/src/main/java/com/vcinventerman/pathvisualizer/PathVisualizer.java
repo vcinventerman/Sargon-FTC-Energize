@@ -4,6 +4,7 @@ import static com.vcinventerman.pathvisualizer.PathTools.addClawOffset;
 import static com.vcinventerman.pathvisualizer.PathTools.addClawOffsetVec;
 import static com.vcinventerman.pathvisualizer.PathTools.getTrajBuilder;
 import static com.vcinventerman.pathvisualizer.PathTools.safeTrajTo;
+import static com.vcinventerman.pathvisualizer.TeamConf.CONE_STACK_POS_RED_LEFT;
 import static com.vcinventerman.pathvisualizer.TeamConf.CONE_STACK_POS_RED_RIGHT;
 import static com.vcinventerman.pathvisualizer.TeamConf.FIELD_BEARING_EAST;
 import static com.vcinventerman.pathvisualizer.TeamConf.FIELD_BEARING_NORTH;
@@ -82,11 +83,11 @@ public class PathVisualizer {
 
         //RedRight
         myBot.followTrajectorySequence(myBot.getDrive().trajectorySequenceBuilder(addClawOffset(CONE_STACK_POS_RED_RIGHT))
-                .addTrajectory(getTrajBuilder(START_POS_RED_RIGHT) // Forward junction
-                        .splineToConstantHeading(new Vector2d(TILE_SIZE * (3.0 / 4.0), START_POS_RED_RIGHT.getY() + 6), FIELD_BEARING_NORTH)
+                .addTrajectory(getTrajBuilder(addClawOffset(CONE_STACK_POS_RED_RIGHT)) // Low junction adjacent to cone stack
+                        //.back(TILE_SIZE / 4)
+                        //.splineToSplineHeading(addClawOffsetVec(JUNCTIONS.get(11), Math.PI * (3.0 / 2)), Math.PI * (3.0 / 2))
 
-                        //.splineToSplineHeading(new Pose2d(TILE_SIZE * (1.0 / 4.0), START_POS_RED_RIGHT.getY() + TILE_SIZE, FIELD_BEARING_NORTH + PI/4), FIELD_BEARING_NORTH + PI/4)
-                        .splineTo(addClawOffsetVec(JUNCTIONS.get(1), FIELD_BEARING_NORTH + PI / 4).vec(), FIELD_BEARING_NORTH + PI / 4)
+                        .lineToLinearHeading(addClawOffset(CONE_STACK_POS_RED_LEFT))
                         .build())
 
 

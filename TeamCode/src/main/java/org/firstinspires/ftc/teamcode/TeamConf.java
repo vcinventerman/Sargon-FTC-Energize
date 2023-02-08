@@ -75,7 +75,7 @@ public class TeamConf {
     public static double CONE_HEIGHT = 3.65 + 1.23;
     public static double CONE_STACK_OFFSET = 1.25;
 
-    public static Pose2d CONE_STACK_POS_RED_LEFT = new Pose2d(-FIELD_WIDTH + CONE_DIAMETER / 2.0 + 1, -TILE_SIZE / 2.0, Math.PI);
+    public static Pose2d CONE_STACK_POS_RED_LEFT = new Pose2d((-TILE_SIZE * 3) + CONE_DIAMETER / 2.0 + 1, -TILE_SIZE / 2.0, Math.PI);
     public static Pose2d CONE_STACK_POS_RED_RIGHT = new Pose2d((TILE_SIZE * 3) - CONE_DIAMETER / 2.0 - 1, -TILE_SIZE / 2.0, 0);
     public static Pose2d CONE_STACK_POS_BLUE_LEFT = new Pose2d(FIELD_WIDTH + CONE_DIAMETER / 2.0, TILE_SIZE / 2.0, 0);
     public static Pose2d CONE_STACK_POS_BLUE_RIGHT = new Pose2d(-FIELD_WIDTH - CONE_DIAMETER / 2.0, TILE_SIZE / 2.0, Math.PI);
