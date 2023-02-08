@@ -21,12 +21,17 @@ import static java.lang.Math.PI;
 import com.acmerobotics.roadrunner.drive.MecanumDrive;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.acmerobotics.roadrunner.path.ParametricCurve;
+import com.acmerobotics.roadrunner.path.Path;
+import com.acmerobotics.roadrunner.path.PathBuilder;
+import com.acmerobotics.roadrunner.path.PathSegment;
 import com.noahbres.meepmeep.MeepMeep;
 import com.noahbres.meepmeep.roadrunner.DefaultBotBuilder;
 import com.noahbres.meepmeep.roadrunner.DriveTrainType;
 import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
 import com.sun.tools.javac.util.List;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -65,23 +70,23 @@ public class PathVisualizer {
                 .addEntity(myBot)
                 .start();
 
+
+        PathBuilder pathBuilder = new PathBuilder(addClawOffsetVec(JUNCTIONS.get(1), FIELD_BEARING_NORTH + Math.PI / 4));
+        //PathBuilder e = new PathBuilder()
+        //ParametricCurve e = new ParametricCurve
+        //PathSegment e = new PathSegment()
+        Path path = new Path(new ArrayList<>());
+
+
+
+
         //RedRight
         myBot.followTrajectorySequence(myBot.getDrive().trajectorySequenceBuilder(addClawOffset(CONE_STACK_POS_RED_RIGHT))
-                .addTrajectory(getTrajBuilder(addClawOffset(CONE_STACK_POS_RED_RIGHT)) // Low junction adjacent to cone stack
-                        .lineToLinearHeading(addClawOffsetVec(JUNCTIONS.get(11), Math.PI * (3.0 / 2)))
+                .addTrajectory(getTrajBuilder(START_POS_RED_RIGHT) // Forward junction
+                        .splineToConstantHeading(new Vector2d(TILE_SIZE * (3.0 / 4.0), START_POS_RED_RIGHT.getY() + 6), FIELD_BEARING_NORTH)
 
-
-                        //.back(TILE_SIZE / 16)
-                        //.splineToSplineHeading(addClawOffsetVec(JUNCTIONS.get(11), Math.PI * (3.0 / 2)), Math.PI * (3.0 / 2))
-
-
-                        //.lineToSplineHeading(new Pose2d(TILE_SIZE * (5.0 / 2), -TILE_SIZE / 2.0, 0))
-
-                        //.splineToSplineHeading(new Pose2d(TILE_SIZE * (5.0 / 2), -TILE_SIZE / 2.0, Math.PI * 1.75), 0)
-                        //.splineToSplineHeading(new Pose2d(TILE_SIZE * (5.0 / 2), -TILE_SIZE / 2.0, 0), 0)
-                        //.splineToSplineHeading(new Pose2d(TILE_SIZE * (5.0 / 2), -TILE_SIZE / 2.0, 0), PI/4)
-                        //.splineToSplineHeading(addClawOffsetVec(JUNCTIONS.get(11), Math.PI * (5.1 / 4.0)), -PI/4)
-                        //.splineToSplineHeading(addClawOffsetVec(JUNCTIONS.get(11), Math.PI * (5.0 / 4.0)), Math.PI * (5.0 / 4.0))
+                        //.splineToSplineHeading(new Pose2d(TILE_SIZE * (1.0 / 4.0), START_POS_RED_RIGHT.getY() + TILE_SIZE, FIELD_BEARING_NORTH + PI/4), FIELD_BEARING_NORTH + PI/4)
+                        .splineTo(addClawOffsetVec(JUNCTIONS.get(1), FIELD_BEARING_NORTH + PI / 4).vec(), FIELD_BEARING_NORTH + PI / 4)
                         .build())
 
 

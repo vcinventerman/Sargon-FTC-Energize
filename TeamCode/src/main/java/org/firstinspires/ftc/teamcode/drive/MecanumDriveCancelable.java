@@ -75,8 +75,8 @@ public class MecanumDriveCancelable extends MecanumDrive {
     public static double OMEGA_WEIGHT = 1;
 
     public static double FOLLOWER_TIMEOUT = 1;
-    public static double ADMISSIBLE_ERROR_X = 1;
-    public static double ADMISSIBLE_ERROR_Y = 1;
+    public static double ADMISSIBLE_ERROR_X = 0.5;
+    public static double ADMISSIBLE_ERROR_Y = 0.5;
     public static double ADMISSIBLE_ERROR_HEADING = Math.toRadians(10);
 
     private TrajectorySequenceRunner trajectorySequenceRunner;
@@ -133,13 +133,13 @@ public class MecanumDriveCancelable extends MecanumDrive {
 
         poseHistory = new LinkedList<>();
 
-        LynxModuleUtil.ensureMinimumFirmwareVersion(hardwareMap);
+        //LynxModuleUtil.ensureMinimumFirmwareVersion(hardwareMap);
 
         batteryVoltageSensor = hardwareMap.voltageSensor.iterator().next();
 
-        for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
+        /*for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
-        }
+        }*/
 
         // TODO: adjust the names of the following hardware devices to match your configuration
         imu = hardwareMap.get(BNO055IMU.class, TeamConf.ROBOT_IMU_DEFAULT);

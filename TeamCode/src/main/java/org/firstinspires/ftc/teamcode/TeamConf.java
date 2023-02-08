@@ -44,7 +44,7 @@ public class TeamConf {
     public static double ROBOTA_LENGTH = 14.5;
     public static double ROBOTA_WIDTH = 13;
     public static String ROBOTA_IMU_DEFAULT = "imu1"; // imu0 is in control hub, imu1 is in expansion hub
-    public static Vector2d ROBOTA_CLAW_OFFSET = new Vector2d(10, 0.0);
+    public static Vector2d ROBOTA_CLAW_OFFSET = new Vector2d(9.25, 2.0);
 
     // Freshman team robot
     public static double ROBOTB_LENGTH = 18;
@@ -63,7 +63,7 @@ public class TeamConf {
     public static Vector2d ROBOT_CLAW_OFFSET = ROBOTA_CLAW_OFFSET;
 
     public static Pose2d START_POS_RED_LEFT = new Pose2d(-30.5, -(FIELD_WIDTH / 2) + (ROBOT_LENGTH / 2), FIELD_BEARING_NORTH);
-    public static Pose2d START_POS_RED_RIGHT = new Pose2d(30.5, -(FIELD_WIDTH / 2) + (ROBOT_LENGTH / 2), FIELD_BEARING_NORTH);
+    public static Pose2d START_POS_RED_RIGHT = new Pose2d(29.5, -(FIELD_WIDTH / 2) + (ROBOT_LENGTH / 2), FIELD_BEARING_NORTH);
     public static Pose2d START_POS_BLUE_LEFT = new Pose2d(30.5, (FIELD_WIDTH / 2) - (ROBOT_LENGTH / 2), FIELD_BEARING_SOUTH);
     public static Pose2d START_POS_BLUE_RIGHT = new Pose2d(-30.5, (FIELD_WIDTH / 2) - (ROBOT_LENGTH / 2), FIELD_BEARING_SOUTH);
     public static List<Pose2d> START_POSITIONS = Arrays.asList(START_POS_RED_LEFT, START_POS_RED_RIGHT, START_POS_BLUE_LEFT, START_POS_BLUE_RIGHT);
@@ -75,8 +75,8 @@ public class TeamConf {
     public static double CONE_HEIGHT = 3.65 + 1.23;
     public static double CONE_STACK_OFFSET = 1.25;
 
-    public static Pose2d CONE_STACK_POS_RED_LEFT = new Pose2d(-FIELD_WIDTH + CONE_DIAMETER / 2.0, -TILE_SIZE / 2.0, Math.PI);
-    public static Pose2d CONE_STACK_POS_RED_RIGHT = new Pose2d((TILE_SIZE * 3) - CONE_DIAMETER / 2.0, -TILE_SIZE / 2.0, 0);
+    public static Pose2d CONE_STACK_POS_RED_LEFT = new Pose2d(-FIELD_WIDTH + CONE_DIAMETER / 2.0 + 1, -TILE_SIZE / 2.0, Math.PI);
+    public static Pose2d CONE_STACK_POS_RED_RIGHT = new Pose2d((TILE_SIZE * 3) - CONE_DIAMETER / 2.0 - 1, -TILE_SIZE / 2.0, 0);
     public static Pose2d CONE_STACK_POS_BLUE_LEFT = new Pose2d(FIELD_WIDTH + CONE_DIAMETER / 2.0, TILE_SIZE / 2.0, 0);
     public static Pose2d CONE_STACK_POS_BLUE_RIGHT = new Pose2d(-FIELD_WIDTH - CONE_DIAMETER / 2.0, TILE_SIZE / 2.0, Math.PI);
     public static List<Pose2d> CONE_STACK_POSITIONS = Arrays.asList(CONE_STACK_POS_RED_LEFT, CONE_STACK_POS_RED_RIGHT, CONE_STACK_POS_BLUE_LEFT, CONE_STACK_POS_BLUE_RIGHT);

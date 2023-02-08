@@ -44,11 +44,13 @@ public class RightAuto extends LinearOpMode {
         robot.slide.claw.turnToAngle(robot.slide.p.CLAW_POS_OPEN);
         robot.slide.claw.turnToAngle(robot.slide.p.CLAW_POS_CLOSED); // Grab the preload cone
 
+        calibrateSlide();
+
         // Creating these trajectories will take a while
         Trajectory[] trajectories = new Trajectory[9];
 
         trajectories[0] = getTrajBuilder(START_POS_RED_RIGHT) // Forward junction
-                .splineToConstantHeading(new Vector2d(TILE_SIZE * (2.5 / 4.0), START_POS_RED_RIGHT.getY() + 3), FIELD_BEARING_NORTH)
+                .splineToConstantHeading(new Vector2d(TILE_SIZE * (3.0 / 4.0), START_POS_RED_RIGHT.getY() + 6), FIELD_BEARING_NORTH)
 
                 //.splineToSplineHeading(new Pose2d(TILE_SIZE * (1.0 / 4.0), START_POS_RED_RIGHT.getY() + TILE_SIZE, FIELD_BEARING_NORTH + PI/4), FIELD_BEARING_NORTH + PI/4)
                 .splineTo(addClawOffsetVec(JUNCTIONS.get(1), FIELD_BEARING_NORTH + PI / 4).vec(), FIELD_BEARING_NORTH + PI / 4)
@@ -59,16 +61,16 @@ public class RightAuto extends LinearOpMode {
                 .splineToSplineHeading(new Pose2d(TILE_SIZE * (1.0 / 2.0), -TILE_SIZE * (3.0 / 2), FIELD_BEARING_NORTH), PI * (7.0 / 4.0))
                 .splineToConstantHeading(new Vector2d(TILE_SIZE * (2.5 / 4.0), START_POS_RED_RIGHT.getY() + TILE_SIZE * 3.0/2.0), FIELD_BEARING_NORTH)
                 //.splineToSplineHeading(new Pose2d(TILE_SIZE * (2.5 / 4.0), START_POS_RED_RIGHT.getY() + TILE_SIZE * (3.0 / 4.0), FIELD_BEARING_NORTH), FIELD_BEARING_NORTH)
-                .splineToSplineHeading(new Pose2d(TILE_SIZE * (2.5 / 4.0), START_POS_RED_RIGHT.getY() + TILE_SIZE * 2, FIELD_BEARING_NORTH), FIELD_BEARING_NORTH)
-                .splineToConstantHeading(new Vector2d(TILE_SIZE, -TILE_SIZE / 2.0), FIELD_BEARING_EAST)
-                .splineToConstantHeading(new Vector2d(TILE_SIZE * (3.0 / 2.0), -TILE_SIZE / 2.0), FIELD_BEARING_EAST)
+                .splineToSplineHeading(new Pose2d(TILE_SIZE * (2.5 / 4.0), START_POS_RED_RIGHT.getY() + TILE_SIZE * 2, FIELD_BEARING_EAST), FIELD_BEARING_EAST + PI/3)
+                .splineToConstantHeading(new Vector2d(TILE_SIZE, -TILE_SIZE / 2.0 - 2), FIELD_BEARING_EAST)
+                .splineToConstantHeading(new Vector2d(TILE_SIZE * (3.0 / 2.0), -TILE_SIZE / 2.0 - 2.5), FIELD_BEARING_EAST)
                 .splineToSplineHeading(addClawOffset(CONE_STACK_POS_RED_RIGHT), FIELD_BEARING_EAST)
                 .build();
 
         trajectories[2] = getTrajBuilder(addClawOffset(CONE_STACK_POS_RED_RIGHT)) // Low junction adjacent to cone stack
                 //.back(TILE_SIZE / 4)
                 //.splineToSplineHeading(addClawOffsetVec(JUNCTIONS.get(11), Math.PI * (3.0 / 2)), Math.PI * (3.0 / 2))
-                
+
                 .lineToLinearHeading(addClawOffsetVec(JUNCTIONS.get(11), Math.PI * (3.0 / 2)))
                 .build();
 
@@ -101,6 +103,7 @@ public class RightAuto extends LinearOpMode {
                 .build();
 
         waitForStart();
+        if (isStopRequested()) { return; }
 
         // Precondition: preload cone is in claw's reach and it was closed during init
         robot.slide.setCurrentWinchTarget(robot.slide.p.SLIDE_POS_HIGH);
@@ -143,12 +146,16 @@ public class RightAuto extends LinearOpMode {
     public static double DROP_TIME = 300; // ms
     public static double PICKUP_TIME = 500; // ms
     public void dropCone(int nextLevel) {
+        if (!opModeIsActive()) { return; }
+
         robot.slide.winch.setTargetPosition(nextLevel);
 
         long current = System.currentTimeMillis();
 
         // Stay in place while the cone is placed on the stack, this is much safer than dropping it
         while (System.currentTimeMillis() < current + DROP_TIME) {
+            if (!opModeIsActive()) { return; }
+
             robot.update();
         }
 
@@ -156,6 +163,8 @@ public class RightAuto extends LinearOpMode {
     }
 
     public void pickupCone(int nextJunctionLevel) {
+        if (!opModeIsActive()) { return; }
+
         robot.slide.claw.turnToAngle(robot.slide.p.CLAW_POS_CLOSED);
 
         robot.slide.winch.setTargetPosition(nextJunctionLevel);
@@ -164,11 +173,34 @@ public class RightAuto extends LinearOpMode {
 
         // Stay in place while we are in danger of knocking over the cone stack
         while (System.currentTimeMillis() < current + PICKUP_TIME) {
+            if (!opModeIsActive()) { return; }
+
             robot.update();
         }
     }
 
+    public static double CALIBRATE_TIME = 2000;
+
+    // Run the winch until its at zero
+    public void calibrateSlide() {
+        if (isStopRequested() || ! (robot.slide.winch instanceof WinchMotor)) { return; }
+
+        long current = System.currentTimeMillis();
+
+        while (System.currentTimeMillis() < current + CALIBRATE_TIME) {
+            if (isStopRequested()) { return; }
+
+            robot.update();
+
+            ((WinchMotor)robot.slide.winch).setRawPower(((WinchMotor)robot.slide.winch).getHoldingPower());
+        }
+
+        robot.slide.winch.resetEncoder();
+    }
+
     public void runTrajectory(Trajectory trajectory) {
+        if (!opModeIsActive()) { return; }
+
         robot.followTrajectory(trajectory);
 
         while (robot.isBusy() && opModeIsActive()) {

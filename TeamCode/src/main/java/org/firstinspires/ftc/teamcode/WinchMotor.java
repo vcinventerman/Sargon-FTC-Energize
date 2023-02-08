@@ -144,7 +144,7 @@ public class WinchMotor extends MotorEx {
     }
 
 
-    public void setRawPower(int power) {
+    public void setRawPower(double power) {
         motor.setPower(power);
     }
 }
