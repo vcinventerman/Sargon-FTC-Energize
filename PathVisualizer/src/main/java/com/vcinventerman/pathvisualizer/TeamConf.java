@@ -34,13 +34,13 @@ public class TeamConf {
     public static String ROBOTA_IMU_DEFAULT = "imu1"; // imu0 is in control hub, imu1 is in expansion hub
     public static double CLAW_TUNE_X = 0.0;
     public static double CLAW_TUNE_Y = 0.0;
-    public static Vector2d ROBOTA_CLAW_OFFSET = new Vector2d(-9.25 - 3, -1.17 - -.15 - 2);
+    public static Vector2d ROBOTA_CLAW_OFFSET = new Vector2d(-9.25 - 3, -1.17 - -.15 - 2 + 0.75);
 
     // Freshman team robot
     public static double ROBOTB_LENGTH = 18;
     public static double ROBOTB_WIDTH = 18;
     public static String ROBOTB_IMU_DEFAULT = "imu"; // imu0 is in control hub, imu1 is in expansion hub
-    public static Vector2d ROBOTB_CLAW_OFFSET = new Vector2d(8.5, 0.0);
+    public static Vector2d ROBOTB_CLAW_OFFSET = new Vector2d(20, 0);
 
     // Choose current robot here
     public static double ROBOT_LENGTH = ROBOTA_LENGTH;

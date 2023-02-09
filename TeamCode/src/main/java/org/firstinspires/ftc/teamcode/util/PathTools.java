@@ -178,34 +178,12 @@ public class PathTools {
     }
 
     public static Pose2d addClawOffset(final Pose2d pos) {
-        //Vector2D vec = new Vector2D(pos.getX(), pos.getY());
+        Vector2d offset = ROBOT_CLAW_OFFSET;
 
-        Vector2d offset = new Vector2d(ROBOTA_CLAW_OFFSET.getY() + CLAW_TUNE_Y, ROBOTA_CLAW_OFFSET.getX() + CLAW_TUNE_X);
-        double mag = Math.sqrt(offset.getX() * offset.getX() + offset.getY() * offset.getY());
-        double ang = offset.angle();
+        double newX = offset.getX() * Math.cos(pos.getHeading()) - offset.getY() * Math.sin(pos.getHeading());
+        double newY = offset.getX() * Math.sin(pos.getHeading()) + offset.getY() * Math.cos(pos.getHeading());
 
-        Vector2d mult = offset.rotated(pos.component3());
-
-        //Vector2d mult = pos.vec().div(pos.vec().norm());
-        //mult = new Vector2d(mult.getX() * offset.getX(), mult.getY() * offset.getY());
-
-        /*offset = offset.rotated(pos.getHeading());
-
-        return pos.minus(new Pose2d(offset.getX(), offset.getY(), 0));*/
-        return pos.plus(new Pose2d(mult.getY(), mult.getX(), 0));
-
-        //Vector2d rotated = offset.rotated(pos.getHeading());
-        //Vector2d rotated = pos.vec().rotated(-pos.getHeading());
-        //rotated = rotated.plus(offset);
-        //rotated = rotated.rotated(pos.getHeading());
-        //return new Pose2d(rotated.getX(), rotated.getY(), pos.getHeading());
-        /*Vector2d offset = new Vector2d(ROBOTA_CLAW_OFFSET.getX() + CLAW_TUNE_X, ROBOTA_CLAW_OFFSET.getY() + CLAW_TUNE_Y);
-
-        //Vector2d rotated = offset.rotated(pos.getHeading());
-        Vector2d rotated = pos.vec().rotated(-pos.getHeading());
-
-        Pose2d minus = pos.plus(new Pose2d(rotated, 0));
-        return new Pose2d(rotated.getX() + offset.getX(), rotated.getY() + offset.getY(), pos.getHeading());*/
+        return new Pose2d(pos.getX() + newX, pos.getY() + newY, pos.getHeading());
     }
 
     public static List<Pose2d> addClawOffsetList(List<Pose2d> poses) {

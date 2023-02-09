@@ -80,8 +80,8 @@ public class PathVisualizer {
 
 
         Pose2d startPose = START_POS_RED_RIGHT;
-        double endBearing = FIELD_BEARING_NORTH + Math.PI / 4;
-        Pose2d endPose = new Pose2d(TILE_SIZE, 0,  endBearing);
+        double endBearing = FIELD_BEARING_NORTH;
+        Pose2d endPose = new Pose2d(TILE_SIZE, 0,  0);
 
         Pose2d adjustedEnd = PathTools.addClawOffset(endPose);
 
