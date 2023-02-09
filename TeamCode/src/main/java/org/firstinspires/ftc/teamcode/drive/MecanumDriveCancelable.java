@@ -75,8 +75,8 @@ public class MecanumDriveCancelable extends MecanumDrive {
     public static double OMEGA_WEIGHT = 1;
 
     public static double FOLLOWER_TIMEOUT = 1;
-    public static double ADMISSIBLE_ERROR_X = 0.5;
-    public static double ADMISSIBLE_ERROR_Y = 0.5;
+    public static double ADMISSIBLE_ERROR_X = 0.15;
+    public static double ADMISSIBLE_ERROR_Y = 0.15;
     public static double ADMISSIBLE_ERROR_HEADING = Math.toRadians(10);
 
     private TrajectorySequenceRunner trajectorySequenceRunner;

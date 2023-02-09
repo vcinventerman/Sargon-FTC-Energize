@@ -22,7 +22,10 @@ import org.firstinspires.ftc.teamcode.util.PathTools;
 @Autonomous
 public class ClawAlignmentTest extends LinearOpMode {
     public static Pose2d startPose = START_POS_RED_RIGHT;
-    public static Pose2d endPose = new Pose2d(TILE_SIZE, 0,  FIELD_BEARING_NORTH);
+    public static double endBearing = 0;//FIELD_BEARING_NORTH + Math.PI / 4;
+    public static Pose2d endPose = new Pose2d(TILE_SIZE, 0,  endBearing);
+
+    public static boolean addClawOffset = true;
 
     Robot robot;
 
@@ -39,7 +42,9 @@ public class ClawAlignmentTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         Pose2d adjustedEnd = PathTools.addClawOffset(endPose);
 
-        Trajectory traj = getTrajBuilder(startPose).lineTo(adjustedEnd.vec()).build();
+        if (!addClawOffset) { adjustedEnd = endPose; }
+
+        Trajectory traj = getTrajBuilder(startPose).lineToLinearHeading(adjustedEnd).build();
 
         robot = getRobot(hardwareMap);
         robot.setPose(startPose);
@@ -51,6 +56,8 @@ public class ClawAlignmentTest extends LinearOpMode {
         robot.waitToComplete();
 
         while (opModeIsActive()) {
+            robot.update();
+
             robot.driveFieldCentric(gamepad1.left_stick_x, gamepad1.left_stick_y,
                     (gamepad1.right_trigger) -
                             (gamepad1.left_trigger), 0.0);

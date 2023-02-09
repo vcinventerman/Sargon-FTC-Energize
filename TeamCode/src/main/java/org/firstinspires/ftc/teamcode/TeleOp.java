@@ -138,6 +138,16 @@ public class TeleOp extends SupervisedOpMode {
             robot.slide.setCurrentWinchTarget(robot.slide.p.SLIDE_POS_BOTTOM);
         }
 
+        if (gamepad2.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
+            robot.slide.setCurrentWinchTarget(robot.slide.p.SLIDE_POS_BOTTOM);
+        }
+        else if (gamepad2.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
+            robot.slide.setCurrentWinchTarget(robot.slide.p.SLIDE_POS_MED);
+        }
+        else if (gamepad2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
+            robot.slide.setCurrentWinchTarget(robot.slide.p.SLIDE_POS_HIGH);
+        }
+
         if (clawButton.wasJustPressed()) {
             robot.slide.setClawTarget(
                     robot.slide.claw.getAngle(AngleUnit.DEGREES) == robot.slide.p.CLAW_POS_CLOSED ?
@@ -153,6 +163,7 @@ public class TeleOp extends SupervisedOpMode {
         telemetry.addData("Winch Level", robot.slide.winch.getCurrentPosition());
         telemetry.addData("Winch Target", robot.slide.currentWinchTarget);
         telemetry.addData("Winch Power", robot.slide.winch.get());
+        telemetry.addData("Winch Velocity", robot.slide.winch.getCorrectedVelocity());
 
         telemetry.addData("Loop Time", 1.0 / lastCalled);
 

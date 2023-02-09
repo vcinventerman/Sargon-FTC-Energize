@@ -25,7 +25,10 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 @Config
 @Autonomous(group="!CompAuto")
 public class HorizontalCalibrator extends LinearOpMode {
-    public static Pose2d startPose = START_POS_RED_RIGHT;
+    public static double startPoseX = START_POS_RED_RIGHT.getX();
+    public static double startPoseY = START_POS_RED_RIGHT.getY();
+    public static double startPoseHeading = START_POS_RED_RIGHT.getHeading();
+
 
     Robot robot;
 
@@ -33,15 +36,17 @@ public class HorizontalCalibrator extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(super.telemetry, FtcDashboard.getInstance().getTelemetry());
 
+        Pose2d startPose = new Pose2d(startPoseX, startPoseY, startPoseHeading);
+
         robot = getRobot(hardwareMap);
         robot.setPose(startPose);
 
         // Creating these trajectories will take a while
         Trajectory[] trajectories = new Trajectory[9];
 
-        trajectories[0] = getTrajBuilder(START_POS_RED_RIGHT) // Forward junction
+        trajectories[0] = getTrajBuilder(startPose) // Forward junction
                 .splineToConstantHeading(new Vector2d(TILE_SIZE * (3.0 / 4.0), START_POS_RED_RIGHT.getY() + 6), FIELD_BEARING_NORTH)
-                .splineToConstantHeading(new Vector2d(TILE_SIZE * (2.5 / 4.0), -TILE_SIZE * 1.0/2.0), FIELD_BEARING_NORTH)
+                .splineToConstantHeading(new Vector2d(TILE_SIZE * (2.5 / 4.0), -TILE_SIZE * (1.0/2.0)), FIELD_BEARING_NORTH)
                 .splineToSplineHeading(new Pose2d(TILE_SIZE * (2.5 / 4.0), START_POS_RED_RIGHT.getY() + TILE_SIZE * 2, FIELD_BEARING_EAST), FIELD_BEARING_EAST + PI/3)
                 .splineToConstantHeading(new Vector2d(TILE_SIZE, -TILE_SIZE / 2.0 - 2), FIELD_BEARING_EAST)
                 .splineToConstantHeading(new Vector2d(TILE_SIZE * (3.0 / 2.0), -TILE_SIZE / 2.0 - 2.5), FIELD_BEARING_EAST)
@@ -68,9 +73,9 @@ public class HorizontalCalibrator extends LinearOpMode {
 
         runTrajectory(trajectories[0]);  // approach forward high junction
 
-        runTrajectory(trajectories[1]); // Go to cone stack
+        runTrajectory(trajectories[2]); // Go to cone stack
 
-        runTrajectory(trajectories[2]); // Low junction adjacent to cone stack
+        runTrajectory(trajectories[1]); // Low junction adjacent to cone stack
     }
 
     public void runTrajectory(Trajectory trajectory) {

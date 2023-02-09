@@ -1,9 +1,12 @@
 package com.vcinventerman.pathvisualizer;
 
 
+import static com.vcinventerman.pathvisualizer.TeamConf.CLAW_TUNE_X;
+import static com.vcinventerman.pathvisualizer.TeamConf.CLAW_TUNE_Y;
 import static com.vcinventerman.pathvisualizer.TeamConf.FIELD_BEARING_NORTH;
 import static com.vcinventerman.pathvisualizer.TeamConf.FIELD_BEARING_SOUTH;
 import static com.vcinventerman.pathvisualizer.TeamConf.JUNCTIONS;
+import static com.vcinventerman.pathvisualizer.TeamConf.ROBOTA_CLAW_OFFSET;
 import static com.vcinventerman.pathvisualizer.TeamConf.ROBOT_CLAW_OFFSET;
 import static com.vcinventerman.pathvisualizer.TeamConf.ROBOT_DRIVE_INST;
 import static com.vcinventerman.pathvisualizer.TeamConf.TILE_SIZE;
@@ -184,8 +187,16 @@ public class PathTools {
     }
 
     public static Pose2d addClawOffset(Pose2d pos) {
-        Vector2d rotated = ROBOT_CLAW_OFFSET.rotated(pos.getHeading());
-        return pos.minus(new Pose2d(rotated, 0));
+        Vector2d offset = new Vector2d(ROBOTA_CLAW_OFFSET.getX() + CLAW_TUNE_X, ROBOTA_CLAW_OFFSET.getY() + CLAW_TUNE_Y);
+
+        //Vector2d rotated = offset.rotated(pos.getHeading());
+        Vector2d rotated = pos.vec().rotated(-pos.getHeading());
+        rotated = rotated.plus(offset);
+        rotated = rotated.rotated(pos.getHeading());
+        return new Pose2d(rotated.getX(), rotated.getY(), pos.getHeading());
+
+        //Pose2d minus = pos.plus(new Pose2d(rotated, 0));
+        //return new Pose2d(rotated.getX() + offset.getX(), rotated.getY() + offset.getY(), pos.getHeading());
     }
 
     public static List<Pose2d> addClawOffsetList(List<Pose2d> poses) {

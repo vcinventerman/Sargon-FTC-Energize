@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import static com.outoftheboxrobotics.photoncore.PhotonCore.EXPANSION_HUB;
 import static org.firstinspires.ftc.teamcode.TeamConf.CONE_STACK_POS_RED_RIGHT;
 import static org.firstinspires.ftc.teamcode.TeamConf.FIELD_BEARING_EAST;
 import static org.firstinspires.ftc.teamcode.TeamConf.FIELD_BEARING_NORTH;
@@ -50,7 +51,7 @@ public class RightAuto extends LinearOpMode {
         Trajectory[] trajectories = new Trajectory[9];
 
         trajectories[0] = getTrajBuilder(START_POS_RED_RIGHT) // Forward junction
-                .splineToConstantHeading(new Vector2d(TILE_SIZE * (3.0 / 4.0), START_POS_RED_RIGHT.getY() + 6), FIELD_BEARING_NORTH)
+                .splineToConstantHeading(new Vector2d(TILE_SIZE * (2.0 / 4.0), START_POS_RED_RIGHT.getY() + 6), FIELD_BEARING_NORTH)
 
                 //.splineToSplineHeading(new Pose2d(TILE_SIZE * (1.0 / 4.0), START_POS_RED_RIGHT.getY() + TILE_SIZE, FIELD_BEARING_NORTH + PI/4), FIELD_BEARING_NORTH + PI/4)
                 .splineTo(addClawOffsetVec(JUNCTIONS.get(1), FIELD_BEARING_NORTH + PI / 4).vec(), FIELD_BEARING_NORTH + PI / 4)
@@ -185,9 +186,9 @@ public class RightAuto extends LinearOpMode {
     public void calibrateSlide() {
         if (isStopRequested() || ! (robot.slide.winch instanceof WinchMotor)) { return; }
 
-        long current = System.currentTimeMillis();
+        long currentTime = System.currentTimeMillis();
 
-        while (System.currentTimeMillis() < current + CALIBRATE_TIME) {
+        while (System.currentTimeMillis() < currentTime + CALIBRATE_TIME) {
             if (isStopRequested()) { return; }
 
             robot.update();

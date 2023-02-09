@@ -79,16 +79,16 @@ public class PathVisualizer {
         Path path = new Path(new ArrayList<>());
 
 
+        Pose2d startPose = START_POS_RED_RIGHT;
+        double endBearing = FIELD_BEARING_NORTH + Math.PI / 4;
+        Pose2d endPose = new Pose2d(TILE_SIZE, 0,  endBearing);
+
+        Pose2d adjustedEnd = PathTools.addClawOffset(endPose);
 
 
         //RedRight
         myBot.followTrajectorySequence(myBot.getDrive().trajectorySequenceBuilder(addClawOffset(CONE_STACK_POS_RED_RIGHT))
-                .addTrajectory(getTrajBuilder(addClawOffset(CONE_STACK_POS_RED_RIGHT)) // Low junction adjacent to cone stack
-                        //.back(TILE_SIZE / 4)
-                        //.splineToSplineHeading(addClawOffsetVec(JUNCTIONS.get(11), Math.PI * (3.0 / 2)), Math.PI * (3.0 / 2))
-
-                        .lineToLinearHeading(addClawOffset(CONE_STACK_POS_RED_LEFT))
-                        .build())
+                .addTrajectory(getTrajBuilder(startPose).lineToLinearHeading(adjustedEnd).build())
 
 
                 /*.addTrajectory(getTrajBuilder(START_POS_RED_RIGHT) // Forward junction

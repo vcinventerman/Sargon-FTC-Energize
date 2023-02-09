@@ -42,15 +42,17 @@ public class TeamConf {
 
     // Senior team robot
     public static double ROBOTA_LENGTH = 14.5;
-    public static double ROBOTA_WIDTH = 13;
+    public static double ROBOTA_WIDTH = 12.75;
     public static String ROBOTA_IMU_DEFAULT = "imu1"; // imu0 is in control hub, imu1 is in expansion hub
-    public static Vector2d ROBOTA_CLAW_OFFSET = new Vector2d(9.25, 2.0);
+    public static double CLAW_TUNE_X = 0.0;
+    public static double CLAW_TUNE_Y = 0.0;
+    public static Vector2d ROBOTA_CLAW_OFFSET = new Vector2d(-9.25 - 3, -1.17 - -.15 - 2 + 0.75);
 
     // Freshman team robot
     public static double ROBOTB_LENGTH = 18;
     public static double ROBOTB_WIDTH = 18;
     public static String ROBOTB_IMU_DEFAULT = "imu"; // imu0 is in control hub, imu1 is in expansion hub
-    public static Vector2d ROBOTB_CLAW_OFFSET = new Vector2d(8.5, 0.0);
+    public static Vector2d ROBOTB_CLAW_OFFSET = new Vector2d(8.5 + 3,  -.15);
 
     // Choose current robot here
     public static double ROBOT_LENGTH = ROBOTA_LENGTH;
@@ -62,8 +64,8 @@ public class TeamConf {
     // Distance from center to claw
     public static Vector2d ROBOT_CLAW_OFFSET = ROBOTA_CLAW_OFFSET;
 
-    public static Pose2d START_POS_RED_LEFT = new Pose2d(-30.5, -(FIELD_WIDTH / 2) + (ROBOT_LENGTH / 2), FIELD_BEARING_NORTH);
-    public static Pose2d START_POS_RED_RIGHT = new Pose2d(29.5, -(FIELD_WIDTH / 2) + (ROBOT_LENGTH / 2), FIELD_BEARING_NORTH);
+    public static Pose2d START_POS_RED_LEFT = new Pose2d(-24 - ROBOT_WIDTH / 2.0, -(FIELD_WIDTH / 2) + (ROBOT_LENGTH / 2) + 2.4, FIELD_BEARING_NORTH);
+    public static Pose2d START_POS_RED_RIGHT = new Pose2d(24 + ROBOT_WIDTH / 2.0, -(FIELD_WIDTH / 2) + (ROBOT_LENGTH / 2) - 2.4, FIELD_BEARING_NORTH);
     public static Pose2d START_POS_BLUE_LEFT = new Pose2d(30.5, (FIELD_WIDTH / 2) - (ROBOT_LENGTH / 2), FIELD_BEARING_SOUTH);
     public static Pose2d START_POS_BLUE_RIGHT = new Pose2d(-30.5, (FIELD_WIDTH / 2) - (ROBOT_LENGTH / 2), FIELD_BEARING_SOUTH);
     public static List<Pose2d> START_POSITIONS = Arrays.asList(START_POS_RED_LEFT, START_POS_RED_RIGHT, START_POS_BLUE_LEFT, START_POS_BLUE_RIGHT);
