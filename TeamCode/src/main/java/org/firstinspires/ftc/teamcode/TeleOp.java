@@ -40,6 +40,7 @@ public class TeleOp extends SupervisedOpMode {
         telemetry = new MultipleTelemetry(super.telemetry, FtcDashboard.getInstance().getTelemetry());
 
         robot = getRobot(hardwareMap);
+        robot.setPose(new Pose2d(0,0,0));
 
         //liftButton = new GamepadButton(gamepad1, GamepadKeys.Button.A);
         //liftCloseButton = new GamepadButton(gamepad1, GamepadKeys.Button.B);
@@ -114,6 +115,7 @@ public class TeleOp extends SupervisedOpMode {
         }
 
         if (gamepad1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
+            // Assert that home is here
             robot.slide.winch.resetEncoder();
             //robot.slide.currentWinchTarget = 0;
             //robot.slide.winchActive = false;

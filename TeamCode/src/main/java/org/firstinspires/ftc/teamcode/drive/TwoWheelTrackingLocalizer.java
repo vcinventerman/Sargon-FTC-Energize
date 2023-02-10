@@ -45,7 +45,7 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
     public static double PARALLEL_X = 0.25; // X is the up and down direction // Doesn't matter
     public static double PARALLEL_Y = 6; // Y is the strafe direction
 
-    public static double PERPENDICULAR_X = 0.4;
+    public static double PERPENDICULAR_X = 0.45;
     public static double PERPENDICULAR_Y = 0; // Doesn't matter
     public static double PERPENDICULAR_ANGLE = Math.toRadians(90);
 

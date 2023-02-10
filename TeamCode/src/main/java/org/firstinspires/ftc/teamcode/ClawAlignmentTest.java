@@ -80,7 +80,23 @@ public class ClawAlignmentTest extends LinearOpMode {
         robot.waitToComplete();
 
         for (int i = 0; opModeIsActive(); i = (i + 1) % 8) {
-            robot.followTrajectory(trajs[i]);
+            runTrajectory(trajs[i]);
+        }
+    }
+
+    public void runTrajectory(Trajectory trajectory) {
+        if (!opModeIsActive()) { return; }
+
+        robot.followTrajectory(trajectory);
+
+        while (robot.isBusy() && opModeIsActive()) {
+            robot.update();
+
+            Pose2d poseEstimate = robot.getPoseEstimate();
+            telemetry.addData("x", poseEstimate.getX());
+            telemetry.addData("y", poseEstimate.getY());
+            telemetry.addData("heading", poseEstimate.getHeading());
+            telemetry.update();
         }
     }
 }

@@ -100,9 +100,17 @@ public class PathVisualizer {
         }
 
 
-        myBot.followTrajectorySequence(seqBuilder.build());
+        //myBot.followTrajectorySequence(seqBuilder.build());
 
+        myBot.followTrajectorySequence(myBot.getDrive().trajectorySequenceBuilder(addClawOffset(CONE_STACK_POS_RED_RIGHT))
+                .addTrajectory(getTrajBuilder(START_POS_RED_RIGHT) // Forward junction
+                        .splineToConstantHeading(new Vector2d(TILE_SIZE * (2.0 / 4.0), START_POS_RED_RIGHT.getY() + 6), FIELD_BEARING_NORTH)
 
+                        //.splineToSplineHeading(new Pose2d(TILE_SIZE * (1.0 / 4.0), START_POS_RED_RIGHT.getY() + TILE_SIZE, FIELD_BEARING_NORTH + PI/4), FIELD_BEARING_NORTH + PI/4)
+                        .splineTo(JUNCTIONS.get(1), FIELD_BEARING_NORTH + PI / 4)
+                        .build()
+
+                ).build());
     }
 
 

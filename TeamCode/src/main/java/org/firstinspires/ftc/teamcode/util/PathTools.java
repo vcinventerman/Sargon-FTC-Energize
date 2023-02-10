@@ -183,7 +183,8 @@ public class PathTools {
         double newX = offset.getX() * Math.cos(pos.getHeading()) - offset.getY() * Math.sin(pos.getHeading());
         double newY = offset.getX() * Math.sin(pos.getHeading()) + offset.getY() * Math.cos(pos.getHeading());
 
-        return new Pose2d(pos.getX() + newX, pos.getY() + newY, pos.getHeading());
+        //return new Pose2d(pos.getX() + newX, pos.getY() + newY, pos.getHeading());
+        return pos;
     }
 
     public static List<Pose2d> addClawOffsetList(List<Pose2d> poses) {

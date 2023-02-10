@@ -164,26 +164,30 @@ public class LinearSlideA {
     }
 
     public Integer coneStackState = 0;
-    public void goToNextConeStackHeight() {
-        List<Double> coneStackHeights = Arrays.asList(CONE_HEIGHT + CONE_STACK_OFFSET * 4,
-                CONE_HEIGHT + CONE_STACK_OFFSET * 3, CONE_HEIGHT + CONE_STACK_OFFSET * 2,
-                CONE_HEIGHT + CONE_STACK_OFFSET * 1, CONE_HEIGHT);
 
-        setCurrentWinchTarget((int)(coneStackHeights.get(coneStackState) * p.WINCH_TICKS_PER_INCH));
+    public static int CONE_STACK_0 = 0;
+    public static int CONE_STACK_1 = 160;
+    public static int CONE_STACK_2 = 252;
+    public static int CONE_STACK_3 = 366;
+    public static int CONE_STACK_4 = 442;
+
+
+    public void goToNextConeStackHeight() {
+        List<Integer> coneStackHeights = Arrays.asList(CONE_STACK_4, CONE_STACK_3, CONE_STACK_2, CONE_STACK_1, CONE_STACK_0);
+
+        setCurrentWinchTarget(coneStackHeights.get(coneStackState));
 
         coneStackState = coneStackState >= p.CONE_STACK_HEIGHTS.size() - 1 ? 0 : coneStackState + 1;
     }
 
     public int getNextConeStackHeight() {
-        List<Double> coneStackHeights = Arrays.asList(CONE_HEIGHT + CONE_STACK_OFFSET * 4,
-                CONE_HEIGHT + CONE_STACK_OFFSET * 3, CONE_HEIGHT + CONE_STACK_OFFSET * 2,
-                CONE_HEIGHT + CONE_STACK_OFFSET * 1, CONE_HEIGHT);
+        List<Integer> coneStackHeights = Arrays.asList(CONE_STACK_4, CONE_STACK_3, CONE_STACK_2, CONE_STACK_1, CONE_STACK_0);
 
         int prevConeStackState = coneStackState;
 
         coneStackState = coneStackState >= p.CONE_STACK_HEIGHTS.size() - 1 ? 0 : coneStackState + 1;
 
-        return ((int)(coneStackHeights.get(prevConeStackState) * p.WINCH_TICKS_PER_INCH));
+        return (coneStackHeights.get(prevConeStackState));
     }
 
     public void disableAutomaticWinch() {

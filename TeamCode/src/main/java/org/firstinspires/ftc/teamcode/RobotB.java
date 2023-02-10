@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 
 @Config
 public class RobotB extends Robot {
-    public org.firstinspires.ftc.teamcode.drive.HDrive drive;
+    public org.firstinspires.ftc.teamcode.drive.SampleTankDrive drive;
 
     public HDrive manualDrive;
 
@@ -71,7 +71,7 @@ public class RobotB extends Robot {
     public RobotB(HardwareMap hardwareMap) {
         PhotonCore.enable();
 
-        drive = new org.firstinspires.ftc.teamcode.drive.HDrive(hardwareMap);
+        drive = new org.firstinspires.ftc.teamcode.drive.SampleTankDrive(hardwareMap);
 
         LinearSlideA.SlideConstants constants = new LinearSlideA.SlideConstants();
         constants.WINCH_TOLERANCE = WINCH_TOLERANCE;
