@@ -39,6 +39,9 @@ public class WinchMotor extends MotorEx {
 
     public VoltageSensor batteryVoltageSensor;
 
+    public double lastTargetPosition = 0;
+    public int lastTargetPositionCurrent = 0;
+
     public WinchMotor(@NonNull HardwareMap hMap, String id) {
         super(hMap, id);
 
@@ -65,8 +68,13 @@ public class WinchMotor extends MotorEx {
     }
 
     public static double ERROR_THRESHOLD = 200;
-    public static double DOWN_SLOW_THRESHOLD = 200;
     public static double LOWERING_MULT = 0.000001;
+
+    // Threshold at which we can start floating instead of holding down and still reach the setpoint
+    public static double DOWN_SLOW_THRESHOLD = 200;
+
+    // Threshold considered "close enough" to goal
+    public static double TARGET_THRESHOLD = 30;
 
     @Override
     public void set(double output) {
@@ -90,6 +98,92 @@ public class WinchMotor extends MotorEx {
             double velocity = veloController.calculate(getVelocity(), speed) + feedforward.calculate(speed, encoder.getAcceleration());
             motor.setPower(velocity / ACHIEVABLE_MAX_TICKS_PER_SECOND + getHoldingPower());
         } else if (runmode == RunMode.PositionControl) {
+            double setpoint = positionController.getSetPoint();
+            int current = getCurrentPosition();
+            double error = positionController.calculate(getDistance());
+
+            // Whether the target position was set while beneath it, meaning we want to rise
+            boolean startedBelowSetpoint = lastTargetPositionCurrent < setpoint;
+
+            // Targeting home position
+            if (setpoint == 0) {
+                if (startedBelowSetpoint) {
+                    // Return to the home point
+                    motor.setPower(getHoldingPower());
+                }
+                else if (current < DOWN_SLOW_THRESHOLD) {
+                    motor.setPower(-1.0);
+                }
+                else {
+                    // Coast the rest of the way down
+                    motor.setPower(0.0);
+                }
+            }
+
+            // Rising to setpoint
+            else if (startedBelowSetpoint) {
+                motor.setPower(output * error);
+            }
+            // Falling to setpoint
+            else {
+                if (current + TARGET_THRESHOLD < setpoint) {
+                    // We have fallen beneath the setpoint, this should never happen
+                    motor.setPower(output * error);
+                }
+                else if (within(current, setpoint, TARGET_THRESHOLD)) {
+                    // At target, hold
+                    motor.setPower(getHoldingPower());
+                }
+                if (within(current, setpoint, DOWN_SLOW_THRESHOLD)) {
+                    // Pretty close, coast
+                    motor.setPower(0.0);
+                }
+                else {
+                    // Go full speed
+                    motor.setPower(-1.0);
+                }
+            }
+
+            return;
+        }
+        else {
+            motor.setPower(getHoldingPower() + output);
+        }
+    }
+
+    public void setHold(boolean status) {
+        hold = status;
+    }
+    public double getHoldingPower() {
+        return holdingPower * 12 / batteryVoltageSensor.getVoltage();
+    }
+
+
+    public void setRawPower(double power) {
+        motor.setPower(power);
+    }
+
+    @Override
+    public void setTargetPosition(int target) {
+        lastTargetPositionCurrent = getCurrentPosition();
+        lastTargetPosition = positionController.getSetPoint();
+
+        super.setTargetPosition(target);
+    }
+}
+
+
+
+/*
+if (hold && output < holdingPower && !(holdingPower < 0.0)) {
+                motor.setPower(output + getHoldingPower());
+            } else {
+                motor.setPower(output);
+            }
+ */
+
+/*
+
             if (within(getCurrentPosition(), positionController.getSetPoint(), HOME_THRESHOLD) &&
                     positionController.getSetPoint() == 0) {
                 // Don't ever apply any holding pressure if our target is zero
@@ -126,25 +220,4 @@ public class WinchMotor extends MotorEx {
             else {
                 motor.setPower(power + getHoldingPower());
             }
-        }
-        else {
-            if (hold && output < holdingPower && !(holdingPower < 0.0)) {
-                motor.setPower(output + getHoldingPower());
-            } else {
-                motor.setPower(output);
-            }
-        }
-    }
-
-    public void setHold(boolean status) {
-        hold = status;
-    }
-    public double getHoldingPower() {
-        return holdingPower * 12 / batteryVoltageSensor.getVoltage();
-    }
-
-
-    public void setRawPower(double power) {
-        motor.setPower(power);
-    }
-}
+ */

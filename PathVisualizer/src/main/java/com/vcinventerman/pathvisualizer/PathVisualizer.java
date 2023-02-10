@@ -26,10 +26,12 @@ import com.acmerobotics.roadrunner.path.ParametricCurve;
 import com.acmerobotics.roadrunner.path.Path;
 import com.acmerobotics.roadrunner.path.PathBuilder;
 import com.acmerobotics.roadrunner.path.PathSegment;
+import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
 import com.noahbres.meepmeep.MeepMeep;
 import com.noahbres.meepmeep.roadrunner.DefaultBotBuilder;
 import com.noahbres.meepmeep.roadrunner.DriveTrainType;
 import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
+import com.noahbres.meepmeep.roadrunner.trajectorysequence.TrajectorySequenceBuilder;
 import com.sun.tools.javac.util.List;
 
 import java.util.ArrayList;
@@ -71,7 +73,6 @@ public class PathVisualizer {
                 .addEntity(myBot)
                 .start();
 
-
         PathBuilder pathBuilder = new PathBuilder(addClawOffsetVec(JUNCTIONS.get(1), FIELD_BEARING_NORTH + Math.PI / 4));
         //PathBuilder e = new PathBuilder()
         //ParametricCurve e = new ParametricCurve
@@ -86,9 +87,40 @@ public class PathVisualizer {
         Pose2d adjustedEnd = PathTools.addClawOffset(endPose);
 
 
-        //RedRight
-        myBot.followTrajectorySequence(myBot.getDrive().trajectorySequenceBuilder(addClawOffset(CONE_STACK_POS_RED_RIGHT))
-                .addTrajectory(getTrajBuilder(startPose).lineToLinearHeading(adjustedEnd).build())
+        TrajectorySequenceBuilder seqBuilder = myBot.getDrive().trajectorySequenceBuilder(addClawOffset(CONE_STACK_POS_RED_RIGHT));
+
+        for (int i = 0; i < 9; i++) {
+            seqBuilder.addTrajectory(getTrajBuilder(
+                    PathTools.addClawOffset(new Pose2d(endPose.getX(), endPose.getY(), PI * (i - 1) / 4.0))
+            ).lineToLinearHeading(PathTools.addClawOffset(new Pose2d(endPose.getX(), endPose.getY(), PI * (i) / 4.0))).build());
+
+            seqBuilder.addTrajectory(getTrajBuilder(
+                    PathTools.addClawOffsetAlt(new Pose2d(endPose.getX(), endPose.getY(), PI * (i - 1) / 4.0))
+            ).lineToLinearHeading(PathTools.addClawOffsetAlt(new Pose2d(endPose.getX(), endPose.getY(), PI * (i) / 4.0))).build());
+        }
+
+
+        myBot.followTrajectorySequence(seqBuilder.build());
+
+
+    }
+
+
+
+
+
+
+    static String variation = "RedLeft";
+    static RoadRunnerBotEntity myBot;
+
+}
+
+
+
+
+//RedRight
+        //myBot.followTrajectorySequence(myBot.getDrive().trajectorySequenceBuilder(addClawOffset(CONE_STACK_POS_RED_RIGHT))
+         //       .addTrajectory(getTrajBuilder(startPose).lineToLinearHeading(adjustedEnd).build())
 
 
                 /*.addTrajectory(getTrajBuilder(START_POS_RED_RIGHT) // Forward junction
@@ -150,24 +182,3 @@ public class PathVisualizer {
                         .splineToSplineHeading(addClawOffset(CONE_STACK_POS_RED_RIGHT), 0)
                         //todo: straight approach to let claw lower
                         .build())*/
-
-                //.splineToLinearHeading(addClawOffset(CONE_STACK_POS_RED_RIGHT), FIELD_BEARING_EAST) // Stack
-
-
-
-
-                //.addTrajectory(safeTrajTo(addClawOffset(CONE_STACK_POS_RED_RIGHT), new Pose2d(TILE_SIZE / 2.0, -TILE_SIZE / 2.0, 0)))
-                .build());
-
-
-    }
-
-
-
-
-
-
-    static String variation = "RedLeft";
-    static RoadRunnerBotEntity myBot;
-
-}

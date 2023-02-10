@@ -191,6 +191,17 @@ public class PathTools {
     public static Pose2d addClawOffset(Pose2d pos) {
         Vector2d offset = ROBOT_CLAW_OFFSET;
 
+        return pos.plus(new Pose2d(offset.rotated(pos.getHeading()), 0));
+
+        /*double newX = offset.getX() * Math.cos(pos.getHeading()) - offset.getY() * Math.sin(pos.getHeading());
+        double newY = offset.getX() * Math.sin(pos.getHeading()) + offset.getY() * Math.cos(pos.getHeading());
+
+        return new Pose2d(pos.getX() + newX, pos.getY() + newY, pos.getHeading());*/
+    }
+
+    public static Pose2d addClawOffsetAlt(Pose2d pos) {
+        Vector2d offset = ROBOT_CLAW_OFFSET;
+
         double newX = offset.getX() * Math.cos(pos.getHeading()) - offset.getY() * Math.sin(pos.getHeading());
         double newY = offset.getX() * Math.sin(pos.getHeading()) + offset.getY() * Math.cos(pos.getHeading());
 

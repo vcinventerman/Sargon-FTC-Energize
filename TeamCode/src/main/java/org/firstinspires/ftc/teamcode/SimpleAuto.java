@@ -6,7 +6,10 @@ import static org.firstinspires.ftc.teamcode.TeamConf.START_POS_BLUE_RIGHT;
 import static org.firstinspires.ftc.teamcode.TeamConf.START_POS_RED_LEFT;
 import static org.firstinspires.ftc.teamcode.TeamConf.START_POS_RED_RIGHT;
 import static org.firstinspires.ftc.teamcode.TeamConf.TILE_SIZE;
+import static org.firstinspires.ftc.teamcode.TeamConf.getRobot;
 import static org.firstinspires.ftc.teamcode.TeamConf.sleep;
+import static org.firstinspires.ftc.teamcode.util.PathTools.getTrajBuilder;
+
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
@@ -19,22 +22,13 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceBuild
 //todo: MUST construct trajectories in another thread or keep winch ticking in any way
 @Supervised(name="Simple?Auto", group="!CompAuto", autonomous=true, linear=true, variations={"RedLeft", "RedRight", "BlueLeft", "BlueRight"}, next="TeleOp")
 public class SimpleAuto extends SupervisedOpMode {
-    RobotA robot;
+    Robot robot;
     AprilTagDetector detector;
-
-
-
-
-
-
-
-
-
 
     Trajectory[] trajectories = null;
     // Code that runs when the INIT button is pressed (mandatory)
     public void init() {
-        robot = new RobotA(hardwareMap,false);
+        robot = getRobot(hardwareMap);
         // Detect AprilTags
         detector = new AprilTagDetector(hardwareMap, List.of(21, 22, 23));
     }
@@ -83,8 +77,8 @@ public class SimpleAuto extends SupervisedOpMode {
 // fix waitToReachWinchTarget
     }
     public void runTrajectory(Trajectory trajectory) {
-        robot.drive.followTrajectoryAsync(trajectory);
-        while (robot.drive.isBusy()) {
+        robot.followTrajectory(trajectory);
+        while (robot.isBusy()) {
             robot.update();
         }
     }
@@ -111,12 +105,12 @@ public class SimpleAuto extends SupervisedOpMode {
     }
     public TrajectorySequenceBuilder faceToCenter(TrajectorySequenceBuilder seq) {
         if (getAlliance() == TeamConf.Alliance.BLUE) {
-            //seq.splineToLinearHeading(robot.drive.getPoseEstimate(), FIELD_BEARING_SOUTH);
-            seq.lineToLinearHeading(new Pose2d(robot.drive.getPoseEstimate().getX(), robot.drive.getPoseEstimate().getY(), FIELD_BEARING_SOUTH));
+            //seq.splineToLinearHeading(robot.getPoseEstimate(), FIELD_BEARING_SOUTH);
+            seq.lineToLinearHeading(new Pose2d(robot.getPoseEstimate().getX(), robot.getPoseEstimate().getY(), FIELD_BEARING_SOUTH));
         }
         else {
-            //seq.splineToLinearHeading(robot.drive.getPoseEstimate(), FIELD_BEARING_NORTH);
-            seq.lineToLinearHeading(new Pose2d(robot.drive.getPoseEstimate().getX(), robot.drive.getPoseEstimate().getY(), FIELD_BEARING_NORTH));
+            //seq.splineToLinearHeading(robot.getPoseEstimate(), FIELD_BEARING_NORTH);
+            seq.lineToLinearHeading(new Pose2d(robot.getPoseEstimate().getX(), robot.getPoseEstimate().getY(), FIELD_BEARING_NORTH));
         }
         return seq;
     }
@@ -166,12 +160,12 @@ public class SimpleAuto extends SupervisedOpMode {
             }
         }
         // Do nothing on error
-        return robot.drive.getPoseEstimate();
+        return robot.getPoseEstimate();
     }
     // Returns the angle the robot needs to turn to before moving forward and the point it needs to drive to
     //todo: claw probably isn't even in the center
     Pose2d centerConeOverJunction(Vector2d junctionPos, Vector2d robotPos) {
-        //Vector2d robotPos = robot.drive.getPoseEstimate().vec();
+        //Vector2d robotPos = robot.getPoseEstimate().vec();
         double angle = Math.atan((junctionPos.getY() - robotPos.getY()) / (junctionPos.getX() - robotPos.getX()));
         double hyp = Math.sqrt(Math.pow(junctionPos.getX() - robotPos.getX(), 2) + Math.pow(junctionPos.getY() - robotPos.getY(), 2))
                 - 10.5; // distance from center of robot to claw which is on a horizontal center axis
@@ -183,85 +177,85 @@ public class SimpleAuto extends SupervisedOpMode {
         trajectories = new Trajectory[5];
         if (variation.equals("RedLeft")) {
             Pose2d startPos = START_POS_RED_LEFT;
-            robot.drive.setPoseEstimate(startPos);
-            trajectories[0] = robot.drive.trajectoryBuilder(startPos)
+            robot.setPose(startPos);
+            trajectories[0] = getTrajBuilder(startPos)
                     .forward(TILE_SIZE * (5.0 / 2.0)) // Get the signal cone out of the way
                     .build();
             // Wait for the winch to rise all the way
-            trajectories[1] = robot.drive.trajectoryBuilder(trajectories[0].end())
+            trajectories[1] = getTrajBuilder(trajectories[0].end())
                     .back(TILE_SIZE / 2)
                     .build();
-            trajectories[2] = robot.drive.trajectoryBuilder(trajectories[1].end())
+            trajectories[2] = getTrajBuilder(trajectories[1].end())
                     .lineToLinearHeading(centerConeOverJunction(new Vector2d(TILE_SIZE, 0), trajectories[1].end().vec()))
                     .build();
             // Release cone
-            trajectories[3] = robot.drive.trajectoryBuilder(trajectories[2].end())
+            trajectories[3] = getTrajBuilder(trajectories[2].end())
                     .strafeTo(new Vector2d(startPos.getX(), startPos.getY() + TILE_SIZE * 2))
                     .build();
-            trajectories[4] = robot.drive.trajectoryBuilder(trajectories[1].end())
+            trajectories[4] = getTrajBuilder(trajectories[1].end())
                     .lineToLinearHeading(getSignalSpot(tag))
                     .build();
         }
         else if (variation.equals("RedRight")) {
             Pose2d startPos = START_POS_RED_RIGHT;
-            robot.drive.setPoseEstimate(startPos);
-            trajectories[0] = robot.drive.trajectoryBuilder(startPos)
+            robot.setPose(startPos);
+            trajectories[0] = getTrajBuilder(startPos)
                     .forward(TILE_SIZE * (5.0 / 2.0)) // Get the signal cone out of the way
                     .build();
             // Wait for the winch to rise all the way
-            trajectories[1] = robot.drive.trajectoryBuilder(trajectories[0].end())
+            trajectories[1] = getTrajBuilder(trajectories[0].end())
                     .back(TILE_SIZE / 2)
                     .build();
-            trajectories[2] = robot.drive.trajectoryBuilder(trajectories[1].end())
+            trajectories[2] = getTrajBuilder(trajectories[1].end())
                     .lineToLinearHeading(centerConeOverJunction(new Vector2d(TILE_SIZE, 0), trajectories[1].end().vec()))
                     .build();
             // Release cone
-            trajectories[3] = robot.drive.trajectoryBuilder(trajectories[2].end())
+            trajectories[3] = getTrajBuilder(trajectories[2].end())
                     .strafeTo(new Vector2d(startPos.getX(), startPos.getY() + TILE_SIZE * 2))
                     .build();
-            trajectories[4] = robot.drive.trajectoryBuilder(trajectories[1].end())
+            trajectories[4] = getTrajBuilder(trajectories[1].end())
                     .lineToLinearHeading(getSignalSpot(tag))
                     .build();
         }
         else if (variation.equals("BlueLeft")) {
             Pose2d startPos = START_POS_BLUE_LEFT;
-            robot.drive.setPoseEstimate(startPos);
-            trajectories[0] = robot.drive.trajectoryBuilder(startPos)
+            robot.setPose(startPos);
+            trajectories[0] = getTrajBuilder(startPos)
                     .forward(TILE_SIZE * (5.0 / 2.0)) // Get the signal cone out of the way
                     .build();
             // Wait for the winch to rise all the way
-            trajectories[1] = robot.drive.trajectoryBuilder(trajectories[0].end())
+            trajectories[1] = getTrajBuilder(trajectories[0].end())
                     .back(TILE_SIZE / 2)
                     .build();
-            trajectories[2] = robot.drive.trajectoryBuilder(trajectories[1].end())
+            trajectories[2] = getTrajBuilder(trajectories[1].end())
                     .lineToLinearHeading(centerConeOverJunction(new Vector2d(TILE_SIZE, 0), trajectories[1].end().vec()))
                     .build();
             // Release cone
-            trajectories[3] = robot.drive.trajectoryBuilder(trajectories[2].end())
+            trajectories[3] = getTrajBuilder(trajectories[2].end())
                     .strafeTo(new Vector2d(startPos.getX(), startPos.getY() - TILE_SIZE * 2))
                     .build();
-            trajectories[4] = robot.drive.trajectoryBuilder(trajectories[1].end())
+            trajectories[4] = getTrajBuilder(trajectories[1].end())
                     .lineToLinearHeading(getSignalSpot(tag))
                     .build();
         }
         else { // if (variation.equals("BlueRightAuto")) {
             Pose2d startPos = START_POS_BLUE_RIGHT;
-            robot.drive.setPoseEstimate(startPos);
-            trajectories[0] = robot.drive.trajectoryBuilder(startPos)
+            robot.setPose(startPos);
+            trajectories[0] = getTrajBuilder(startPos)
                     .forward(TILE_SIZE * (5.0 / 2.0)) // Get the signal cone out of the way
                     .build();
             // Wait for the winch to rise all the way
-            trajectories[1] = robot.drive.trajectoryBuilder(trajectories[0].end())
+            trajectories[1] = getTrajBuilder(trajectories[0].end())
                     .back(TILE_SIZE / 2)
                     .build();
-            trajectories[2] = robot.drive.trajectoryBuilder(trajectories[1].end())
+            trajectories[2] = getTrajBuilder(trajectories[1].end())
                     .lineToLinearHeading(centerConeOverJunction(new Vector2d(TILE_SIZE, 0), trajectories[1].end().vec()))
                     .build();
             // Release cone
-            trajectories[3] = robot.drive.trajectoryBuilder(trajectories[2].end())
+            trajectories[3] = getTrajBuilder(trajectories[2].end())
                     .strafeTo(new Vector2d(startPos.getX(), startPos.getY() - TILE_SIZE * 2))
                     .build();
-            trajectories[4] = robot.drive.trajectoryBuilder(trajectories[1].end())
+            trajectories[4] = getTrajBuilder(trajectories[1].end())
                     .lineToLinearHeading(getSignalSpot(tag))
                     .build();
         }
