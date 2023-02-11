@@ -68,12 +68,22 @@ public class RightAuto extends LinearOpMode {
         Pose2d coneStackPos = combinePose(CONE_STACK_POS_RED_RIGHT.vec(), comb2_x, comb2_y, CONE_STACK_POS_RED_RIGHT.getHeading());
         Pose2d junc2Pos = combinePose(JUNCTIONS.get(2), comb3_x, comb3_y, FIELD_BEARING_NORTH);
 
-        trajectories[0] = getTrajBuilder(START_POS_RED_RIGHT) // Forward junction
+        trajectories[0] = getTrajBuilder(START_POS_RED_RIGHT).lineTo(new Vector2d(TILE_SIZE * (3.0 / 4.0), START_POS_RED_RIGHT.getY() + 6)).build();
+        trajectories[1] = getTrajBuilder(trajectories[0].end()).splineToLinearHeading(junc1Pos, FIELD_BEARING_NORTH + PI / 4).build();
+
+        trajectories[2] = getTrajBuilder(trajectories[1].end()).strafeRight(TILE_SIZE * 1.0 / 2.0).build();
+        trajectories[3] = getTrajBuilder(trajectories[2].end()).forward(TILE_SIZE).build();
+        trajectories[4] = getTrajBuilder(trajectories[3].end()).lineToLinearHeading(TILE_SIZE * 5.0/6.0).build();
+        trajectories[5] = getTrajBuilder(trajectories[4].end()).strafeLeft(TILE_SIZE * 5.0/6.0).build();
+        trajectories[6] = getTrajBuilder(trajectories[5].end()).strafeLeft(TILE_SIZE * 5.0/6.0).build();
+
+
+        /*trajectories[0] = getTrajBuilder(START_POS_RED_RIGHT) // Forward junction
                 .splineToConstantHeading(new Vector2d(TILE_SIZE * (3.0 / 4.0), START_POS_RED_RIGHT.getY() + 6), FIELD_BEARING_NORTH)
 
                 //.splineToSplineHeading(new Pose2d(TILE_SIZE * (1.0 / 4.0), START_POS_RED_RIGHT.getY() + TILE_SIZE, FIELD_BEARING_NORTH + PI/4), FIELD_BEARING_NORTH + PI/4)
                 .splineTo(junc1Pos.vec(), FIELD_BEARING_NORTH + PI / 4)
-                .build();
+                .build();*/
 
         trajectories[1] = getTrajBuilder(junc1Pos) // Cone stack
                 .back(TILE_SIZE / 8)
