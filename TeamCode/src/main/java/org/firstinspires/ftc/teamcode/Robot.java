@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
+import static com.outoftheboxrobotics.photoncore.PhotonCore.CONTROL_HUB;
+import static com.outoftheboxrobotics.photoncore.PhotonCore.EXPANSION_HUB;
+
 import com.acmerobotics.roadrunner.drive.Drive;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
@@ -22,5 +25,10 @@ public abstract class Robot {
     abstract public boolean isBusy();
     public void waitToComplete() {
         while (isBusy()) { update(); }
+    }
+
+    public void clearBulkCache () {
+        CONTROL_HUB.clearBulkCache();
+        EXPANSION_HUB.clearBulkCache();
     }
 }

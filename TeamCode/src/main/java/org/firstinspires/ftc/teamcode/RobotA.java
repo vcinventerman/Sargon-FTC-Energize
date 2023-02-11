@@ -104,8 +104,7 @@ public class RobotA extends Robot {
 
     public void update()
     {
-        CONTROL_HUB.clearBulkCache();
-        EXPANSION_HUB.clearBulkCache();
+        clearBulkCache();
 
         slide.update();
         drive.update();

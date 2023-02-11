@@ -26,6 +26,7 @@ import com.acmerobotics.roadrunner.path.ParametricCurve;
 import com.acmerobotics.roadrunner.path.Path;
 import com.acmerobotics.roadrunner.path.PathBuilder;
 import com.acmerobotics.roadrunner.path.PathSegment;
+import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
 import com.noahbres.meepmeep.MeepMeep;
 import com.noahbres.meepmeep.roadrunner.DefaultBotBuilder;
@@ -99,18 +100,65 @@ public class PathVisualizer {
             ).lineToLinearHeading(PathTools.addClawOffsetAlt(new Pose2d(endPose.getX(), endPose.getY(), PI * (i) / 4.0))).build());
         }
 
+        Pose2d junc1Pos = combinePose(JUNCTIONS.get(1), 0, 0, FIELD_BEARING_NORTH);
+        Pose2d coneStackPos = combinePose(CONE_STACK_POS_RED_RIGHT.vec(), 0, 0, CONE_STACK_POS_RED_RIGHT.getHeading());
+        Pose2d junc2Pos = combinePose(JUNCTIONS.get(2), 0, 0, FIELD_BEARING_NORTH);
+
+
+        Trajectory[] trajectories = new Trajectory[50];
+
+        trajectories[0] = getTrajBuilder(START_POS_RED_RIGHT).lineTo(new Vector2d(TILE_SIZE * (2.2 / 4.0), START_POS_RED_RIGHT.getY() + 6)).build();
+        trajectories[1] = getTrajBuilder(trajectories[0].end()).splineToLinearHeading(junc1Pos, FIELD_BEARING_NORTH + PI / 4).build();
+
+        // Forward junction to cone stack
+        trajectories[2] = getTrajBuilder(trajectories[1].end()).lineTo(new Vector2d(TILE_SIZE * (1.25 / 4.0), junc1Pos.getY() -10)).build();
+        trajectories[3] = getTrajBuilder(trajectories[2].end()).lineToLinearHeading(new Pose2d(TILE_SIZE * (3.0 / 4.0), -TILE_SIZE/2.0, FIELD_BEARING_EAST)).build();
+        trajectories[4] = getTrajBuilder(trajectories[3].end()).lineToLinearHeading(coneStackPos).build();
+
+        // Cone stack to high junction
+        trajectories[5] = getTrajBuilder(trajectories[4].end()).lineTo(new Vector2d(TILE_SIZE, -TILE_SIZE/2.0)).build();
+        trajectories[6] = getTrajBuilder(trajectories[5].end()).lineToLinearHeading(new Pose2d(trajectories[5].end().getX(), trajectories[5].end().getY() + 1, FIELD_BEARING_NORTH)).build();
+        trajectories[7] = getTrajBuilder(trajectories[6].end()).lineToLinearHeading(junc2Pos).build();
+
+        // High junction back to cone stack
+        trajectories[8] = getTrajBuilder(trajectories[7].end()).lineTo(new Vector2d(TILE_SIZE, -TILE_SIZE/2.0)).build();
+        trajectories[9] = getTrajBuilder(trajectories[8].end()).lineToLinearHeading(new Pose2d(trajectories[5].end().getX() + 1, trajectories[5].end().getY(), FIELD_BEARING_EAST)).build();
+        trajectories[10] = getTrajBuilder(trajectories[9].end()).lineToLinearHeading(coneStackPos).build();
+
+        // High junction to park
+        trajectories[11] = getTrajBuilder(trajectories[7].end()).lineTo(new Vector2d(TILE_SIZE, -TILE_SIZE/2.0)).build();
+        trajectories[12] = getTrajBuilder(trajectories[11].end()).lineTo(new Vector2d(TILE_SIZE / 2.0, -TILE_SIZE/2.0)).build();
+        trajectories[13] = getTrajBuilder(trajectories[11].end()).lineTo(new Vector2d(TILE_SIZE * 3.0 / 2.0, -TILE_SIZE/2.0)).build();
+        trajectories[14] = getTrajBuilder(trajectories[11].end()).lineTo(new Vector2d(TILE_SIZE * 5.0 / 2.0, -TILE_SIZE/2.0)).build();
+
+
+
+
+
 
         //myBot.followTrajectorySequence(seqBuilder.build());
 
         myBot.followTrajectorySequence(myBot.getDrive().trajectorySequenceBuilder(addClawOffset(CONE_STACK_POS_RED_RIGHT))
-                .addTrajectory(getTrajBuilder(START_POS_RED_RIGHT) // Forward junction
-                        .splineToConstantHeading(new Vector2d(TILE_SIZE * (2.0 / 4.0), START_POS_RED_RIGHT.getY() + 6), FIELD_BEARING_NORTH)
 
-                        //.splineToSplineHeading(new Pose2d(TILE_SIZE * (1.0 / 4.0), START_POS_RED_RIGHT.getY() + TILE_SIZE, FIELD_BEARING_NORTH + PI/4), FIELD_BEARING_NORTH + PI/4)
-                        .splineTo(JUNCTIONS.get(1), FIELD_BEARING_NORTH + PI / 4)
-                        .build()
+                .addTrajectory(trajectories[11])
+                .addTrajectory(trajectories[12])
+                .addTrajectory(trajectories[13])
+                .addTrajectory(trajectories[14])
 
-                ).build());
+                //.addTrajectory(trajectories[3])
+
+
+
+                .build());
+    }
+
+
+    static Vector2d combine(Vector2d in, double x, double y) {
+        return new Vector2d(in.getX() + x, in.getY() + y);
+    }
+
+    static Pose2d combinePose(Vector2d in, double x, double y, double heading) {
+        return new Pose2d(in.getX() + x, in.getY() + y, heading);
     }
 
 

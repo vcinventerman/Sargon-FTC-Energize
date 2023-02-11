@@ -35,6 +35,8 @@ public class TeleOp extends SupervisedOpMode {
     ToggleButtonReader fieldCentric;
     GamepadButton resetHeadingButton;
 
+
+
     // Code that runs when the INIT button is pressed (mandatory)
     public void init() {
         telemetry = new MultipleTelemetry(super.telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -117,8 +119,8 @@ public class TeleOp extends SupervisedOpMode {
         if (gamepad1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
             // Assert that home is here
             robot.slide.winch.resetEncoder();
-            //robot.slide.currentWinchTarget = 0;
-            //robot.slide.winchActive = false;
+            robot.clearBulkCache();
+            robot.slide.winch.setTargetPosition(robot.slide.winch.getCurrentPosition());
         }
 
         if (gamepad1.isDown(GamepadKeys.Button.DPAD_LEFT)) {

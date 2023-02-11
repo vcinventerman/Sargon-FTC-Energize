@@ -36,6 +36,8 @@ public class LinearSlideA {
 
     public VoltageSensor batteryVoltageSensor;
 
+    public SlideState state = SlideState.Manual;
+
     public static class SlideConstants {
         public Double WINCH_TOLERANCE = 40.0;
         public Double WINCH_TICKS_PER_INCH = (1390.0 / 24.0);
@@ -67,6 +69,7 @@ public class LinearSlideA {
         currentWinchTarget = p.SLIDE_POS_BOTTOM;
 
         winch = new WinchMotor(hardwareMap, "winch");
+        ((WinchMotor)winch).forceResetEncoder();
         winch.setRunMode(Motor.RunMode.PositionControl);
         //winch.setPositionCoefficient(p.WINCH_COEFFICIENT);
         winch.setPositionTolerance(p.WINCH_TOLERANCE);
@@ -119,6 +122,9 @@ public class LinearSlideA {
 
     public void update()
     {
+        if (state == SlideState.Calibrate) {
+
+        }
         if (!winchManualMode) {
             winch.set(WINCH_SPEED);
         }
@@ -198,5 +204,11 @@ public class LinearSlideA {
 
     public void setClawTarget(double degrees) {
         claw.turnToAngle(degrees);
+    }
+
+    enum SlideState {
+        Position,
+        Manual,
+        Calibrate
     }
 }

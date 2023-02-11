@@ -10,6 +10,8 @@ import static org.firstinspires.ftc.teamcode.TeamConf.ROBOT_CLAW_OFFSET;
 import static org.firstinspires.ftc.teamcode.TeamConf.ROBOT_DRIVE_INST;
 import static org.firstinspires.ftc.teamcode.TeamConf.TILE_SIZE;
 
+import androidx.annotation.NonNull;
+
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
@@ -18,10 +20,12 @@ import com.acmerobotics.roadrunner.trajectory.constraints.AngularVelocityConstra
 import com.acmerobotics.roadrunner.trajectory.constraints.MecanumVelocityConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.MinVelocityConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.ProfileAccelerationConstraint;
+import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityConstraint;
 
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceBuilder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,6 +59,14 @@ public class PathTools {
                 new AngularVelocityConstraint(DriveConstants.MAX_ANG_VEL),
                 new MecanumVelocityConstraint(DriveConstants.MAX_VEL, DriveConstants.TRACK_WIDTH)
         )), new ProfileAccelerationConstraint(DriveConstants.MAX_ACCEL));
+    }
+
+    public static double SLOW_TRAJ_FACTOR = 1.0 / 4.0;
+    public static TrajectoryBuilder getSlowTrajBuilder(Pose2d start) {
+        return new TrajectoryBuilder(start, new MinVelocityConstraint(Arrays.asList(
+                new AngularVelocityConstraint(DriveConstants.MAX_ANG_VEL * SLOW_TRAJ_FACTOR),
+                new MecanumVelocityConstraint(DriveConstants.MAX_VEL * SLOW_TRAJ_FACTOR, DriveConstants.TRACK_WIDTH)
+        )), new ProfileAccelerationConstraint(DriveConstants.MAX_ACCEL * SLOW_TRAJ_FACTOR));
     }
 
     // Go to the nearest center of a cell

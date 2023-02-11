@@ -8,7 +8,7 @@ import static org.firstinspires.ftc.teamcode.TeamConf.START_POS_RED_RIGHT;
 import static org.firstinspires.ftc.teamcode.TeamConf.TILE_SIZE;
 import static org.firstinspires.ftc.teamcode.TeamConf.getRobot;
 import static org.firstinspires.ftc.teamcode.TeamConf.sleep;
-import static org.firstinspires.ftc.teamcode.util.PathTools.getTrajBuilder;
+import static org.firstinspires.ftc.teamcode.util.PathTools.getSlowTrajBuilder;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
@@ -178,84 +178,84 @@ public class SimpleAuto extends SupervisedOpMode {
         if (variation.equals("RedLeft")) {
             Pose2d startPos = START_POS_RED_LEFT;
             robot.setPose(startPos);
-            trajectories[0] = getTrajBuilder(startPos)
+            trajectories[0] = getSlowTrajBuilder(startPos)
                     .forward(TILE_SIZE * (5.0 / 2.0)) // Get the signal cone out of the way
                     .build();
             // Wait for the winch to rise all the way
-            trajectories[1] = getTrajBuilder(trajectories[0].end())
+            trajectories[1] = getSlowTrajBuilder(trajectories[0].end())
                     .back(TILE_SIZE / 2)
                     .build();
-            trajectories[2] = getTrajBuilder(trajectories[1].end())
+            trajectories[2] = getSlowTrajBuilder(trajectories[1].end())
                     .lineToLinearHeading(centerConeOverJunction(new Vector2d(TILE_SIZE, 0), trajectories[1].end().vec()))
                     .build();
             // Release cone
-            trajectories[3] = getTrajBuilder(trajectories[2].end())
+            trajectories[3] = getSlowTrajBuilder(trajectories[2].end())
                     .strafeTo(new Vector2d(startPos.getX(), startPos.getY() + TILE_SIZE * 2))
                     .build();
-            trajectories[4] = getTrajBuilder(trajectories[1].end())
+            trajectories[4] = getSlowTrajBuilder(trajectories[1].end())
                     .lineToLinearHeading(getSignalSpot(tag))
                     .build();
         }
         else if (variation.equals("RedRight")) {
             Pose2d startPos = START_POS_RED_RIGHT;
             robot.setPose(startPos);
-            trajectories[0] = getTrajBuilder(startPos)
+            trajectories[0] = getSlowTrajBuilder(startPos)
                     .forward(TILE_SIZE * (5.0 / 2.0)) // Get the signal cone out of the way
                     .build();
             // Wait for the winch to rise all the way
-            trajectories[1] = getTrajBuilder(trajectories[0].end())
+            trajectories[1] = getSlowTrajBuilder(trajectories[0].end())
                     .back(TILE_SIZE / 2)
                     .build();
-            trajectories[2] = getTrajBuilder(trajectories[1].end())
+            trajectories[2] = getSlowTrajBuilder(trajectories[1].end())
                     .lineToLinearHeading(centerConeOverJunction(new Vector2d(TILE_SIZE, 0), trajectories[1].end().vec()))
                     .build();
             // Release cone
-            trajectories[3] = getTrajBuilder(trajectories[2].end())
+            trajectories[3] = getSlowTrajBuilder(trajectories[2].end())
                     .strafeTo(new Vector2d(startPos.getX(), startPos.getY() + TILE_SIZE * 2))
                     .build();
-            trajectories[4] = getTrajBuilder(trajectories[1].end())
+            trajectories[4] = getSlowTrajBuilder(trajectories[1].end())
                     .lineToLinearHeading(getSignalSpot(tag))
                     .build();
         }
         else if (variation.equals("BlueLeft")) {
             Pose2d startPos = START_POS_BLUE_LEFT;
             robot.setPose(startPos);
-            trajectories[0] = getTrajBuilder(startPos)
+            trajectories[0] = getSlowTrajBuilder(startPos)
                     .forward(TILE_SIZE * (5.0 / 2.0)) // Get the signal cone out of the way
                     .build();
             // Wait for the winch to rise all the way
-            trajectories[1] = getTrajBuilder(trajectories[0].end())
+            trajectories[1] = getSlowTrajBuilder(trajectories[0].end())
                     .back(TILE_SIZE / 2)
                     .build();
-            trajectories[2] = getTrajBuilder(trajectories[1].end())
+            trajectories[2] = getSlowTrajBuilder(trajectories[1].end())
                     .lineToLinearHeading(centerConeOverJunction(new Vector2d(TILE_SIZE, 0), trajectories[1].end().vec()))
                     .build();
             // Release cone
-            trajectories[3] = getTrajBuilder(trajectories[2].end())
+            trajectories[3] = getSlowTrajBuilder(trajectories[2].end())
                     .strafeTo(new Vector2d(startPos.getX(), startPos.getY() - TILE_SIZE * 2))
                     .build();
-            trajectories[4] = getTrajBuilder(trajectories[1].end())
+            trajectories[4] = getSlowTrajBuilder(trajectories[1].end())
                     .lineToLinearHeading(getSignalSpot(tag))
                     .build();
         }
         else { // if (variation.equals("BlueRightAuto")) {
             Pose2d startPos = START_POS_BLUE_RIGHT;
             robot.setPose(startPos);
-            trajectories[0] = getTrajBuilder(startPos)
+            trajectories[0] = getSlowTrajBuilder(startPos)
                     .forward(TILE_SIZE * (5.0 / 2.0)) // Get the signal cone out of the way
                     .build();
             // Wait for the winch to rise all the way
-            trajectories[1] = getTrajBuilder(trajectories[0].end())
+            trajectories[1] = getSlowTrajBuilder(trajectories[0].end())
                     .back(TILE_SIZE / 2)
                     .build();
-            trajectories[2] = getTrajBuilder(trajectories[1].end())
+            trajectories[2] = getSlowTrajBuilder(trajectories[1].end())
                     .lineToLinearHeading(centerConeOverJunction(new Vector2d(TILE_SIZE, 0), trajectories[1].end().vec()))
                     .build();
             // Release cone
-            trajectories[3] = getTrajBuilder(trajectories[2].end())
+            trajectories[3] = getSlowTrajBuilder(trajectories[2].end())
                     .strafeTo(new Vector2d(startPos.getX(), startPos.getY() - TILE_SIZE * 2))
                     .build();
-            trajectories[4] = getTrajBuilder(trajectories[1].end())
+            trajectories[4] = getSlowTrajBuilder(trajectories[1].end())
                     .lineToLinearHeading(getSignalSpot(tag))
                     .build();
         }

@@ -62,20 +62,36 @@ public class RightAuto extends LinearOpMode {
         calibrateSlide();
 
         // Creating these trajectories will take a while
-        Trajectory[] trajectories = new Trajectory[10];
+        Trajectory[] trajectories = new Trajectory[50];
 
         Pose2d junc1Pos = combinePose(JUNCTIONS.get(1), comb1_x, comb1_y, FIELD_BEARING_NORTH + Math.PI / 4);
         Pose2d coneStackPos = combinePose(CONE_STACK_POS_RED_RIGHT.vec(), comb2_x, comb2_y, CONE_STACK_POS_RED_RIGHT.getHeading());
         Pose2d junc2Pos = combinePose(JUNCTIONS.get(2), comb3_x, comb3_y, FIELD_BEARING_NORTH);
 
-        trajectories[0] = getTrajBuilder(START_POS_RED_RIGHT).lineTo(new Vector2d(TILE_SIZE * (3.0 / 4.0), START_POS_RED_RIGHT.getY() + 6)).build();
+        // Forward junction
+        trajectories[0] = getTrajBuilder(START_POS_RED_RIGHT).lineTo(new Vector2d(TILE_SIZE * (2.2 / 4.0), START_POS_RED_RIGHT.getY() + 6)).build();
         trajectories[1] = getTrajBuilder(trajectories[0].end()).splineToLinearHeading(junc1Pos, FIELD_BEARING_NORTH + PI / 4).build();
 
-        trajectories[2] = getTrajBuilder(trajectories[1].end()).strafeRight(TILE_SIZE * 1.0 / 2.0).build();
-        trajectories[3] = getTrajBuilder(trajectories[2].end()).forward(TILE_SIZE).build();
-        trajectories[4] = getTrajBuilder(trajectories[3].end()).lineToLinearHeading(TILE_SIZE * 5.0/6.0).build();
-        trajectories[5] = getTrajBuilder(trajectories[4].end()).strafeLeft(TILE_SIZE * 5.0/6.0).build();
-        trajectories[6] = getTrajBuilder(trajectories[5].end()).strafeLeft(TILE_SIZE * 5.0/6.0).build();
+        // Forward junction to cone stack
+        trajectories[2] = getTrajBuilder(trajectories[1].end()).lineTo(new Vector2d(TILE_SIZE * (1.25 / 4.0), junc1Pos.getY() -10)).build();
+        trajectories[3] = getTrajBuilder(trajectories[2].end()).lineToLinearHeading(new Pose2d(TILE_SIZE * (3.0 / 4.0), -TILE_SIZE/2.0, FIELD_BEARING_EAST)).build();
+        trajectories[4] = getTrajBuilder(trajectories[3].end()).lineToLinearHeading(coneStackPos).build();
+
+        // Cone stack to high junction
+        trajectories[5] = getTrajBuilder(trajectories[4].end()).lineTo(new Vector2d(TILE_SIZE, -TILE_SIZE/2.0)).build();
+        trajectories[6] = getTrajBuilder(trajectories[5].end()).lineToLinearHeading(new Pose2d(trajectories[5].end().getX(), trajectories[5].end().getY() + 1, FIELD_BEARING_NORTH)).build();
+        trajectories[7] = getTrajBuilder(trajectories[6].end()).lineToLinearHeading(junc2Pos).build();
+
+        // High junction back to cone stack
+        trajectories[8] = getTrajBuilder(trajectories[7].end()).lineTo(new Vector2d(TILE_SIZE, -TILE_SIZE/2.0)).build();
+        trajectories[9] = getTrajBuilder(trajectories[8].end()).lineToLinearHeading(new Pose2d(trajectories[5].end().getX() + 1, trajectories[5].end().getY(), FIELD_BEARING_EAST)).build();
+        trajectories[10] = getTrajBuilder(trajectories[9].end()).lineToLinearHeading(coneStackPos).build();
+
+        // High junction to park
+        trajectories[11] = getTrajBuilder(trajectories[7].end()).lineTo(new Vector2d(TILE_SIZE, -TILE_SIZE/2.0)).build();
+        trajectories[12] = getTrajBuilder(trajectories[11].end()).lineTo(new Vector2d(TILE_SIZE / 2.0, -TILE_SIZE/2.0)).build();
+        trajectories[13] = getTrajBuilder(trajectories[11].end()).lineTo(new Vector2d(TILE_SIZE * 3.0 / 2.0, -TILE_SIZE/2.0)).build();
+        trajectories[14] = getTrajBuilder(trajectories[11].end()).lineTo(new Vector2d(TILE_SIZE * 5.0 / 2.0, -TILE_SIZE/2.0)).build();
 
 
         /*trajectories[0] = getTrajBuilder(START_POS_RED_RIGHT) // Forward junction
@@ -85,7 +101,7 @@ public class RightAuto extends LinearOpMode {
                 .splineTo(junc1Pos.vec(), FIELD_BEARING_NORTH + PI / 4)
                 .build();*/
 
-        trajectories[1] = getTrajBuilder(junc1Pos) // Cone stack
+        /*trajectories[1] = getTrajBuilder(junc1Pos) // Cone stack
                 .back(TILE_SIZE / 8)
                 .splineToSplineHeading(new Pose2d(TILE_SIZE * (1.0 / 2.0), -TILE_SIZE * (3.0 / 2), FIELD_BEARING_NORTH), PI * (7.0 / 4.0))
                 .splineToConstantHeading(new Vector2d(TILE_SIZE * (2.5 / 4.0), START_POS_RED_RIGHT.getY() + TILE_SIZE * 3.0/2.0), FIELD_BEARING_NORTH)
@@ -106,39 +122,56 @@ public class RightAuto extends LinearOpMode {
                 .back(TILE_SIZE / 16)
                 .splineToSplineHeading(coneStackPos, 0)
                 //todo: straight approach to let claw lower
-                .build();
+                .build();*/
 
 
         detectUntilStart();
         if (isStopRequested()) { return; }
 
-        trajectories[9] = mapParkingTrajectory(detector.getTagSeenOrDefault(2));
+        //trajectories[9] = mapParkingTrajectory(detector.getTagSeenOrDefault(2));
 
         // Precondition: preload cone is in claw's reach and it was closed during init
         robot.slide.setCurrentWinchTarget(robot.slide.p.SLIDE_POS_HIGH);
 
-        runTrajectory(trajectories[0]);  // approach forward high junction
+        runTrajectory(trajectories[0]);  // approach forward high
+        runTrajectory(trajectories[1]);
 
         dropCone(robot.slide.getNextConeStackHeight()); // Drop cone and prepare for next
 
-        runTrajectory(trajectories[1]); // Go to cone stack
+        runTrajectory(trajectories[2]); // Go to cone stack
+        runTrajectory(trajectories[3]);
+        runTrajectory(trajectories[4]);
 
         pickupCone(robot.slide.p.SLIDE_POS_HIGH); // Pickup cone and prepare to drop
 
-        runTrajectory(trajectories[6]);  // approach side high junction
+        runTrajectory(trajectories[5]); runTrajectory(trajectories[6]); runTrajectory(trajectories[7]); // approach side high junction
         dropCone(robot.slide.getNextConeStackHeight()); // Drop cone and prepare for next
-        runTrajectory(trajectories[7]); // Go to cone stack
+        runTrajectory(trajectories[8]); runTrajectory(trajectories[9]); runTrajectory(trajectories[10]); // Go to cone stack
         pickupCone(robot.slide.p.SLIDE_POS_HIGH); // Pickup cone and prepare to drop
 
-        runTrajectory(trajectories[6]);  // approach side high junction
+        runTrajectory(trajectories[5]); runTrajectory(trajectories[6]); runTrajectory(trajectories[7]); // approach side high junction
         dropCone(robot.slide.getNextConeStackHeight()); // Drop cone and prepare for next
-        runTrajectory(trajectories[7]); // Go to cone stack
+        runTrajectory(trajectories[8]); runTrajectory(trajectories[9]); runTrajectory(trajectories[10]); // Go to cone stack
         pickupCone(robot.slide.p.SLIDE_POS_HIGH); // Pickup cone and prepare to drop
 
-        runTrajectory(trajectories[6]);  // approach side high junction
+        runTrajectory(trajectories[5]); runTrajectory(trajectories[6]); runTrajectory(trajectories[7]); // approach side high junction
         dropCone(robot.slide.getNextConeStackHeight()); // Drop cone and prepare for next
 
-        runTrajectory(trajectories[9]); // Park
+        // Park
+        int tag = detector.getTagSeenOrDefault(2);
+        runTrajectory(trajectories[11]);
+        if (tag == 1) {
+            runTrajectory(trajectories[12]);
+        }
+        else if (tag == 2) {
+            runTrajectory(trajectories[13]);
+        }
+        else if (tag == 3) {
+            runTrajectory(trajectories[14]);
+        }
+
+
+
 
         /*runTrajectory(trajectories[2]); // Low junction adjacent to cone stack
 
@@ -252,18 +285,9 @@ public class RightAuto extends LinearOpMode {
         while (!isStarted() && !isStopRequested()) {
             detector.detect();
             sleep(100);
-            if (detector.done()) {
-                mapParkingTrajectory(detector.getTagSeenOrDefault(2));
-            }
         }
 
         waitForStart();
-    }
-
-    public Trajectory mapParkingTrajectory(int tag) {
-        return getTrajBuilder(addClawOffsetVec(JUNCTIONS.get(2), Math.PI * (3.0 / 4.0)))
-                .lineToLinearHeading(getSignalParkingSpot(tag))
-                .build();
     }
 
     public Pose2d getSignalParkingSpot(int tag) {
