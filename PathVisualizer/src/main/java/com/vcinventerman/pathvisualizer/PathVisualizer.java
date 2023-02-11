@@ -121,7 +121,7 @@ public class PathVisualizer {
         trajectories[7] = getTrajBuilder(trajectories[6].end()).lineToLinearHeading(junc2Pos).build();
 
         // High junction back to cone stack
-        trajectories[8] = getTrajBuilder(trajectories[7].end()).lineTo(new Vector2d(TILE_SIZE, -TILE_SIZE/2.0)).build();
+        trajectories[8] = getTrajBuilder(trajectories[7].end()).lineTo(new Vector2d(junc2Pos.getX(), junc2Pos.getY() - TILE_SIZE/2.0)).build();
         trajectories[9] = getTrajBuilder(trajectories[8].end()).lineToLinearHeading(new Pose2d(trajectories[5].end().getX() + 1, trajectories[5].end().getY(), FIELD_BEARING_EAST)).build();
         trajectories[10] = getTrajBuilder(trajectories[9].end()).lineToLinearHeading(coneStackPos).build();
 
@@ -140,10 +140,9 @@ public class PathVisualizer {
 
         myBot.followTrajectorySequence(myBot.getDrive().trajectorySequenceBuilder(addClawOffset(CONE_STACK_POS_RED_RIGHT))
 
-                .addTrajectory(trajectories[11])
-                .addTrajectory(trajectories[12])
-                .addTrajectory(trajectories[13])
-                .addTrajectory(trajectories[14])
+                .addTrajectory(trajectories[8])
+                .addTrajectory(trajectories[9])
+                .addTrajectory(trajectories[10])
 
                 //.addTrajectory(trajectories[3])
 
