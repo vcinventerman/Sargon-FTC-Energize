@@ -65,7 +65,7 @@ public class TeamConf {
     public static Vector2d ROBOT_CLAW_OFFSET = ROBOTA_CLAW_OFFSET;
 
     public static Pose2d START_POS_RED_LEFT = new Pose2d(-24 - ROBOT_WIDTH / 2.0, -(FIELD_WIDTH / 2) + (ROBOT_LENGTH / 2) + 2.4, FIELD_BEARING_NORTH);
-    public static Pose2d START_POS_RED_RIGHT = new Pose2d(24 + ROBOT_WIDTH / 2.0, -(FIELD_WIDTH / 2) + (ROBOT_LENGTH / 2) - 2.4, FIELD_BEARING_NORTH);
+    public static Pose2d START_POS_RED_RIGHT = new Pose2d(24 + ROBOT_WIDTH / 2.0, -(FIELD_WIDTH / 2) + (ROBOT_LENGTH / 2) - 2.4 + 1.5, FIELD_BEARING_NORTH);
     public static Pose2d START_POS_BLUE_LEFT = new Pose2d(30.5, (FIELD_WIDTH / 2) - (ROBOT_LENGTH / 2), FIELD_BEARING_SOUTH);
     public static Pose2d START_POS_BLUE_RIGHT = new Pose2d(-30.5, (FIELD_WIDTH / 2) - (ROBOT_LENGTH / 2), FIELD_BEARING_SOUTH);
     public static List<Pose2d> START_POSITIONS = Arrays.asList(START_POS_RED_LEFT, START_POS_RED_RIGHT, START_POS_BLUE_LEFT, START_POS_BLUE_RIGHT);

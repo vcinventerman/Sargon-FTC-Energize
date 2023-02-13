@@ -31,20 +31,24 @@ import com.sun.tools.javac.util.List;
 
 import org.firstinspires.ftc.teamcode.util.PathTools;
 
+import java.util.Timer;
+
 @Config
-@Autonomous(group="!CompAuto")
+@Autonomous(group="!CompAuto", preselectTeleOp="TeleOp")
 public class RightAuto extends LinearOpMode {
     public static Pose2d startPose = START_POS_RED_RIGHT;
 
     Robot robot;
     AprilTagDetector detector;
 
-    public static double comb1_x = 6.5;
-    public static double comb1_y = -10;
+    public static double comb1_x = 6;
+    public static double comb1_y = -8;
     public static double comb2_x = -10;
     public static double comb2_y = -3;
     public static double comb3_x = 4.76;
     public static double comb3_y = -14;
+
+    public static double DOWN_CONST = 5.0;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -52,9 +56,6 @@ public class RightAuto extends LinearOpMode {
 
         robot = getRobot(hardwareMap);
         robot.setPose(startPose);
-
-        detector = new AprilTagDetector(hardwareMap, List.of(21, 22, 23));
-        detector.detect();
 
         // Initialize the claw so that it's ready to move when started
         robot.slide.claw.turnToAngle(robot.slide.p.CLAW_POS_OPEN);
@@ -75,7 +76,7 @@ public class RightAuto extends LinearOpMode {
 
         // Forward junction to cone stack
         trajectories[2] = getTrajBuilder(trajectories[1].end()).lineTo(new Vector2d(TILE_SIZE * (1.25 / 4.0), junc1Pos.getY() -10)).build();
-        trajectories[3] = getTrajBuilder(trajectories[2].end()).lineToLinearHeading(new Pose2d(TILE_SIZE * (3.0 / 4.0), -TILE_SIZE/2.0, FIELD_BEARING_EAST)).build();
+        trajectories[3] = getTrajBuilder(trajectories[2].end()).lineToLinearHeading(new Pose2d(TILE_SIZE * (3.0 / 4.0), -TILE_SIZE/2.0 - DOWN_CONST, FIELD_BEARING_NORTH)).build();
         trajectories[4] = getTrajBuilder(trajectories[3].end()).lineToLinearHeading(new Pose2d(coneStackPos.getX() - 15, coneStackPos.getY(), coneStackPos.getHeading())).build();
         trajectories[5] = getSlowTrajBuilder(trajectories[4].end()).lineToLinearHeading(coneStackPos).build();
 
@@ -91,10 +92,10 @@ public class RightAuto extends LinearOpMode {
         trajectories[12] = getSlowTrajBuilder(trajectories[11].end()).lineToLinearHeading(new Pose2d(coneStackPos.getX() - 15, coneStackPos.getY(), coneStackPos.getHeading())).build();
 
         // High junction to park
-        trajectories[13] = getTrajBuilder(trajectories[8].end()).lineTo(new Vector2d(TILE_SIZE, -TILE_SIZE/2.0)).build();
-        trajectories[14] = getTrajBuilder(trajectories[3].end()).lineTo(new Vector2d(TILE_SIZE / 2.0, -TILE_SIZE/2.0)).build();
-        trajectories[15] = getTrajBuilder(trajectories[3].end()).lineTo(new Vector2d(TILE_SIZE * 3.0 / 2.0, -TILE_SIZE/2.0)).build();
-        trajectories[16] = getTrajBuilder(trajectories[3].end()).lineTo(new Vector2d(TILE_SIZE * 5.0 / 2.0, -TILE_SIZE/2.0)).build();
+        trajectories[13] = getTrajBuilder(trajectories[8].end()).lineTo(new Vector2d(TILE_SIZE, -TILE_SIZE/2.0 - DOWN_CONST)).build();
+        trajectories[14] = getTrajBuilder(trajectories[3].end()).lineTo(new Vector2d(TILE_SIZE / 2.0, -TILE_SIZE/2.0 - DOWN_CONST)).build();
+        trajectories[15] = getTrajBuilder(trajectories[3].end()).lineTo(new Vector2d(TILE_SIZE * 3.0 / 2.0, -TILE_SIZE/2.0 - DOWN_CONST)).build();
+        trajectories[16] = getTrajBuilder(trajectories[3].end()).lineTo(new Vector2d(TILE_SIZE * 5.0 / 2.0, -TILE_SIZE/2.0 - DOWN_CONST)).build();
 
 
         /*trajectories[0] = getTrajBuilder(START_POS_RED_RIGHT) // Forward junction
@@ -128,8 +129,20 @@ public class RightAuto extends LinearOpMode {
                 .build();*/
 
 
-        detectUntilStart();
+        //detectUntilStart();
+        waitForStart();
         if (isStopRequested()) { return; }
+
+        detector = new AprilTagDetector(hardwareMap, List.of(21, 22, 23));
+        detector.detect();
+
+        long cur = System.currentTimeMillis();
+        while (!isStopRequested() && System.currentTimeMillis() < cur + 5000) {
+            detector.detect();
+            sleep(100);
+        }
+
+
 
         //trajectories[9] = mapParkingTrajectory(detector.getTagSeenOrDefault(2));
 
@@ -166,15 +179,15 @@ public class RightAuto extends LinearOpMode {
 
         // Park
         int tag = detector.getTagSeenOrDefault(2);
-        runTrajectory(trajectories[12]);
+        //runTrajectory(trajectories[12]);
         if (tag == 1) {
-            runTrajectory(trajectories[13]);
-        }
-        else if (tag == 2) {
             runTrajectory(trajectories[14]);
         }
-        else if (tag == 3) {
+        else if (tag == 2) {
             runTrajectory(trajectories[15]);
+        }
+        else if (tag == 3) {
+            runTrajectory(trajectories[16]);
         }
 
 
